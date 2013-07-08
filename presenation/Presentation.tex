@@ -1,0 +1,145 @@
+\documentclass{beamer}
+\let\Tiny=\tiny %to avoid warnings related to font size and beamer 
+\usetheme{Amsterdam}
+\usecolortheme{dolphin}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usepackage{verbatim}
+\usetikzlibrary{arrows,shapes}
+
+\title{Parallel network flows}
+\subtitle{A follow up to the Parallel Algorithms lecture}
+\author{Martin Kalany\inst{1} }
+\institute
+{
+  \inst{1}
+  Graduate student in Computer Science\\
+  Vienna University of Technology\\
+}
+\date{\today}
+
+\AtBeginSection[]
+{
+  \begin{frame}
+    \frametitle{Table of Contents}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+\begin{document}
+	% Declare layers (for more convenience when drawing graphs)
+	\pgfdeclarelayer{background}
+	\pgfsetlayers{background,main}
+
+	\frame{\titlepage}
+	
+	\section{Flow networks}
+ 	\begin{frame}
+	\frametitle{Definitions}
+    \begin{block}{Definition: Flow network}
+    A \textcolor{red}{flow network}\cite{Ahuja93} is given by $N = (G,s,t,c)$, where
+    \begin{itemize}
+    		\item $G =(V,A)$ is a directed graph
+    		\item $s$ and $t$, $s \neq t$ are the source and terminal node
+    		\item $c:A\rightarrow \mathbb{R}_0^{+}$ assigns a capacity $\forall a \in A$
+    \end{itemize}
+    \end{block}
+    \textbf{Assumptions:}
+	\begin{itemize}
+		\item $G$ is connected
+		\item $\nexists P(s,t) \in G$ s.t. $c(P) = \infty$
+		\item $G$ is simple, i.e., does not contain loops or parallel arcs
+	\end{itemize}
+	\end{frame}
+  
+	\begin{frame}[shrink]
+	\frametitle{Network flows}
+	\begin{block}{Definition: Flow}
+	$f:A \rightarrow \mathbb{R}_0^{+}$ is a \textcolor{red}{flow} if it satisfies:
+	\begin{itemize}
+		\item \textbf{Capacity constraints:} $f(a) \leq c(a)$ $\forall a \in A$
+		\item \textbf{Flow conservation:} 
+		$ \sum\limits_{v \in V} f(u,v) =  0 \Leftrightarrow IN(f,v) = OUT(f,v)$ $\forall v \in V \setminus \{s,t\}$
+		\item \textbf{Value of a flow:} $\lvert f\rvert = f(V,t)$ 
+	\end{itemize}
+	\end{block}
+	
+	\begin{block}{More definitions }
+	A flow $f$	
+	\begin{itemize}
+		\item is a \textcolor{red}{maximum flow} if $\lvert f\rvert \geq \lvert f\rvert$, for any other flow $f$
+		\item \textcolor{red}{saturates} an arc a if $f(a) = c(a)$
+		\item is \textcolor{red}{maximal flow} if every directed path P(s,t) contains at least one saturated edge
+	\end{itemize}
+	
+	\end{block}
+	\end{frame}
+	
+	\begin{frame}
+	\frametitle{An intuitive sequential algorithm}
+	
+\tikzstyle{vertex}=[circle,fill=black!25,minimum size=20pt,inner sep=0pt]
+\tikzstyle{edge} = [draw,thick,->]
+\tikzstyle{weight} = [font=\small]
+\tikzstyle{selected edge} = [draw,line width=5pt,-,red!75]
+
+%TODO: remove
+\tikzstyle{ignored edge} = [draw,line width=5pt,-,black!20]
+\tikzstyle{selected vertex} = [vertex, fill=red!24]
+
+\begin{figure}
+\begin{tikzpicture}[scale=1.8, auto,swap]
+    % draw the vertices
+    \foreach \pos/\name in {{(0,2)/s}, {(1.5,3)/v_1}, {(3,3)/v_2},
+                            {(1.5,1)/v_3}, {(3,1)/v_4}, {(4.5,2)/t}}
+        \node[vertex] (\name) at \pos {$\name$};
+    % Connect vertices with edges and draw weights
+    \foreach \source/ \dest /\weight in {s/v_1/7, s/v_3/8,v_1/v_3/5,v_1/v_4/9,
+                                         v_1/v_2/7, v_2/v_4/15, v_3/v_4/5,
+                                         v_2/t/8,
+                                         v_4/t/9}
+        \path[edge] (\source) -- node[weight] {$\weight$} (\dest);
+        \path[edge] (v_4) to[bend right] node[weight] {6}  (v_2);
+  
+    % Start animating the vertex and edge selection. 
+   %\foreach \vertex / \fr in {d/1,a/2,f/3,b/4,e/5,c/6,g/7}
+    %    \path<\fr-> node[selected vertex] at (\vertex) {$\vertex$};
+    % For convenience we use a background layer to highlight edges
+    % This way we don't have to worry about the highlighting covering
+    % weight labels. 
+    \begin{pgfonlayer}{background}
+        \pause
+        \foreach \source / \dest in {s/v_1,v_1/v_2}
+            \path<+->[selected edge] (\source.center) -- (\dest.center);
+    %    \foreach \source / \dest / \fr in {d/b/4,d/e/5,e/f/5,b/c/6,f/g/7}
+    %        \path<\fr->[ignored edge] (\source.center) -- (\dest.center);
+    \end{pgfonlayer}
+\end{tikzpicture}
+\end{figure}
+	
+	\end{frame}		
+	  
+  
+	\section{Complexity}
+  	\begin{frame}
+    		\frametitle{This is the second slide}
+	    \framesubtitle{A bit more information about this}
+    		%More content goes here
+ 	 \end{frame}
+ 	 
+	\begin{frame}[allowframebreaks]
+  	\frametitle<presentation>{Literature}    
+  	\begin{thebibliography}{10}    
+		\beamertemplatearticlebibitems
+		\bibitem{Ahuja93}
+		    R.K. Ahuja, T.L. Magnanti, J.B. Orlin
+    			\newblock {\em Network Flows}. Prentice Hall, 1993
+		\beamertemplatearticlebibitems
+	  	\bibitem{Jemand2000}
+    		S.~Jemand.
+	    \newblock On this and that.
+    		\newblock {\em Journal of This and That}, 2(1):50--100, 2000.
+	\end{thebibliography}
+	\end{frame} 	 
+ 	 
+\end{document}

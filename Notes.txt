@@ -1,0 +1,45 @@
+Thema:
+	Max-flow: P-complete aber einzelne Spezialisierungen gut parallelisierbar
+	Modus:
+		10-15 Seiten Seminar
+		30-45min Präsentation
+		Präsentation ca. Anfang Juni
+		Abgabe Ende des Semesters
+	Papers: 
+		Goldberg
+		Tarjan
+		Vishkin
+		Rao
+		
+	Structure:
+	   ? General intro
+	   - Network flows
+	      - Definition
+	      - A simple sequential algorithm
+	   - The problem of parallel network flows
+	   - Complexity
+	   - Different Algos
+	   
+		
+	Suggestions by Jesper:
+		*Placing the problem in the complexity hierarchy/recap: 
+			+ Papadimitriou, Chapter 15
+		
+		*Basic, parallel algorithms for the general problem: 
+			+ Yossi Shiloach, Uzi Vishkin: An O(n² log n) Parallel MAX-FLOW Algorithm. J. Algorithms (JAL) 3(2):128-146 (1982)#
+			+ Uzi Vishkin: A Parallel Blocking Flow Algorithm for Acyclic Networks. J. Algorithms 13(3): 489-501 (1992)
+			+ Andrew V. Goldberg, Robert Endre Tarjan: A Parallel Algorithm for Finding a Blocking Flow in an Acyclic Network. Inf. Process. Lett. 31(5): 265-271 (1989)
+			+ Andrew V. Goldberg: Processor-Efficient Implementation of a Maximum Flow Algorithm. Inf. Process. Lett. 38(4): 179-185 (1991)
+
+		*One of the currently best maxflow algorithms; probably difficult to parallelize:
+			+ Andrew V. Goldberg, Satish Rao: Beyond the Flow Decomposition Barrier. J. ACM 45(5): 783-797 (1998)
+
+		*Special results, worth mentioning:
+			+ Donald B. Johnson: Parallel algorithms for minimum cuts and maximum flows in planar networks. J. ACM (JACM) 34(4):950-967 (1987)
+			+ Baruch Schieber, Shlomo Moran: Parallel Algorithms for Maximum Bipartite Matchings and Maximum 0-1 Flows. J. Parallel Distrib. Comput. (JPDC) 6(1):20-38 (1989)			
+
+		*Another complexity result, would be great to mention (is the reduction nice, enlightening?):
+			Joseph Cheriyan, S. N. Maheshwari: The Parallel Complexity of Finding a Blocking Flow in a 3-Layer Network. Inf. Process. Lett. (IPL) 31(3):157-161 (1989)
+			
+
+
