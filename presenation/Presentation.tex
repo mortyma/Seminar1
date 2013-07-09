@@ -6,6 +6,11 @@
 \usepackage{tikz}
 \usepackage{verbatim}
 \usetikzlibrary{arrows,shapes}
+\usepackage{hyperref}
+\usepackage[style=verbose,backend=bibtex]{biblatex}
+\addbibresource{../sources}
+\let\oldfootnotesize\footnotesize
+\renewcommand*{\footnotesize}{\oldfootnotesize\tiny}
 
 \title{Parallel network flows}
 \subtitle{A follow up seminar to the Parallel Algorithms lecture}
@@ -37,7 +42,7 @@
  	\begin{frame}
 	\frametitle{Definitions}
     \begin{block}{Definition: Flow network}
-    A \textcolor{red}{flow network}\cite{Ahuja93} is given by $N = (G,s,t,c)$, where
+    A \textcolor{red}{flow network}\footnote{\cite{ahuja93}}  is given by $N = (G,s,t,c)$, where
     \begin{itemize}
     		\item $G =(V,A)$ is a directed graph
     		\item $s$ and $t$, $s \neq t$ are the source and terminal node
@@ -128,48 +133,7 @@
  	 
 \begin{frame}[allowframebreaks]
 \frametitle<presentation>{Literature}    
-\begin{thebibliography}{10}    
-	\bibitem{Ahuja93}
-	 R.K. Ahuja, T.L. Magnanti, J.B. Orlin:
-    \emph{Network Flows.} 
-    Prentice Hall, 1993
-    \bibitem{papa95}
-    Christos H. Papadimitriou:
-    \emph{Computitional Complexity.} 
-    Addison-Wesley, 1995
-    \bibitem{yossi81}
-    Yossi Shiloach, Uzi Vishkin:
-    \emph{An $O(n^{2}log n)$ Parallel MAX\_FLOW Algorithm.} 
-    Journal of Algorithms (JAL) 3(2):128-146, 1982
-    \bibitem{vishkin92}
-    Uzi Vishkin:
-    \emph{A Parallel Blocking Flow Algorithm for Acyclic Networks.} 
-    Journal of Algorithms 13(3): 489-501, 1992
-    \bibitem{goldberg89}
-    Andrew V. Goldberg, Robert Endre Tarjan:
-    \emph{A Parallel Algorithm for Finding a Blocking Flow in an Acyclic Network.} 
-    Information Processing Letters (IPL) 31(5): 265-271, 1989
-    \bibitem{goldberg91}
-    Andrew V. Goldberg:
-    \emph{Processor-Efficient Implementation of a Maximum Flow Algorithm.}
-    Information Processing Letters (IPL) 38(4): 179-185, 1991
-    \bibitem{goldberg98}
-    Andrew V. Goldberg, Satish Rao: 
-    \emph{Beyond the Flow Decomposition Barrier.}
-    J. ACM 45(5): 783-797, 1998
-    \bibitem{johnson87}
-	Donald B. Johnson:
-    \emph{Parallel algorithms for minimum cuts and maximum flows in planar networks.}
-    J. ACM (JACM) 34(4):950-967, 1987
-    \bibitem{schieber87}
-    Baruch Schieber, Shlomo Moran:
-    \emph{Parallel Algorithms for Maximum Bipartite Matchings and Maximum 0-1 Flows.}
-    J. ACM (JACM) 34(4):950-96,l 1987
-	\bibitem{cherivan89}
-	Joseph Cheriyan, S. N. Maheshwari:
-	\emph{The Parallel Complexity of Finding a Blocking Flow in a 3-Layer Network.}
-	Information Processing Letters (IPL) 31(3):157-161, 1989  	
-\end{thebibliography}
+\printbibliography
 \end{frame} 	 
  	 
 \end{document}
