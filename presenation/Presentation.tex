@@ -32,9 +32,9 @@
 }
 
 \tikzstyle{vertex}=[circle,fill=black!25,minimum size=20pt,inner sep=0pt]
-\tikzstyle{edge} = [draw,thick,->]
+\tikzstyle{edge} = [draw,thick,->,>=stealth',shorten >=1pt]
 \tikzstyle{weight} = [font=\small]
-\tikzstyle{selected edge} = [draw,line width=2pt,->,red!75]
+\tikzstyle{selected edge} = [draw,line width=2pt,->,red!75,>=stealth',shorten >=1pt]
 \tikzstyle{selected vertex} = [vertex, fill=red!24]
 
 \begin{document}
@@ -84,7 +84,8 @@
 	\end{itemize}
 	\end{block}
 \end{frame}
-	
+
+\section{Ford-Fulkerson}
 \begin{frame}
 	\frametitle{Ford-Fulkerson}
 	\framesubtitle{An intuitive sequential algorithm}
@@ -99,8 +100,8 @@
     	\foreach \source/ \dest /\weight in {s/v_1/7, s/v_3/8,v_3/v_1/5,v_1/v_4/9,
                                          v_1/v_2/7, v_4/v_2/15, v_3/v_4/5,
                                          v_2/t/8, v_4/t/9}
-        	\path<1-1>[edge] (\source) -- node[weight] {$\weight$} (\dest);
-        	\path<1-1>[edge] (v_4) to[bend right] node[weight] {6}  (v_1);
+        	\path[edge] (\source) -- node[weight] {$\weight$} (\dest);
+        	\path[edge] (v_4) to[bend right] node[weight] {6}  (v_1);
   
 	    % For convenience we use a background layer to highlight edges
     	% This way we don't have to worry about the highlighting covering
@@ -108,21 +109,17 @@
    		%\pause
 	    \begin{pgfonlayer}{background}
 	        \pause
-    	    \foreach \source /\dest  /\weight in {v_1/v_4/3,s/v_3/8,v_3/v_4/5,v_4/t/8, v_3/v_1/3}
-	            \path[selected edge] (\source) -- node[weight] {$\weight$}(\dest);
+    	    \foreach \source /\dest  /\weight in {v_1/v_4/3,s/v_3/8,v_3/v_4/5,v_4/t/8}
+	            \path[selected edge] (\source) -- node[weight,above] {$\weight$}(\dest);
+	            \path[selected edge] (v_3) -- node[weight,left] {$3$}(v_1);
 	        \pause
     	    \foreach \source /\dest  /\weight in {s/v_1/7,v_1/v_2/7,v_2/t/7}
-	            \path[selected edge] (\source) -- node[weight] {$\weight$}(\dest);
+	            \path[selected edge] (\source) -- node[weight,above] {$\weight$}(\dest);
     	\end{pgfonlayer}
 	\end{tikzpicture}
 	\end{figure}	
 \end{frame}		
 
-\begin{frame}
-	\frametitle{Preflow-Push Algorithm}
-	%todo
-\end{frame}
- 
 \section{Computational Complexity}
 \begin{frame}
 	\frametitle{Computational Complexity}
@@ -145,6 +142,13 @@
 		\end{itemize}			
 	\end{itemize}
 \end{frame}
+
+\section{Preflow-Push}
+\begin{frame}
+	\frametitle{Preflow-Push Algorithm}
+	Basic idea: push flow along individual arks instead of paths from $s$ to $t$
+	
+\end{frame} 
  	 
 \begin{frame}[allowframebreaks]
 \frametitle<presentation>{Literature}    
