@@ -31,15 +31,21 @@
   \end{frame}
 }
 
-\begin{document}
-	% Declare layers (for more convenience when drawing graphs)
-	\pgfdeclarelayer{background}
-	\pgfsetlayers{background,main}
+\tikzstyle{vertex}=[circle,fill=black!25,minimum size=20pt,inner sep=0pt]
+\tikzstyle{edge} = [draw,thick,->]
+\tikzstyle{weight} = [font=\small]
+\tikzstyle{selected edge} = [draw,line width=2pt,->,red!75]
+\tikzstyle{selected vertex} = [vertex, fill=red!24]
 
-	\frame{\titlepage}
+\begin{document}
+% Declare layers (for more convenience when drawing graphs)
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+\frame{\titlepage}
 	
-	\section{Flow networks}
- 	\begin{frame}
+\section{Flow networks}
+\begin{frame}
 	\frametitle{Definitions}
     \begin{block}{Definition: Flow network}
     A \textcolor{red}{flow network}\footnote{\cite{ahuja93}}  is given by $N = (G,s,t,c)$, where
@@ -55,9 +61,9 @@
 		\item $\nexists P(s,t) \in G$ s.t. $c(P) = \infty$
 		\item $G$ is simple, i.e., does not contain loops or parallel arcs
 	\end{itemize}
-	\end{frame}
+\end{frame}
   
-	\begin{frame}[shrink]
+\begin{frame}[shrink]
 	\frametitle{Network flows}
 	\begin{block}{Definition: Flow}
 	$f:A \rightarrow \mathbb{R}_0^{+}$ is a \textcolor{red}{flow} if it satisfies:
@@ -76,49 +82,40 @@
 		\item \textcolor{red}{saturates} an arc a if $f(a) = c(a)$
 		\item is \textcolor{red}{maximal flow} if every directed path P(s,t) contains at least one saturated edge
 	\end{itemize}
-	
 	\end{block}
-	\end{frame}
+\end{frame}
 	
-	\begin{frame}
-	\framesubtitle{An intuitive sequential algorithm}
+\begin{frame}
 	\frametitle{Ford-Fulkerson}
-	
-\tikzstyle{vertex}=[circle,fill=black!25,minimum size=20pt,inner sep=0pt]
-\tikzstyle{edge} = [draw,thick,->]
-\tikzstyle{weight} = [font=\small]
-\tikzstyle{selected edge} = [draw,line width=2pt,->,red!75]
-\tikzstyle{selected vertex} = [vertex, fill=red!24]
+	\framesubtitle{An intuitive sequential algorithm}
 
-\begin{figure}
-\begin{tikzpicture}[scale=1.8, auto,swap]
-    % draw the vertices
-    \foreach \pos/\name in {{(0,2)/s}, {(1.5,3)/v_1}, {(3,3)/v_2},
-                            {(1.5,1)/v_3}, {(3,1)/v_4}, {(4.5,2)/t}}
+	\begin{figure}
+	\begin{tikzpicture}[scale=1.8, auto,swap]
+    	% draw the vertices
+	    \foreach \pos/\name in {{(0,2)/s}, {(1.5,3)/v_1}, {(3,3)/v_2},
+    	                        {(1.5,1)/v_3}, {(3,1)/v_4}, {(4.5,2)/t}}
         \node[vertex] (\name) at \pos {$\name$};
-    % Connect vertices with edges and draw weights
-    \foreach \source/ \dest /\weight in {s/v_1/7, s/v_3/8,v_3/v_1/5,v_1/v_4/9,
+    	% Connect vertices with edges and draw weights
+    	\foreach \source/ \dest /\weight in {s/v_1/7, s/v_3/8,v_3/v_1/5,v_1/v_4/9,
                                          v_1/v_2/7, v_4/v_2/15, v_3/v_4/5,
                                          v_2/t/8, v_4/t/9}
-        \path<1-1>[edge] (\source) -- node[weight] {$\weight$} (\dest);
-        \path<1-1>[edge] (v_4) to[bend right] node[weight] {6}  (v_1);
+        	\path<1-1>[edge] (\source) -- node[weight] {$\weight$} (\dest);
+        	\path<1-1>[edge] (v_4) to[bend right] node[weight] {6}  (v_1);
   
-    % For convenience we use a background layer to highlight edges
-    % This way we don't have to worry about the highlighting covering
-    % weight labels. 
-   	%\pause
-    \begin{pgfonlayer}{background}
-        \pause
-        \foreach \source /\dest  /\weight in {s/v_1/7,v_1/v_4/3,v_1/v_2/7,v_2/t/7,s/v_3/8,v_3/v_4/5,v_4/t/8, v_3/v_1/3}
-            \path[selected edge] (\source) -- node[weight] {$\weight$}(\dest);
-
-    \end{pgfonlayer}
-\end{tikzpicture}
-\end{figure}
-	
+	    % For convenience we use a background layer to highlight edges
+    	% This way we don't have to worry about the highlighting covering
+	    % weight labels. 
+   		%\pause
+	    \begin{pgfonlayer}{background}
+	        \pause
+    	    \foreach \source /\dest  /\weight in {s/v_1/7,v_1/v_4/3,v_1/v_2/7,v_2/t/													7,s/v_3/8,v_3/v_4/5,v_4/t/8, v_3/v_1/3}
+	            \path[selected edge] (\source) -- node[weight] {$\weight$}(\dest);
+    	\end{pgfonlayer}
+	\end{tikzpicture}
+	\end{figure}	
 \end{frame}		
  
-\section{Complexity}
+\section{Computational Complexity}
 \begin{frame}
 	\frametitle{This is the second slide}
    \framesubtitle{A bit more information about this}
