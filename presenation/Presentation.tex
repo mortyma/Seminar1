@@ -108,18 +108,42 @@
    		%\pause
 	    \begin{pgfonlayer}{background}
 	        \pause
-    	    \foreach \source /\dest  /\weight in {s/v_1/7,v_1/v_4/3,v_1/v_2/7,v_2/t/													7,s/v_3/8,v_3/v_4/5,v_4/t/8, v_3/v_1/3}
+    	    \foreach \source /\dest  /\weight in {v_1/v_4/3,s/v_3/8,v_3/v_4/5,v_4/t/8, v_3/v_1/3}
+	            \path[selected edge] (\source) -- node[weight] {$\weight$}(\dest);
+	        \pause
+    	    \foreach \source /\dest  /\weight in {s/v_1/7,v_1/v_2/7,v_2/t/7}
 	            \path[selected edge] (\source) -- node[weight] {$\weight$}(\dest);
     	\end{pgfonlayer}
 	\end{tikzpicture}
 	\end{figure}	
 \end{frame}		
+
+\begin{frame}
+	\frametitle{Preflow-Push Algorithm}
+	%todo
+\end{frame}
  
 \section{Computational Complexity}
 \begin{frame}
-	\frametitle{This is the second slide}
-   \framesubtitle{A bit more information about this}
- 		%More content goes here
+	\frametitle{Computational Complexity}
+	\begin{itemize}
+		\item Sequential complexity:
+		\begin{itemize}
+			\item Ford-Fulkerson: $O((|A|+|V|)*f_{max})$
+			\item Edmonds-Karp: $O(|V|^{2} * |E|) $
+		\end{itemize}
+		\pause
+		\item Parallel complexity:
+		\begin{itemize}
+			\item Construct residual network: $O(1)$
+			\item Find augmenting path: $O(log^{2}|V|)$ time and $O(|V|^{2})$ work
+			\item \# stages: $O(|f_{max}|)$\\
+				\# stages may be reduced to $O(\sqrt(|V|))$\\
+			  	\textcolor{red}{but not to a polylogarithmic bound} $O(log^{k}(|V| + |A|))$\\
+			  	Proof: Odd Max-Flow is P-complete and  thus $\notin$ NC
+			  	\footcite{papa95}.
+		\end{itemize}			
+	\end{itemize}
 \end{frame}
  	 
 \begin{frame}[allowframebreaks]
