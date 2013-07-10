@@ -15,10 +15,10 @@ Thema:
 	   ? General intro
 	   - Network flows
 	      - Definition
-	      - A simple sequential algorithm
+	      - A simple sequential algorithm: Ford Fulkerson
+			- Residiual network?			
 	   - The problem of parallel network flows
 	   - Complexity
-	   
 	   - Different Algos
 	   
 		

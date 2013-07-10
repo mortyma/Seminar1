@@ -81,15 +81,13 @@
 	\end{frame}
 	
 	\begin{frame}
-	\frametitle{An intuitive sequential algorithm}
+	\framesubtitle{An intuitive sequential algorithm}
+	\frametitle{Ford-Fulkerson}
 	
 \tikzstyle{vertex}=[circle,fill=black!25,minimum size=20pt,inner sep=0pt]
 \tikzstyle{edge} = [draw,thick,->]
 \tikzstyle{weight} = [font=\small]
-\tikzstyle{selected edge} = [draw,line width=5pt,-,red!75]
-
-%TODO: remove
-\tikzstyle{ignored edge} = [draw,line width=5pt,-,black!20]
+\tikzstyle{selected edge} = [draw,line width=2pt,->,red!75]
 \tikzstyle{selected vertex} = [vertex, fill=red!24]
 
 \begin{figure}
@@ -99,25 +97,21 @@
                             {(1.5,1)/v_3}, {(3,1)/v_4}, {(4.5,2)/t}}
         \node[vertex] (\name) at \pos {$\name$};
     % Connect vertices with edges and draw weights
-    \foreach \source/ \dest /\weight in {s/v_1/7, s/v_3/8,v_1/v_3/5,v_1/v_4/9,
-                                         v_1/v_2/7, v_2/v_4/15, v_3/v_4/5,
-                                         v_2/t/8,
-                                         v_4/t/9}
-        \path[edge] (\source) -- node[weight] {$\weight$} (\dest);
-        \path[edge] (v_4) to[bend right] node[weight] {6}  (v_2);
+    \foreach \source/ \dest /\weight in {s/v_1/7, s/v_3/8,v_3/v_1/5,v_1/v_4/9,
+                                         v_1/v_2/7, v_4/v_2/15, v_3/v_4/5,
+                                         v_2/t/8, v_4/t/9}
+        \path<1-1>[edge] (\source) -- node[weight] {$\weight$} (\dest);
+        \path<1-1>[edge] (v_4) to[bend right] node[weight] {6}  (v_1);
   
-    % Start animating the vertex and edge selection. 
-   %\foreach \vertex / \fr in {d/1,a/2,f/3,b/4,e/5,c/6,g/7}
-    %    \path<\fr-> node[selected vertex] at (\vertex) {$\vertex$};
     % For convenience we use a background layer to highlight edges
     % This way we don't have to worry about the highlighting covering
     % weight labels. 
+   	%\pause
     \begin{pgfonlayer}{background}
         \pause
-        \foreach \source / \dest in {s/v_1,v_1/v_2}
-            \path<+->[selected edge] (\source.center) -- (\dest.center);
-    %    \foreach \source / \dest / \fr in {d/b/4,d/e/5,e/f/5,b/c/6,f/g/7}
-    %        \path<\fr->[ignored edge] (\source.center) -- (\dest.center);
+        \foreach \source /\dest  /\weight in {s/v_1/7,v_1/v_4/3,v_1/v_2/7,v_2/t/7,s/v_3/8,v_3/v_4/5,v_4/t/8, v_3/v_1/3}
+            \path[selected edge] (\source) -- node[weight] {$\weight$}(\dest);
+
     \end{pgfonlayer}
 \end{tikzpicture}
 \end{figure}
