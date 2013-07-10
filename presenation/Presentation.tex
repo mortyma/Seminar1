@@ -35,7 +35,8 @@
 \tikzstyle{edge} = [draw,thick,->,>=stealth',shorten >=1pt]
 \tikzstyle{weight} = [font=\small]
 \tikzstyle{selected edge} = [draw,line width=2pt,->,red!75,>=stealth',shorten >=1pt]
-\tikzstyle{selected vertex} = [vertex, fill=red!24]
+\tikzstyle{vertexE}=[circle,fill=black!25,minimum size=20pt,inner sep=0pt]
+
 
 \begin{document}
 % Declare layers (for more convenience when drawing graphs)
@@ -106,7 +107,6 @@
 	    % For convenience we use a background layer to highlight edges
     	% This way we don't have to worry about the highlighting covering
 	    % weight labels. 
-   		%\pause
 	    \begin{pgfonlayer}{background}
 	        \pause
     	    \foreach \source /\dest  /\weight in {v_1/v_4/3,s/v_3/8,v_3/v_4/5,v_4/t/8}
@@ -146,8 +146,38 @@
 \section{Preflow-Push}
 \begin{frame}
 	\frametitle{Preflow-Push Algorithm}
-	Basic idea: push flow along individual arks instead of paths from $s$ to $t$
-	
+	\begin{itemize}
+		\item Push flow along individual arks instead of paths from $s$ to $t$
+		\item Excess flow $e_f(v) \geq 0$ $\forall v \in V$\\
+	\end{itemize}
+
+	\begin{figure}
+	\begin{tikzpicture}[scale=1.8, auto,swap]
+    	% draw the vertices
+	    \foreach \pos/\name in {{(0,2)/s}, {(1.5,3)/v_1}, {(3,3)/v_2},
+    	                        {(1.5,1)/v_3}, {(3,1)/v_4}, {(4.5,2)/t}}
+        \node[vertex] (\name) at \pos {$\name$};
+    	% Connect vertices with edges and draw weights
+    	\foreach \source/ \dest /\weight in {s/v_1/12, s/v_3/11,v_3/v_1/5,v_1/v_4/9,
+                                         v_1/v_2/7, v_4/v_2/15, v_3/v_4/5,
+                                         v_2/t/8, v_4/t/9}
+        	\path[edge] (\source) -- node[weight] {$\weight$} (\dest);
+        	\path[edge] (v_4) to[bend right] node[weight] {6}  (v_1);
+  
+	    % For convenience we use a background layer to highlight edges
+    	% This way we don't have to worry about the highlighting covering
+	    % weight labels. 
+	    \begin{pgfonlayer}{background}
+	        \pause
+    	    \foreach \source /\dest  /\weight in {s/v_3/11,s/v_1/12}
+	            \path[selected edge] (\source) -- node[weight,above] {$\weight$} (\dest);
+	            \node[vertex,label={[color=blue]80:$+12$}] (v_1) at (1.5,3) {$v_1$};
+	            \node[vertex,label={[color=blue]280:$+11$}] (v_3) at (1.5,1) {$v_3$};
+	           
+
+    	\end{pgfonlayer}
+	\end{tikzpicture}
+	\end{figure}	
 \end{frame} 
  	 
 \begin{frame}[allowframebreaks]
