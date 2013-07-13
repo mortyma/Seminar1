@@ -258,21 +258,42 @@
 		\begin{itemize}
 			\item Ford-Fulkerson: $O((|A|+|V|)*f_{max})$
 			\item Edmonds-Karp: $O(|V|^{2} * |E|) $
+			\pause \\	
+			$\Rightarrow$ \textcolor{green}{clearly solvable in polynomial time}
 		\end{itemize}
 		\pause
 		\item Parallel complexity:
 		\begin{itemize}
 			\item Construct residual network: $O(1)$
 			\item Find augmenting path: $O(log^{2}|V|)$ time and $O(|V|^{2})$ work
-			\item \# stages: $O(|f_{max}|)$\\
-				\# stages may be reduced to $O(\sqrt(|V|))$\\
-			  	\textcolor{red}{but not to a polylogarithmic bound} $O(log^{k}(|V| + |A|))$\\
-			  	Proof: Odd Max-Flow is P-complete and  thus $\notin$ NC
-			  	\footcite{papa95}.
+			\item Number of stages: $O(|f_{max}|)$\\
+			may be reduced\footcite{papa95} to $O(|V|)$ or even $O(\sqrt{|V|})$
+%			\item In general\\
+%			\textcolor{red}{but not to a polylogarithmic bound} $O(log^{k}(|V| + |A|))$\\
+%			  	Proof: Odd Max-Flow is P-complete and  thus $\notin$ NC
+%			  	\footcite{papa95}.
 		\end{itemize}			
+		\pause
+		\textcolor{blue}{Can we get an "efficient" parallel algorithm?}
 	\end{itemize}
 \end{frame}
 
+\begin{frame}
+	\frametitle{Computational Complexity}
+	\begin{itemize}
+	\item \textbf{NC}\footcite{papa95} ("Nick's Class"): Problems solvable in $O(log^{k_1}(n))$ time and $O(n^{k_2})$ total work
+	\item alternatively: Language decided by PRAM in $O(log^{k_1}(n))$ time steps with $O(n^{k_2})$ processors available at each step 
+	\item $NC \subseteq P$, but whether $NC \subset P$ or $NC = P$ is unknown 
+	\item $P \setminus NC$: "Inherently sequential"  problems
+	\item Most likely candidates to be in $P \setminus NC$: P-complete problems
+	\end{itemize}
+
+	\pause	
+	\textcolor{red}{Max-flow is P-complete\footcite{papa95}.} \\
+	No parallel algorithm to solve the problem in poly-log time is currently known.
+	
+	
+\end{frame}
 
 \begin{comment}
 \section{Preflow-Push}
