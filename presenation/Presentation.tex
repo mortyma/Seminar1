@@ -268,10 +268,6 @@
 			\item Find augmenting path: $O(log^{2}|V|)$ time and $O(|V|^{2})$ work
 			\item Number of stages: $O(|f_{max}|)$\\
 			may be reduced\footcite{papa95} to $O(|V|)$ or even $O(\sqrt{|V|})$
-%			\item In general\\
-%			\textcolor{red}{but not to a polylogarithmic bound} $O(log^{k}(|V| + |A|))$\\
-%			  	Proof: Odd Max-Flow is P-complete and  thus $\notin$ NC
-%			  	\footcite{papa95}.
 		\end{itemize}			
 		\pause
 		\textcolor{blue}{Can we get an "efficient" parallel algorithm?}
@@ -289,11 +285,16 @@
 	\end{itemize}
 
 	\pause	
-	\textcolor{red}{Max-flow is P-complete\footcite{papa95}.} \\
-	No parallel algorithm to solve the problem in poly-log time is currently known.
-	
-	
+	\textcolor{red}{Max-flow is P-complete.} \\
+	No parallel algorithm to solve the problem in poly-log time is currently known.	
 \end{frame}
+
+\section{Parallel algorithms}
+\begin{frame}
+
+\end{frame}
+
+
 
 \begin{comment}
 \section{Preflow-Push}
