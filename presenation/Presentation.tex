@@ -8,7 +8,10 @@
 \usetikzlibrary{arrows,shapes}
 \usepackage{hyperref}
 \usepackage[style=verbose,backend=bibtex]{biblatex}
+\usepackage{comment}
+
 \addbibresource{../sources}
+
 \let\oldfootnotesize\footnotesize
 \renewcommand*{\footnotesize}{\oldfootnotesize\tiny}
 
@@ -79,9 +82,9 @@
 	\begin{block}{More definitions }
 	A flow $f$	
 	\begin{itemize}
-		\item is a \textcolor{red}{maximum flow} if $\lvert f\rvert \geq \lvert f\rvert$, for any other flow $f$
+		\item is a \textcolor{red}{maximum flow} if $\lvert f\rvert \geq \lvert f'\rvert$, for any other flow $f'$
 		\item \textcolor{red}{saturates} an arc a if $f(a) = c(a)$
-		\item is \textcolor{red}{maximal flow} if every directed path P(s,t) contains at least one saturated edge
+		\item is a \textcolor{red}{maximal flow} if every directed path P(s,t) contains at least one saturated edge
 	\end{itemize}
 	\end{block}
 \end{frame}
@@ -143,6 +146,8 @@
 	\end{itemize}
 \end{frame}
 
+
+\begin{comment}
 \section{Preflow-Push}
 \begin{frame}
 	\frametitle{Preflow-Push Algorithm}
@@ -179,6 +184,7 @@
 	\end{tikzpicture}
 	\end{figure}	
 \end{frame} 
+\end{comment}
  	 
 \begin{frame}[allowframebreaks]
 \frametitle<presentation>{Literature}    

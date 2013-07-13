@@ -1,25 +1,32 @@
 Thema:
 	Max-flow: P-complete aber einzelne Spezialisierungen gut parallelisierbar
 	Modus:
-		10-15 Seiten Seminar
+		10 Seiten Seminar
 		30-45min Präsentation
-		Präsentation ca. Anfang Juni
-		Abgabe Ende des Semesters
-	Papers: 
-		Goldberg
-		Tarjan
-		Vishkin
-		Rao
-		
+			Überblick, konkrete Probleme, Ergebnisse
 	Structure:
-	   ? General intro
-	   - Network flows
-	      - Definition
-	      - A simple sequential algorithm: Ford Fulkerson
+		? General intro
+		- Network flows
+			- Definition
+			- A simple sequential algorithm: Ford Fulkerson
 			- Residiual network?			
-	   - The problem of parallel network flows
-	   - Complexity
-	   - Different Algos
+		- The problem of parallel network flows
+		- Complexity
+		- Different Algos
+			- Vishkin 1
+				- why it doesn't work for acyclic networks (TODO!!!)
+			- Goldberg
+			- Vishkin 2
+			- Overview of other results
+			
+	Todo:
+		- currently fasted sequential algorithm?
+		- Layered network
+
+		- Dinic's scheme
+		
+		- Minimum cost circulation
+	
 	   
 		
 	Suggestions by Jesper:
