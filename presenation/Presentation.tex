@@ -52,8 +52,8 @@
 \section{Network flows}
 \begin{frame}
 	\frametitle{Network flows}
-    \begin{block}{Definition: Flow network}
-    A \textcolor{red}{flow network}\footnote{\cite{ahuja93}}  is given by $N = (G,s,t,c)$, where
+    \begin{block}{Definition: Flow network}\footnote{\cite{ahuja93}}
+    A \textcolor{red}{flow network}  is given by $N = (G,s,t,c)$, where
     \begin{itemize}
     		\item $G =(V,A)$ is a directed graph
     		\item $s$ and $t$, $s \neq t$ are the source and terminal node
@@ -290,12 +290,12 @@
 \end{frame}
 
 \section{Parallel algorithms}
-\subsection{Prerequisites}
+\subsection{Dinitz' scheme}
 \begin{frame}
 \frametitle{Dinitz' scheme}
 	
-	\begin{block}{Layered network}
-	$N = (V,A,s,t,c)$ is a \textcolor{red}{layered network\footcite{yossi81}} if each vertex $v \in V$ has a layer number $l(v)$ s.t.
+	\begin{block}{Definition: Layered network\footcite{yossi81}}
+	$N = (V,A,s,t,c)$ is a \textcolor{red}{layered network} if each vertex $v \in V$ has a layer number $l(v)$ s.t.
 	\begin{itemize}
 		\item $l(s) = 0$ and $0 \leq l(v) \leq l(t)$ $\forall v \in V$
 		\item $(e = u \rightarrow v) \in A  \Rightarrow l(v) - l(u) = 1$
@@ -305,8 +305,6 @@
 	\begin{block}{Lemma: Dinitz' scheme\footcite{dinitz70}}
 	A maximum flow problem in a \emph{general network} can be transformed \emph{into $O(n)$ maximal flow problems in layered networks}.
 	\end{block}
-
-
 \end{frame}
 
 
