@@ -89,6 +89,23 @@
 	\end{block}
 \end{frame}
 
+\begin{frame}
+	\begin{block}{Residual capacity}
+		The \textcolor{red}{residual capacity} of $a \in V \times V$ w.r.t. a flow $f$ is defined as $r_f(a) = c(a) - f(a)$. \\
+	\end{block}
+	
+	\pause
+	\begin{block}{Residual graph}
+		$G_r = (V, A_r)$ with $A_r = \left\{a \in V \times V \lvert r_f(a) > 0\right\}$
+	\end{block}
+	
+	\pause
+	\begin{block}{Augmenting path}
+		A path $P$ from $s$ to $t$ in $G_r$ is called an \textcolor{red}{augmenting} path and can be used to increase the flow $f$.
+	\end{block}
+\end{frame}
+
+
 \section{Ford-Fulkerson}
 \begin{frame}
 	\frametitle{Ford-Fulkerson}
