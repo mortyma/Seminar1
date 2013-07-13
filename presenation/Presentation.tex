@@ -9,6 +9,9 @@
 \usepackage{hyperref}
 \usepackage[style=verbose,backend=bibtex]{biblatex}
 \usepackage{comment}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 
 \addbibresource{../sources}
 
@@ -305,8 +308,26 @@
 	\begin{block}{Lemma: Dinitz' scheme\footcite{dinitz70}}
 	A maximum flow problem in a \emph{general network} can be transformed \emph{into $O(n)$ maximal flow problems in layered networks}.
 	\end{block}
+
 \end{frame}
 
+\begin{frame}
+\frametitle{Algorithm 1}
+\framesubtitle{Shiloach and Vishkin\footcite{yossi81}} 
+
+	\begin{algorithmic}[5]
+		\State Input: Flow network $N=(V,A,s,t,c)$
+		\State start with some valid flow 
+		\While{$\neg$ finished} \Comment{$O(\lvert V \rvert)$}
+			\State Construct residual network $G_r$ \Comment{$O(\lvert V \rvert)$, $p=O(\lvert V \rvert)}$
+			\State Construct layered network $G_l$ from $G_r$ \Comment{$O(\lvert A \rvert/p + \lvert V \rvert)$ (BFS on CREW)}
+			\State Calculate max flow $f_l$ in $G_l$  \Comment{next slides}
+			\State $f$ = $f$ + $f_l$
+		\EndWhile	
+	\end{algorithmic}
+	
+
+\end{frame}
 
 
 
