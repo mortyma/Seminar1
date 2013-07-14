@@ -533,7 +533,17 @@ One PS-tree attached to every arc $a\in A$:
 
 \begin{frame}
 \frametitle{Algorithm 1}
-\framesubtitle{Parallel implementation}
+\framesubtitle{Operations on PS-trees}
+Let T be a PS-tree. Every node of T is represented by $T[height,i]$. $height(root) = \lceil log_2 k \rceil$
+\begin{itemize}
+	\item \textbf{CLEAR($i$)}: Value of all nodes on $P(T[1,i],root)$ set to 0.
+	\item \textbf{UPDATE($i$, $a_i$)}:  Value of $i^{th}$ leave set to $a_i$. Updates sums on $P(T[1,i],root)$.
+	\item \textbf{SUM($i$, $S_i$)}: $S_i$ = $a_1+\ldots +a_i$ 
+	\item \textbf{FIND($\alpha$, $k$, $\rho$)}: Given $\alpha$, returns $k$ and $\rho$ s.t.
+	$a_1+\ldots +a_{k-1} < \alpha \leq a_1+\ldots +a_k$ and
+	$\rho = \alpha - (a_1+\ldots +a_{k-1})$
+\end{itemize}
+
 \end{frame}
 
 
