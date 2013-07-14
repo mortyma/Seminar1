@@ -509,11 +509,27 @@
 \begin{frame}
 \frametitle{Algorithm 1}
 \framesubtitle{Parallel implementation} 
-
 \begin{block}{Partial sums tree}
 $k$ numbers $a_1$,...,$a_k$ are associated with the leftmost $k$ leaves of a complete binary tree with $2^{\lceil log_2(k) \rceil}$ leaves. Remaining nodes are initialized with $0$. \\
 Each internal node stores the sum of its child nodes.
 \end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Algorithm 1}
+\framesubtitle{Parallel implementation} 
+Four PS-trees attached to every vertex $v\in V$:
+\begin{itemize}
+	\item \textbf{T-OUT(v)}: $d_{out}(v)$ active leaves, where $a_i=c(e_i)-f(e_i)$.
+	\item \textbf{T-IN(v)}: $2n*d_{in}(v)$ active leaves; each records incoming flow quanta.
+	\item \textbf{T-ACCESS(v)}: $d_{in}(v)$ active leaves; each leave associated with one incoming edge. Coordinates access to $v$. 
+	\item \textbf{T-SUM}: $d_{out}(v)$ active leaves; each leave associated with one outgoing edge. Sums flow returned to $v$ in a given pulse. 
+\end{itemize}
+One PS-tree attached to every arc $a\in A$:
+\begin{itemize}
+	\item \textbf{T-EDGE}: $2n$ active leaves; each associated with one pulse. Records amount of flow returned to arc in a given pulse.
+\end{itemize}
+
 \end{frame}
 
 \begin{comment}

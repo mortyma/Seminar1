@@ -21,9 +21,7 @@ Thema:
 			
 	Todo:
 		- currently fasted sequential algorithm?
-		- Layered network
-
-		- Dinic's scheme
+		- name arcs/edges correctly everywhere
 		
 		- Minimum cost circulation
 	
