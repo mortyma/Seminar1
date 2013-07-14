@@ -292,9 +292,7 @@
 	No parallel algorithm to solve the problem in poly-log time is currently known.	
 \end{frame}
 
-\section{Parallel algorithms}
-\subsection{Dinitz' scheme}
-
+\section{Shiloach-Vishkin}
 \begin{frame}
 \frametitle{Layered networks}
 	\begin{block}{Definition: Layered network\footcite{yossi81}}
@@ -342,10 +340,9 @@
 	\end{figure}
 \end{frame}
 
-\subsection{Algorithm 1}
 \begin{frame}
-\frametitle{Algorithm 1}
-\framesubtitle{Shiloach and Vishkin\footcite{yossi81} on CREW} 
+\frametitle{Algorithm 1: Shiloach and Vishkin\footcite{yossi81}}
+\framesubtitle{High level description}
 	\begin{algorithmic}[1]
 	\Function{MAX-FLOW}{$N=(V,A,s,t,c)$}
 	\State start with some valid flow 
@@ -360,8 +357,8 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Algorithm 1}
-\framesubtitle{Shiloach and Vishkin} 	
+\frametitle{Algorithm 1: Shiloach and Vishkin}
+\framesubtitle{Max-Flow in a layered network}	
 	\begin{algorithmic}[1]
 	\Function{MAX-FLOW}{$G_l$}
 		\State EXCESS(s) = $\Sigma_{v \in L_1}$ c(s$\rightarrow$v)
@@ -380,8 +377,8 @@
 \end{frame}
 
 \begin{frame}[shrink]
-\frametitle{Algorithm 1}
-\framesubtitle{Shiloach and Vishkin} 
+\frametitle{Algorithm 1: Shiloach and Vishkin}
+\framesubtitle{The PUSH function}
 	\begin{algorithmic}[1]
 	\Function{PUSH}{v, EXCESS(v)}
 		\While{EXCESS(v) $>$ 0 and AVAILABLE $\neq\emptyset$}
@@ -404,8 +401,8 @@
 \end{frame}
 
 \begin{frame}[shrink]
-\frametitle{Algorithm 1}
-\framesubtitle{Shiloach and Vishkin} 
+\frametitle{Algorithm 1: Shiloach and Vishkin}
+\framesubtitle{The RETURN function}
 	\begin{algorithmic}[1]
 	\Function{RETURN}{v, EXCESS(v)}
 		\While{EXCESS(v) $>$ 0}
@@ -427,8 +424,8 @@
 
 %        \node[vertex,label={[color=blue]80:$\layer$}] (\name) at \pos {$\name$};
 \begin{frame}
-\frametitle{Algorithm 1}
-\framesubtitle{Shiloach and Vishkin} 
+\frametitle{Algorithm 1: Shiloach and Vishkin}
+\framesubtitle{Preflow-Push example}
 \begin{figure}
 	\begin{tikzpicture}[scale=1.8, auto,swap]
 		% s and t don't change
@@ -507,17 +504,17 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Algorithm 1}
-\framesubtitle{Parallel implementation} 
-\begin{block}{Partial sums tree}
+\frametitle{Algorithm 1: Shiloach and Vishkin}
+\framesubtitle{Partial sum trees} 
+\begin{block}{Partial sum tree}
 $k$ numbers $a_1$,...,$a_k$ are associated with the leftmost $k$ leaves of a complete binary tree with $2^{\lceil log_2(k) \rceil}$ leaves. Remaining nodes are initialized with $0$. \\
 Each internal node stores the sum of its child nodes.
 \end{block}
 \end{frame}
 
 \begin{frame}
-\frametitle{Algorithm 1}
-\framesubtitle{Parallel implementation} 
+\frametitle{Algorithm 1: Shiloach and Vishkin}
+\framesubtitle{Data structures} 
 Four PS-trees attached to every vertex $v\in V$:
 \begin{itemize}
 	\item \textbf{T-OUT(v)}: $d_{out}(v)$ active leaves, where $a_i=c(e_i)-f(e_i)$.
@@ -532,7 +529,7 @@ One PS-tree attached to every arc $a\in A$:
 \end{frame}
 
 \begin{frame}
-\frametitle{Algorithm 1}
+\frametitle{Algorithm 1: Shiloach and Vishkin}
 \framesubtitle{Operations on PS-trees}
 Let T be a PS-tree. Every node of T is represented by $T[height,i]$. $height(root) = \lceil log_2 k \rceil$
 \begin{itemize}
@@ -546,8 +543,8 @@ Let T be a PS-tree. Every node of T is represented by $T[height,i]$. $height(roo
 \end{frame}
 
 \begin{frame}
-\frametitle{Algorithm 1}
-\framesubtitle{Assumptions} 
+\frametitle{Algorithm 1: Shiloach and Vishkin}
+\framesubtitle{Processor assignment} 
 \begin{itemize}
 	\item Each vertex $v$ has a processor $P(v)$ assigned
 	\item Each edge $e$ has a processor $P(e)$ assigned
@@ -558,8 +555,8 @@ Apparently large number of processors can be reduced to $\lvert V \rvert$\footci
 \end{frame}
 
 \begin{frame}
-\frametitle{Algorithm 1}
-\framesubtitle{Parallel implementation} 
+\frametitle{Algorithm 1: Shiloach and Vishkin}
+\framesubtitle{Parallel INTIALIZE function} 
 At beginning of each phase:	
 	\begin{algorithmic}[1]
 	\Function{INTIALIZE}{v}
@@ -574,7 +571,8 @@ At beginning of each phase:
 \end{frame}
 
 \begin{frame}
-\frametitle{Algorithm 1}
+\frametitle{Algorithm 1: Shiloach and Vishkin}
+\framesubtitle{Parallel PUSH function} 
 	\begin{algorithmic}[1]
 	\Function{PUSH}{v,EXCESS(v)}
 		\State \textcolor{blue}{P(v):}
@@ -586,8 +584,8 @@ At beginning of each phase:
 \end{frame}
 
 \begin{frame}[shrink]
-\frametitle{Algorithm 1}
-\framesubtitle{Pulses} 
+\frametitle{Algorithm 1: Shiloach and Vishkin}
+\framesubtitle{Parallel PUSH function cont.} 
 \begin{algorithmic}[1]
 	\State \textcolor{blue}{P($e_j = v \rightarrow w$):}
 	\If{k' $\leq$ j $\leq$ k}
@@ -610,8 +608,8 @@ At beginning of each phase:
 \end{frame}
 
 \begin{frame}
-\frametitle{Algorithm 1}
-\framesubtitle{Pulses} 
+\frametitle{Algorithm 1: Shiloach and Vishkin}
+\framesubtitle{Parallel PUSH function cont.} 
 \begin{algorithmic}[1]
 	\State \textcolor{blue}{P(v):} k = k'
 	\State \textcolor{blue}{P($e_d = u \rightarrow w$):}
@@ -623,22 +621,13 @@ At beginning of each phase:
 \end{frame}
 
 \begin{frame}
-\frametitle{Algorithm 1}
+\frametitle{Algorithm 1: Shiloach and Vishkin}
 \framesubtitle{Bounding the number of pulses\footcite{vishkin92}} 
 \end{frame}
 
 \begin{frame}
-\frametitle{Algorithm 1}
-\framesubtitle{Problems in acyclic networks\footcite{vishkin92}} 
-\end{frame}
-
-\begin{comment}
-Just mention briefly
-\end{comment}
-
-\begin{frame}
-\frametitle{Algorithm 1}
-\framesubtitle{Shiloach and Vishki} 
+\frametitle{Algorithm 1: Shiloach and Vishkin}
+\framesubtitle{Complexity} 
 	\begin{algorithmic}[1]
 	\Function{MAX-FLOW}{$N=(V,A,s,t,c)$}
 	\State start with some valid flow 
@@ -655,7 +644,16 @@ Just mention briefly
 \textcolor{red}{Result}: solves Max-Flow in $O({\lvert V \rvert}^{2} * log \lvert V \rvert)$ using $\lvert V \rvert$ processors on a CREW PRAM.
 \end{frame}
 
-\subsection{Algorithm 2}
+\begin{frame}
+\frametitle{Algorithm 1}
+\framesubtitle{Problems in acyclic networks\footcite{vishkin92}} 
+\end{frame}
+
+\begin{comment}
+Just mention briefly
+\end{comment}
+
+\section{Goldberg-Tarjan}
 \begin{frame}
 \frametitle{Algorithm 2}
 \framesubtitle{Goldberg and Tarjan\footcite{goldberg89}} 
@@ -664,10 +662,15 @@ Just mention briefly
 Atomic method
 proof (?)
 \end{comment}
+
+\section{Further results}
+\begin{frame}
+\frametitle{Further results}
+\end{frame}
+
  	 
 \begin{frame}[allowframebreaks]
 \frametitle<presentation>{Literature}    
 \printbibliography
 \end{frame} 	 
- 	 
 \end{document}
