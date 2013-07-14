@@ -2,6 +2,7 @@
 \let\Tiny=\tiny %to avoid warnings related to font size and beamer 
 \usetheme{Amsterdam}
 \usecolortheme{dolphin}
+\usepackage{color}
 \usepackage{amsmath}
 \usepackage{tikz}
 \usepackage{verbatim}
@@ -12,8 +13,11 @@
 \usepackage{listings}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+%\usepackage{color}
 
 \addbibresource{../sources}
+
+\definecolor{OliveGreen}{cmyk}{0.64,0,0.95,0.40}
 
 \let\oldfootnotesize\footnotesize
 \renewcommand*{\footnotesize}{\oldfootnotesize\tiny}
@@ -341,27 +345,167 @@
 \subsection{Algorithm 1}
 \begin{frame}
 \frametitle{Algorithm 1}
-\framesubtitle{Shiloach and Vishkin\footcite{yossi81}} 
-
-	\begin{algorithmic}[5]
-		\State Input: Flow network $N=(V,A,s,t,c)$
-		\State start with some valid flow 
-		\While{$\neg$ finished} \Comment{$O(\lvert V \rvert)$}
-			\State Construct residual network $G_r$ \Comment{$O(\lvert V \rvert)$, $p=O(\lvert V \rvert)}$
-			\State Construct layered network $G_l$ from $G_r$ \Comment{$O(\lvert A \rvert/p + \lvert V \rvert)$ (BFS on CREW)}
-			\State Calculate max flow $f_l$ in $G_l$  \Comment{next slides}
-			\State $f$ = $f$ + $f_l$
-		\EndWhile	
+\framesubtitle{Shiloach and Vishkin\footcite{yossi81} on CREW} 
+	\begin{algorithmic}[1]
+	\Function{MAX-FLOW}{$N=(V,A,s,t,c)$}
+	\State start with some valid flow 
+	\While{$l(t) \neq \infty$} \Comment{\textcolor{OliveGreen}{$O(\lvert V \rvert)$}}	
+		\State Construct residual network $G_r$ \Comment{\textcolor{OliveGreen}{$O(\lvert V \rvert)$, $p=O(\lvert V \rvert)$}}
+		\State Construct layered network $G_l$ from $G_r$ \Comment{\textcolor{OliveGreen}}{$O(\lvert A \rvert/p + \lvert V \rvert)$}
+		\State $f_l$ = MAX-FLOW($G_l$)  \Comment{next slides}
+		\State $f$ = $f$ + $f_l$ \Comment{\textcolor{OliveGreen}{$O(\lvert V \rvert)$}}
+	\EndWhile
+	\EndFunction
 	\end{algorithmic}
 \end{frame}
 
 \begin{frame}
 \frametitle{Algorithm 1}
-\framesubtitle{Shiloach and Vishkin} 
-
-
-
+\framesubtitle{Shiloach and Vishkin} 	
+	\begin{algorithmic}[1]
+	\Function{MAX-FLOW}{$G_l$}
+		\State EXCESS(s) = $\Sigma_{v \in L_1}$ c(s$\rightarrow$v)
+		\State PUSH(s, EXCESS(s))
+		\State i = 1
+		\While{$\exists$ v $\in$ UNBALANCED}
+			\State i++
+			\If{$v$ is not blocked}
+				\State PUSH(v, EXCESS(v))
+			\EndIf
+			\State RETURN(v, EXCESS(v))
+		\EndWhile
+	
+	\EndFunction
+	\end{algorithmic}
 \end{frame}
+
+\begin{frame}[shrink]
+\frametitle{Algorithm 1}
+\framesubtitle{Shiloach and Vishkin} 
+	\begin{algorithmic}[1]
+	\Function{PUSH}{v, EXCESS(v)}
+		\While{EXCESS(v) $>$ 0 and AVAILABLE $\neq\emptyset$}
+			\State e (= v$\rightarrow$w) = first edge in AVAILABLE(v)
+			\State q = min\{c(e) - f(e), EXCESS(v)\}
+			\State add Q = (e,q) to STACK(w)
+			\State f(e) = f(e) + q
+			\State EXCESS(v) = EXCESS(v) - q
+			\State EXCESS(w) = EXCESS(w) + q
+			\If{f(e) == c(e)}
+				\State remove e from AVAILABLE(v)
+			\EndIf
+		\EndWhile
+	 	\If{AVAILABLE == $\emptyset$}
+	 		\State block v
+\State $\forall u$ s.t. $(u \rightarrow v) \in A$: delete $(u\rightarrow v)$ from AVAILABLE(u) 
+	 	\EndIf
+	\EndFunction
+	\end{algorithmic}
+\end{frame}
+
+\begin{frame}[shrink]
+\frametitle{Algorithm 1}
+\framesubtitle{Shiloach and Vishkin} 
+	\begin{algorithmic}[1]
+	\Function{RETURN}{v, EXCESS(v)}
+		\While{EXCESS(v) $>$ 0}
+			\State let Q (= e=u$\rightarrow$v, q) be first element on in STACK(v)
+			\State q' = min\{q, EXCESS(v)\}
+			\State add Q = (e,q) to STACK(w)
+			\State f(e) = f(e) - q'
+			\State EXCESS(v) = EXCESS(v) - q'
+			\State EXCESS(u) = EXCESS(u) + q
+			\If{q' == q}
+				\State delete Q from STACK(v)
+			\Else
+				\State Q = (e, q - q')
+			\EndIf
+		\EndWhile
+	\EndFunction
+	\end{algorithmic}
+\end{frame}
+
+%        \node[vertex,label={[color=blue]80:$\layer$}] (\name) at \pos {$\name$};
+\begin{frame}
+\frametitle{Algorithm 1}
+\framesubtitle{Shiloach and Vishkin} 
+\begin{figure}
+	\begin{tikzpicture}[scale=1.8, auto,swap]
+		% s and t don't change
+	    \foreach \pos/\name in {{(0,2)/s/0},{(3.5,2)/t/0}}
+       		\node[vertex] (\name) at \pos {$\name$};
+       
+        \foreach \pos/\name in {{(1,3)/v_1/0},{(1,1)/v_3/0}}
+       		{\visible<1>{\node[vertex] (\name) at \pos {$\name$};}}
+		\foreach \pos/\name in {{(2.5,3)/v_2/0}}
+       		{\visible<1-2>{\node[vertex] (\name) at \pos {$\name$};}}       	
+       	\foreach \pos/\name in {{(2.5,1)/v_4/0}}
+       		{\visible<1->{\node[vertex] (\name) at \pos {$\name$};}}       	
+       	\foreach \pos/\name/\excess in {{(1,3)/v_1/+5}}
+       		{\visible<2>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}       	
+       	\foreach \pos/\name/\excess in {{(1,1)/v_3/+2}}
+       		{\visible<2>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}    
+       	\foreach \pos/\name/\excess in {{(1,3)/v_1/0}}
+       		{\visible<3-4,6,8->{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}    
+       	\foreach \pos/\name/\excess in {{(1,1)/v_3/0}}
+       		{\visible<3->{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}      	  	
+       	\foreach \pos/\name/\excess in {{(2.5,3)/v_2/+5}}
+       		{\visible<3>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}      	  	
+       	\foreach \pos/\name/\excess in {{(2.5,3)/v_2/+2}}
+       		{\visible<4>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}      	 
+       	\foreach \pos/\name/\excess in {{(2.5,3)/v_2/0}}
+       		{\visible<5->{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}   
+       	\foreach \pos/\name/\excess in {{(1,3)/v_1/+2}}
+       		{\visible<5,7>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}       
+       	\foreach \pos/\name/\excess in {{(2.5,1)/v_4/+2}}
+       		{\visible<6>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}      	
+       \foreach \pos/\name/\excess in {{(2.5,1)/v_4/0}}
+       		{\visible<7>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}   	
+       	
+    	                      
+    	% Connect vertices with edges and draw weights
+	   	\foreach \source /\dest /\weight in {s/v_3/0|2,s/v_1/0|5} 
+	    	{\visible<1-1>{\path[edge] (\source) --node[weight]{$\weight$} (\dest);}}
+      	\foreach \source /\dest /\weight in {v_1/v_2/0|5}
+	    	{\visible<1-2>{\path[edge] (\source) --node[weight]{$\weight$} (\dest);}}
+	    \foreach \source /\dest /\weight in {v_1/v_4/0|4}
+	    	{\visible<1-5>{\path[edge] (\source) --node[weight]{$\weight$} (\dest);}}
+	   	\foreach \source /\dest /\weight in {v_2/t/0|3}
+	    	{\visible<1-3>{\path[edge] (\source) --node[weight]{$\weight$} (\dest);}}	    	
+    	
+    	\foreach \source /\dest /\weight in {s/v_3/0|2} 
+	    	{\visible<2>{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}} 
+	   \foreach \source /\dest /\weight in {s/v_1/5|5} 
+	    	{\visible<2-7>{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}
+	    
+	    \foreach \source /\dest /\weight in {v_1/v_2/5|5}
+	    	{\visible<3-4>{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}	
+	    \foreach \source /\dest /\weight in {s/v_3/0|2} 
+	    	{\visible<3->{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}
+		
+		 \foreach \source /\dest /\weight in {v_2/t/3|3}
+	    	{\visible<4->{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}	
+	    
+	     \foreach \source /\dest /\weight in {v_1/v_2/3|5}
+	    	{\visible<5->{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}	
+	     \foreach \source /\dest /\weight in {v_1/v_4/2|4}
+	    	{\visible<6>{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}	
+	     \foreach \source /\dest /\weight in {v_1/v_4/0|4}
+	    	{\visible<7->{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}	
+	   	 \foreach \source /\dest /\weight in {s/v_1/3|5} 
+	    	{\visible<8>{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}
+	    	
+		\pause
+		\pause
+		\pause
+		\pause
+		\pause
+		\pause
+		\pause
+	\end{tikzpicture}
+	\end{figure}
+\end{frame}
+
 
 \begin{comment}
 Preflow push on layered network
@@ -390,8 +534,6 @@ proof (?)
 \end{comment}
 
 
-
-\begin{comment}
 \section{Preflow-Push}
 \begin{frame}
 	\frametitle{Preflow-Push Algorithm}
@@ -428,7 +570,7 @@ proof (?)
 	\end{tikzpicture}
 	\end{figure}	
 \end{frame} 
-\end{comment}
+
  	 
 \begin{frame}[allowframebreaks]
 \frametitle<presentation>{Literature}    
