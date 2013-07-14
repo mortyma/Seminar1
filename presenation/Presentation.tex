@@ -545,12 +545,6 @@ Let T be a PS-tree. Every node of T is represented by $T[height,i]$. $height(roo
 \end{itemize}
 \end{frame}
 
-
-\begin{comment}
-only n processors (just state)
-2n bound proof
-\end{comment}
-
 \begin{frame}
 \frametitle{Algorithm 1}
 \framesubtitle{Assumptions} 
@@ -630,12 +624,36 @@ At beginning of each phase:
 
 \begin{frame}
 \frametitle{Algorithm 1}
+\framesubtitle{Bounding the number of pulses\footcite{vishkin92}} 
+\end{frame}
+
+\begin{frame}
+\frametitle{Algorithm 1}
 \framesubtitle{Problems in acyclic networks\footcite{vishkin92}} 
 \end{frame}
 
 \begin{comment}
 Just mention briefly
 \end{comment}
+
+\begin{frame}
+\frametitle{Algorithm 1}
+\framesubtitle{Shiloach and Vishki} 
+	\begin{algorithmic}[1]
+	\Function{MAX-FLOW}{$N=(V,A,s,t,c)$}
+	\State start with some valid flow 
+	\While{$l(t) \neq \infty$} \Comment{\textcolor{OliveGreen}{$O(\lvert V \rvert)$}}	
+		\State Construct residual network $G_r$ \Comment{\textcolor{OliveGreen}{$O(\lvert V \rvert)$, $p=O(\lvert V \rvert)$}}
+		\State Construct layered network $G_l$ from $G_r$ \Comment{\textcolor{OliveGreen}}{$O(\lvert A \rvert/p + \lvert V \rvert)$}
+		\State $f_l$ = MAX-FLOW($G_l$)  \Comment{\textcolor{OliveGreen}{$O(\lvert V \rvert * log \lvert V \rvert)$}}
+		\State $f$ = $f$ + $f_l$ \Comment{\textcolor{OliveGreen}{$O(\lvert V \rvert)$}}
+	\EndWhile
+	\EndFunction
+	\end{algorithmic}
+	
+\pause
+\textcolor{red}{Result}: solves Max-Flow in $O({\lvert V \rvert}^{2} * log \lvert V \rvert)$ using $\lvert V \rvert$ processors on a CREW PRAM.
+\end{frame}
 
 \subsection{Algorithm 2}
 \begin{frame}
