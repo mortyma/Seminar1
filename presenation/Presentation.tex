@@ -543,7 +543,6 @@ Let T be a PS-tree. Every node of T is represented by $T[height,i]$. $height(roo
 	$a_1+\ldots +a_{k-1} < \alpha \leq a_1+\ldots +a_k$ and
 	$\rho = \alpha - (a_1+\ldots +a_{k-1})$
 \end{itemize}
-
 \end{frame}
 
 
@@ -552,8 +551,82 @@ only n processors (just state)
 2n bound proof
 \end{comment}
 
+\begin{frame}
+\frametitle{Algorithm 1}
+\framesubtitle{Assumptions} 
+\begin{itemize}
+	\item Each vertex $v$ has a processor $P(v)$ assigned
+	\item Each edge $e$ has a processor $P(e)$ assigned
+	\item Every leaf in every tree T-IN(v) has a processor $P(Q)$ assigned
+\end{itemize}
+\pause
+Apparently large number of processors can be reduced to $\lvert V \rvert$\footcite{yossi81}.
+\end{frame}
 
+\begin{frame}
+\frametitle{Algorithm 1}
+\framesubtitle{Parallel implementation} 
+At beginning of each phase:	
+	\begin{algorithmic}[1]
+	\Function{INTIALIZE}{v}
+		\State \textcolor{blue}{P($e_j = v \rightarrow w$):}
+		\State UPDATE($j$, $c(e_j)$)
+		\State f($e_j$) = 0
+		\State \textcolor{blue}{P(v):}
+		\State head(v) = 0	\Comment{points to last recorded flow quanta}
+		\State k'(v) = 1		\Comment{smallest index of edge in AVAILABLE(v)}
+ 	\EndFunction
+	\end{algorithmic}
+\end{frame}
 
+\begin{frame}
+\frametitle{Algorithm 1}
+	\begin{algorithmic}[1]
+	\Function{PUSH}{v,EXCESS(v)}
+		\State \textcolor{blue}{P(v):}
+		\State $\alpha$ = min\{EXCESS(v), T-OUT(v)[root]\} 
+		\State EXCESS(v) = EXCESS(v) - $\alpha$
+		\State FIND($\alpha$, k, $\rho$) in T-OUT(v)
+ 	\EndFunction
+	\end{algorithmic}
+\end{frame}
+
+\begin{frame}[shrink]
+\frametitle{Algorithm 1}
+\framesubtitle{Pulses} 
+\begin{algorithmic}[1]
+	\State \textcolor{blue}{P($e_j = v \rightarrow w$):}
+	\If{k' $\leq$ j $\leq$ k}
+ 	\State UPDATE(j,1) in T-ACCESS(w)
+	\State SUM(j,$S_j$) in T-ACCESS(w)
+	\If{j $<$ k}
+		$q_j$ = $\rho$
+	\Else
+		\State $q_j$ = T-OUT(v)[1,j]
+	\EndIf
+	\State $f(e_j)$ = $f(e_j)$ + $q_j$
+	\State TOTAL(w) = T-IN(w)[root]
+	\State UPDATE(head(w) + $S_j$, $q_j$) in T-IN(w)
+	\State UPDATE(j, T-OUT(v)[1,j] - $q_j$) in T-OUT(v)
+	\State head(w) = head(w) + T-ACCESS(w)[root] 
+	\State CLEAR(j) in T-ACCESS(w)
+	\State EXCESS(w) = T-IN(w)[root] - TOTAL(w)
+	\EndIf
+\end{algorithmic}
+\end{frame}
+
+\begin{frame}
+\frametitle{Algorithm 1}
+\framesubtitle{Pulses} 
+\begin{algorithmic}[1]
+	\State \textcolor{blue}{P(v):} k = k'
+	\State \textcolor{blue}{P($e_d = u \rightarrow w$):}
+	\If{EXCESS(v) $>$ 0}
+		\State block v
+		\State UPDATE(d,0) in T-OUT(v)
+	\EndIf
+\end{algorithmic}
+\end{frame}
 
 \begin{frame}
 \frametitle{Algorithm 1}
