@@ -443,18 +443,24 @@
        	\foreach \pos/\name/\excess in {{(1,1)/v_3/+2}}
        		{\visible<2>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}    
        	\foreach \pos/\name/\excess in {{(1,3)/v_1/0}}
-       		{\visible<3-4,6,8->{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}    
+       		{\visible<3-4,7->{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}    
        	\foreach \pos/\name/\excess in {{(1,1)/v_3/0}}
        		{\visible<3->{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}      	  	
        	\foreach \pos/\name/\excess in {{(2.5,3)/v_2/+5}}
        		{\visible<3>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}      	  	
+    	\foreach \pos/\name/\excess in {{(2.5,1)/v_4/+1}}
+       		{\visible<3>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}      	  	
        	\foreach \pos/\name/\excess in {{(2.5,3)/v_2/+2}}
-       		{\visible<4>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}      	 
+       		{\visible<4>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}    
+       	\foreach \pos/\name/\excess in {{(2.5,1)/v_4/0}}
+       		{\visible<4-5>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}    
        	\foreach \pos/\name/\excess in {{(2.5,3)/v_2/0}}
        		{\visible<5->{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}   
        	\foreach \pos/\name/\excess in {{(1,3)/v_1/+2}}
-       		{\visible<5,7>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}       
-       	\foreach \pos/\name/\excess in {{(2.5,1)/v_4/+2}}
+       		{\visible<5>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}     
+       	\foreach \pos/\name/\excess in {{(1,3)/v_1/+1}}
+       		{\visible<6>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}       
+       	\foreach \pos/\name/\excess in {{(2.5,1)/v_4/+1}}
        		{\visible<6>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}      	
        \foreach \pos/\name/\excess in {{(2.5,1)/v_4/0}}
        		{\visible<7>{\node[vertex,label={[color=red]80:$\excess$}] (\name) at \pos {$\name$};}}   	
@@ -463,36 +469,44 @@
     	% Connect vertices with edges and draw weights
 	   	\foreach \source /\dest /\weight in {s/v_3/0|2,s/v_1/0|5} 
 	    	{\visible<1-1>{\path[edge] (\source) --node[weight]{$\weight$} (\dest);}}
-      	\foreach \source /\dest /\weight in {v_1/v_2/0|5}
+      	\foreach \source /\dest /\weight in {v_1/v_2/0|5,v_3/v_4/0|1}
 	    	{\visible<1-2>{\path[edge] (\source) --node[weight]{$\weight$} (\dest);}}
-	    \foreach \source /\dest /\weight in {v_1/v_4/0|4}
+	    \foreach \source /\dest /\weight in {v_1/v_4/0|1}
 	    	{\visible<1-5>{\path[edge] (\source) --node[weight]{$\weight$} (\dest);}}
-	   	\foreach \source /\dest /\weight in {v_2/t/0|3}
+	   	\foreach \source /\dest /\weight in {v_2/t/0|3,v_4/t/0|6}
 	    	{\visible<1-3>{\path[edge] (\source) --node[weight]{$\weight$} (\dest);}}	    	
-    	
+	    	
     	\foreach \source /\dest /\weight in {s/v_3/2|2} 
 	    	{\visible<2>{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}} 
 	   \foreach \source /\dest /\weight in {s/v_1/5|5} 
-	    	{\visible<2-7>{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}
+	    	{\visible<2-5>{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}
 	    
 	    \foreach \source /\dest /\weight in {v_1/v_2/5|5}
 	    	{\visible<3-4>{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}	
-	    \foreach \source /\dest /\weight in {s/v_3/0|2} 
+	    \foreach \source /\dest /\weight in {s/v_3/1|2} 
+	    	{\visible<3->{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}
+	    \foreach \source /\dest /\weight in {v_3/v_4/1|1} 
 	    	{\visible<3->{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}
 		
 		 \foreach \source /\dest /\weight in {v_2/t/3|3}
-	    	{\visible<4->{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}	
+	    	{\visible<4->{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}};
+	     \foreach \source /\dest /\weight in {v_4/t/1|6}
+	    	{\visible<4-6>{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}	
+		    	
 	    
 	     \foreach \source /\dest /\weight in {v_1/v_2/3|5}
 	    	{\visible<5->{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}	
-	     \foreach \source /\dest /\weight in {v_1/v_4/2|4}
+	     \foreach \source /\dest /\weight in {v_1/v_4/1|1}
 	    	{\visible<6>{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}	
-	     \foreach \source /\dest /\weight in {v_1/v_4/0|4}
+	     \foreach \source /\dest /\weight in {s/v_1/5|5} 
+	    	{\visible<6>{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}
+	     \foreach \source /\dest /\weight in {s/v_1/4|5} 
+	    	{\visible<7->{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}
+    	 \foreach \source /\dest /\weight in {v_1/v_4/1|1}
 	    	{\visible<7->{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}	
-	   	 \foreach \source /\dest /\weight in {s/v_1/3|5} 
-	    	{\visible<8>{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}
+	   	 \foreach \source /\dest /\weight in {v_4/t/2|6} 
+	    	{\visible<7->{\path[selected edge] (\source) --node[weight]{$\weight$} (\dest);}}
 	    	
-		\pause
 		\pause
 		\pause
 		\pause
