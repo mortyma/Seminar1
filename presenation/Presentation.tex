@@ -655,7 +655,7 @@ At beginning of each phase:
 	\end{algorithmic}
 	
 \pause
-\textcolor{red}{Result}: solves Max-Flow in $O({\lvert V \rvert}^{2} * log \lvert V \rvert)$ using $\lvert V \rvert$ processors on a CREW PRAM.
+\textcolor{red}{Result}: solves Max-Flow in $O({\lvert V \rvert}^{2} * log \lvert V \rvert)$ time using $\lvert V \rvert$ processors on a CREW PRAM.
 \end{frame}
 
 \begin{frame}
@@ -695,9 +695,9 @@ $E^{-1} = \{(w,v)\vert (v,w) \in E \}$ \\
 
 \begin{frame}
 \frametitle{Algorithm 2: Goldberg and Tarjan}
-\framesubtitle{The INITIALIZATION function}
+\framesubtitle{The INITIALIZE function}
 	\begin{algorithmic}[1]
-	\Function{INITIALIZATION}{$N=(V,A,s,t,c)$}
+	\Function{INITIALIZE}{$N=(V,A,s,t,c)$}
 	\ForAll{$e_i = (s,v_i) \in E$}
 		\State create new atom $a_i$
 		\State $size(a_i) = c(e_i)$
@@ -741,14 +741,17 @@ $\forall v \in V \setminus \{s,t\}$ and $v$ not blocked, do in parallel:
 \frametitle{Algorithm 2: Goldberg and Tarjan}
 \framesubtitle{The PUSH function cont.}
 	\begin{algorithmic}[1]
-	\If{$a_i$ assigned to more than 1 $(v,w_j)$
-		\ForAll{$(v,w_j)$ assigned to $a_i$)}
-			\State create new atom $a_k$ 
-			\State $size(a_k$) = quanta assigned to $(v,w_j)$
-			\State $trace(a_k) = trace(a_i)$ and $position(a_k) = position(a_i)$
+	\If{$a_i$ assigned to more than 1 $(v,w_j)}$
+		\ForAll{$(v,w_j)$ assigned to $a_i$}
+			\If{assignment saturates $(v,w_j)$}
+				\State create new atom $a_k$ 
+				\State $size(a_k$) = quanta assigned to $(v,w_j)$
+				\State $trace(a_k) = trace(a_i)$ 
+				\State $position(a_k) = position(a_i)$
+			\EndIf
 		\EndFor
 	\EndIf	
-	\ForAll($(v,w_j)$}
+	\ForAll{$(v,w_j)$}
 		\ForAll{$a_i \leftrightarrow (v,w_j)$}
 			\State $f(v,w_j) = f(v,w_j) + size(a_i)$
 			\State $location(a_i) = w_j$
@@ -778,14 +781,93 @@ $\forall v \in V \setminus \{s,t\}$ and $v$ not blocked, do in parallel:
 \pause
 \bigskip
 Repeat PUSH until all atoms at $s$ or $t$
-	
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Algorithm 2: Goldberg and Tarjan}
+\framesubtitle{Observations}
+\begin{itemize}
+	\item atoms can move forward on $(v,w) \in E$, increasing the $f(v,w)$
+	\item or backward on $(w,v)$, decreasing the flow. $w$ becomes blocked. 
+	\item $f(v,w)$ never becomes negative: an atom can only move backward on $(w,v)$ if it moved along $(v,w)$ first.
+	\item $f(v,w)$ increases until $w$ is blocked, after which $f(v,w)$ decreases
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Algorithm 2: Goldberg and Tarjan}
+\framesubtitle{Analysis}
+\begin{block}{Lemma:}
+	The number of created atoms is $\leq \lvert E\rvert$.
+\end{block}
+\pause
+\textbf{Proof:} Atoms created in \\
+\begin{itemize}
+	\item INITIALIZE: $\lvert (s,v_i) \in E \rvert$. $size(a_i) = c(s,v_i)$\\
+	\item PUSH: Splitting an atom. New atom $a'$: $size(a') = c_r(v,w)$
+\end{itemize}
+\bigskip
+\pause
+$\Rightarrow$ Each newly created atom saturates an arc. Each arc may be saturated only once.
+\end{frame}
+
+\begin{frame}
+\frametitle{Algorithm 2: Goldberg and Tarjan}
+\framesubtitle{Analysis}
+\begin{block}{Lemma:}
+	$\forall a_i:$ at any time, $\lvert trace(a_i) \rvert \leq 2n-3$ arcs.
+\end{block}
+\pause
+\textbf{Proof:} 
+\begin{itemize}
+	\item An atom $a_i$ only moves backward on $(v,w) \in E$ once $w$ is blocked.
+	\item $\Rightarrow w \notin path(a_i)$.
+	\item $\Rightarrow a_i$ never visits $w$ again.
+	\item $\Rightarrow \forall w \in E \setminus \{t\}: trace(a_i)$ contains $(v,w)$ at most once
+	\item $\Rightarrow \forall w \in E \setminus \{s,t\}: trace(a_i)$ contains $(w,v)$ at most once
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Algorithm 2: Goldberg and Tarjan}
+\framesubtitle{Analysis}
+\begin{block}{Definition: Phase}
+	\begin{itemize}
+		\item \textit{phase $1$:} INITIALIZE
+		\item \textit{phase $i$:}
+		\begin{itemize}
+			\item starts at end of phase $i-1$.
+			\item ends as soon as all atoms from phase $i-1$ and all atoms created since the end of phase $i-1$ moved at least one step.
+		\end{itemize}
+	\end{itemize}		
+\end{block}
+
+\bigskip
+$\Rightarrow$ Every atom moves at least one step in each phase.
+\pause
+\begin{block}{Corollary:}
+	The algorithm terminates after at most $2n - 3$ phases.
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Algorithm 2: Goldberg and Tarjan}
+\framesubtitle{Analysis}
+
+\begin{itemize}
+	\item Assign one processor to each atom
+	\item One phase requires $O(log n)$ steps
+	\item $O(n)$ phases required
+	\item $O(nm)$ space required: storing traces of atoms
+\end{itemize}
+\textcolor{red}{Result}: solves Max-Flow in $O(n*log n)$ time using $m$ processors  and $O(nm)$ space on a EREW PRAM.
 \end{frame}
 
 \section{Further results}
 \begin{frame}
 \frametitle{Further results}
 \end{frame}
-
  	 
 \begin{frame}[allowframebreaks]
 \frametitle<presentation>{Literature}    
