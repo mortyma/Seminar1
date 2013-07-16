@@ -265,7 +265,7 @@
 		\begin{itemize}
 			\item Ford-Fulkerson: $O((n+m)*f_{max})$
 			\item Edmonds-Karp: $O(n*m^2)$
-			\pause \\	
+			\\	
 			$\Rightarrow$ \textcolor{green}{clearly solvable in polynomial time}
 		\end{itemize}
 		\pause
@@ -276,7 +276,6 @@
 			\item Number of stages: $O(|f_{max}|)$\\
 			may be reduced\footfullcite{papa95} to $O(n)$ or even $O(\sqrt{n})$
 		\end{itemize}			
-		\pause
 		\textcolor{blue}{Can we get an "efficient" parallel algorithm?}
 	\end{itemize}
 \end{frame}
@@ -380,6 +379,7 @@
 	\end{algorithmic}
 \end{frame}
 
+\begin{comment}
 \begin{frame}[shrink]
 \frametitle{Algorithm 1: Shiloach and Vishkin}
 \framesubtitle{The PUSH function}
@@ -425,8 +425,8 @@
 	\EndFunction
 	\end{algorithmic}
 \end{frame}
+\end{comment}
 
-%        \node[vertex,label={[color=blue]80:$\layer$}] (\name) at \pos {$\name$};
 \begin{frame}
 \frametitle{Algorithm 1: Shiloach and Vishkin}
 \framesubtitle{Preflow-Push example}
@@ -568,14 +568,14 @@ Let T be a PS-tree. Every node of T is represented by $T[height,i]$. $height(roo
 	\item Each edge $e$ has a processor $P(e)$ assigned
 	\item Every leaf in every tree T-IN(v) has a processor $P(Q)$ assigned
 \end{itemize}
-\pause
-Apparently large number of processors can be reduced to $n$\footfullcite{yossi81}.
+\bigskip
+Note: This apparently large number of processors can be reduced to $n$\footfullcite{yossi81}.
 \end{frame}
 
 \begin{frame}
 \frametitle{Algorithm 1: Shiloach and Vishkin}
 \framesubtitle{Parallel INTIALIZE function} 
-At beginning of each phase:	
+At beginning of each pulse:	
 	\begin{algorithmic}[1]
 	\Function{INTIALIZE}{v}
 		\State \textcolor{blue}{P($e_j = v \rightarrow w$):}
@@ -591,6 +591,7 @@ At beginning of each phase:
 \begin{frame}
 \frametitle{Algorithm 1: Shiloach and Vishkin}
 \framesubtitle{Parallel PUSH function} 
+$\forall v \in UNBALANCED$ do in parallel:
 	\begin{algorithmic}[1]
 	\Function{PUSH}{v,EXCESS(v)}
 		\State \textcolor{blue}{P(v):}
@@ -640,7 +641,11 @@ At beginning of each phase:
 
 \begin{frame}
 \frametitle{Algorithm 1: Shiloach and Vishkin}
-\framesubtitle{Bounding the number of pulses} 
+\framesubtitle{Analysis} 
+\begin{block}{Corollary:}
+Each PUSH or RETURN operation required $O(log n)$ time steps.
+\end{block}
+\pause
 \begin{block}{Corollary:}
 The number of pulses is at most\footfullcite{yossi81} $2n$.
 \end{block}
@@ -662,7 +667,7 @@ The number of pulses is at most\footfullcite{yossi81} $2n$.
 	\end{algorithmic}
 	
 \pause
-\textcolor{red}{Result}: solves Max-Flow in $O({n}^{2} * log nt)$ time using $n$ processors on a CREW PRAM.
+\textcolor{red}{Result}: solves Max-Flow in $O({n}^{2} * log n)$ time using $n$ processors on a CREW PRAM.
 \end{frame}
 
 \section{Goldberg-Tarjan}
@@ -683,12 +688,11 @@ The number of pulses is at most\footfullcite{yossi81} $2n$.
 An atom $a$ is the maximal quantity of flow that so far moved along path $P(s,v)$.\\
 \end{block}
 
-\textit{size(a)}: amount of excess flow that $a$ carries \\
-\textit{position(a)}: vertex $v\in V$ atom a is currently located at\\
-$E^{-1} = \{(w,v)\vert (v,w) \in E \}$ \\
-\textit{trace(a)}: $P(s, position(a))$ in $E \cup  E^{-1}$ \\
-\textit{path(a)}: simple path $P(s, position(a))$ in $E$ \\
-\textit{active atom}: $position(a) \in V \setminus \{s, t\}$
+\textbf{size(a)}: amount of excess flow that $a$ carries \\
+\textbf{position(a)}: vertex $v\in V$ atom a is currently located at\\
+\textbf{trace(a)}: $P(s, position(a))$ in $E \cup  E^{-1}$, where $E^{-1} = \{(w,v)\vert (v,w) \in E \}$ \\
+\textbf{path(a)}: simple path $P(s, position(a))$ in $E$ \\
+\textbf{active atom}: $position(a) \in V \setminus \{s, t\}$
 \end{frame}
 
 \begin{frame}
@@ -778,7 +782,7 @@ $\forall v \in V \setminus \{s,t\}$ and $v$ not blocked, do in parallel:
 	\end{algorithmic}
 \pause
 \bigskip
-Repeat PUSH until all atoms at arrive $s$ or $t$
+Repeat PUSH until all atoms arrive at $s$ or $t$
 \end{frame}
 
 \begin{frame}
@@ -882,7 +886,7 @@ Algorithm & Bounds & Remarks \\
 \rowcolor{c1} Vishkin\cite{vishkin92} & $O(n*log n)$, $p=O(n)$, $O(n^2)$ space & Combines previous two\\
 \rowcolor{c2} Johnson\cite{johnson87} & $O(log^{3} n)$, $p=O(n^{4})$ or $O(log^{2} n)$, $p=O(n^{6})$ &
 for planar networks\\
-\rowcolor{c1} & $	O(log^{2} n)$, $p=O(n^{4})$ & on undirected graphs or if  $\lvert f_{max} \rvert$ is given\\
+\rowcolor{c2} & $	O(log^{2} n)$, $p=O(n^{4})$ & on undirected graphs or if  $\lvert f_{max} \rvert$ is given\\
 \hline
 \end{tabularx}
 \end{table}
