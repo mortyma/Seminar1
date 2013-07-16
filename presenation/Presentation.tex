@@ -22,24 +22,16 @@
 \let\oldfootnotesize\footnotesize
 \renewcommand*{\footnotesize}{\oldfootnotesize\tiny}
 
-\title{Parallel network flows}
+\title{Parallel Network Flows}
 \subtitle{A follow up seminar to the Parallel Algorithms lecture}
-\author{Martin Kalany\inst{1} }
+\author{Martin Kalany }
 \institute
 {
-  \inst{1}
+  
   Graduate student in Computer Science\\
   Vienna University of Technology\\
 }
 \date{\today}
-
-\AtBeginSection[]
-{
-  \begin{frame}
-    \frametitle{Table of Contents}
-    \tableofcontents[currentsection]
-  \end{frame}
-}
 
 \tikzstyle{vertex}=[circle,fill=black!25,minimum size=20pt,inner sep=0pt]
 \tikzstyle{edge} = [draw,thick,->,>=latex,shorten >=1pt]
@@ -48,23 +40,27 @@
 \tikzstyle{residual edge} = [draw,thick,->,blue!75,>=latex]
 \tikzstyle{vertexE}=[circle,fill=black!25,minimum size=20pt,inner sep=0pt]
 
-
 \begin{document}
 % Declare layers (for more convenience when drawing graphs)
 \pgfdeclarelayer{background}
 \pgfsetlayers{background,main}
 
 \frame{\titlepage}
-	
 \section{Network flows}
+\begin{frame}
+    \frametitle{Table of Contents}
+    \tableofcontents
+  \end{frame}
+  
 \begin{frame}
 	\frametitle{Network flows}
     \begin{block}{Definition: Flow network}
     A \textcolor{red}{flow network}  \footfullcite{ahuja93} is given by $N = (G,s,t,c)$, where
     \begin{itemize}
-    		\item $G =(V,A)$ is a directed graph
+    		\item $G =(V,E)$ is a directed graph
     		\item $s$ and $t$, $s \neq t$ are the source and terminal node
-    		\item $c:A\rightarrow \mathbb{R}_0^{+}$ assigns a capacity $\forall a \in A$
+    		\item $c:E\rightarrow \mathbb{R}_0^{+}$ assigns a capacity $\forall a \in E$
+    		\item $n=\lvert V\rvert$, $m=\lvert E\rvert$
     \end{itemize}
     \end{block}
     \textbf{Assumptions:}
@@ -78,9 +74,9 @@
 \begin{frame}[shrink]
 	\frametitle{Network flows}
 	\begin{block}{Definition: Flow}
-	$f:A \rightarrow \mathbb{R}_0^{+}$ is a \textcolor{red}{flow} if it satisfies:
+	$f:E \rightarrow \mathbb{R}_0^{+}$ is a \textcolor{red}{flow} if it satisfies:
 	\begin{itemize}
-		\item \textbf{Capacity constraints:} $f(a) \leq c(a)$ $\forall a \in A$
+		\item \textbf{Capacity constraints:} $f(e) \leq c(e)$ $\forall e \in E$
 		\item \textbf{Flow conservation:} 
 		$ \sum\limits_{v \in V} f(u,v) =  0 \Leftrightarrow IN(f,v) = OUT(f,v)$ $\forall v \in V \setminus \{s,t\}$
 		\item \textbf{Value of a flow:} $\lvert f\rvert = f(V,t)$ 
@@ -90,7 +86,7 @@
 	\begin{block}{A flow $f$}
 	\begin{itemize}
 		\item is a \textcolor{red}{maximum flow} if $\lvert f\rvert \geq \lvert f'\rvert$, for any other flow $f'$
-		\item \textcolor{red}{saturates} an arc a if $f(a) = c(a)$
+		\item \textcolor{red}{saturates} an arc e if $f(e) = c(e)$
 		\item is a \textcolor{red}{maximal (or blocking) flow} if every directed path P(s,t) contains at least one saturated edge
 	\end{itemize}
 	\end{block}
@@ -99,12 +95,12 @@
 \begin{frame}
 	\frametitle{Network flows}
 	\begin{block}{Definition: Residual capacity}
-		The \textcolor{red}{residual capacity} of $a \in V \times V$ w.r.t. a flow $f$ is defined as $r_f(a) = c(a) - f(a)$. \\
+		The \textcolor{red}{residual capacity} of $e \in V \times V$ w.r.t. a flow $f$ is defined as $c_r(e) = c(e) - f(e)$. \\
 	\end{block}
 	
 	\pause
 	\begin{block}{Definition: Residual network}
-		$G_r = (V, A_r)$ with $A_r = \left\{a \in V \times V \lvert r_f(a) > 0\right\}$
+		$G_r = (V, E_r)$ with $E_r = \left\{e \in V \times V \lvert c_r(e) > 0\right\}$
 	\end{block}
 	
 	\pause
@@ -253,13 +249,21 @@
     \end{columns}	
 \end{frame}
 
+\AtBeginSection[]
+{
+  \begin{frame}
+    \frametitle{Table of Contents}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
 \section{Computational Complexity}
 \begin{frame}
 	\frametitle{Computational Complexity}
 	\begin{itemize}
 		\item Sequential complexity:
 		\begin{itemize}
-			\item Ford-Fulkerson: $O((|A|+|V|)*f_{max})$
+			\item Ford-Fulkerson: $O((n+m)*f_{max})$
 			\item Edmonds-Karp: $O(n*m^2)$
 			\pause \\	
 			$\Rightarrow$ \textcolor{green}{clearly solvable in polynomial time}
@@ -268,9 +272,9 @@
 		\item Parallel complexity:
 		\begin{itemize}
 			\item Construct residual network: $O(1)$
-			\item Find augmenting path: $O(log^{2}|V|)$ time and $O(|V|^{2})$ work
+			\item Find augmenting path: $O(log^{2}n)$ time and $O(n^{2})$ work
 			\item Number of stages: $O(|f_{max}|)$\\
-			may be reduced\footfullcite{papa95} to $O(|V|)$ or even $O(\sqrt{|V|})$
+			may be reduced\footfullcite{papa95} to $O(n)$ or even $O(\sqrt{n})$
 		\end{itemize}			
 		\pause
 		\textcolor{blue}{Can we get an "efficient" parallel algorithm?}
@@ -295,19 +299,19 @@
 \section{Shiloach-Vishkin}
 \begin{frame}
 \frametitle{Layered networks}
-	\begin{block}{Definition: Layered network\footcite{yossi81}}
-	$N = (V,A,s,t,c)$ is a \textcolor{red}{layered network} if each vertex $v \in V$ has a layer number $l(v)$ s.t.
+	\begin{block}{Definition: Layered network\footfullcite{yossi81}}
+	$N = (V,E,s,t,c)$ is a \textcolor{red}{layered network} if each vertex $v \in V$ has a layer number $l(v)$ s.t.
 	\begin{itemize}
 		\item $l(s) = 0$ and $0 \leq l(v) \leq l(t)$ $\forall v \in V$
-		\item $(e = u \rightarrow v) \in A  \Rightarrow l(v) - l(u) = 1$
+		\item $(e = u \rightarrow v) \in E  \Rightarrow l(v) - l(u) = 1$
 	\end{itemize}
 	\end{block}
 \end{frame}
 
 \begin{frame}
 \frametitle{Dinitz' scheme}	
-	\begin{block}{Lemma: Dinitz' scheme\footcite{dinitz70}}
-	A maximum flow problem in a \emph{general network} can be transformed \emph{into $O(n)$ maximal flow problems in layered networks}.
+	\begin{block}{Lemma: Dinitz' scheme\footfullcite{dinitz70}}
+	A maximum flow problem in a \emph{general network} can be transformed into \emph{$O(n)$ maximal flow problems in layered networks}.
 	\end{block}
 	
 	\begin{figure}
@@ -341,16 +345,16 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Algorithm 1: Shiloach and Vishkin\footcite{yossi81}}
+\frametitle{Algorithm 1: Shiloach and Vishkin\footfullcite{yossi81}}
 \framesubtitle{High level description}
 	\begin{algorithmic}[1]
-	\Function{MAX-FLOW}{$N=(V,A,s,t,c)$}
+	\Function{MAX-FLOW}{$N=(V,E,s,t,c)$}
 	\State start with some valid flow 
-	\While{$l(t) \neq \infty$} \Comment{\textcolor{OliveGreen}{$O(\lvert V \rvert)$}}	
-		\State Construct residual network $G_r$ \Comment{\textcolor{OliveGreen}{$O(\lvert V \rvert)$, $p=O(\lvert V \rvert)$}}
-		\State Construct layered network $G_l$ from $G_r$ \Comment{\textcolor{OliveGreen}}{$O(\lvert A \rvert/p + \lvert V \rvert)$}
+	\While{$l(t) \neq \infty$} \Comment{\textcolor{OliveGreen}{$O(n)$}}	
+		\State Construct residual network $G_r$ \Comment{\textcolor{OliveGreen}{$O(n)$, $p=On)$}}
+		\State Construct layered network $G_l$ from $G_r$ \Comment{\textcolor{OliveGreen}}{$O(m/p + n)$}
 		\State $f_l$ = MAX-FLOW($G_l$)  \Comment{next slides}
-		\State $f$ = $f$ + $f_l$ \Comment{\textcolor{OliveGreen}{$O(\lvert V \rvert)$}}
+		\State $f$ = $f$ + $f_l$ \Comment{\textcolor{OliveGreen}{$O(n)$}}
 	\EndWhile
 	\EndFunction
 	\end{algorithmic}
@@ -394,7 +398,7 @@
 		\EndWhile
 	 	\If{AVAILABLE == $\emptyset$}
 	 		\State block v
-\State $\forall u$ s.t. $(u \rightarrow v) \in A$: delete $(u\rightarrow v)$ from AVAILABLE(u) 
+\State $\forall u$ s.t. $(u \rightarrow v) \in E$: delete $(u\rightarrow v)$ from AVAILABLE(u) 
 	 	\EndIf
 	\EndFunction
 	\end{algorithmic}
@@ -536,7 +540,7 @@ Four PS-trees attached to every vertex $v\in V$:
 	\item \textbf{T-ACCESS(v)}: $d_{in}(v)$ active leaves; each leave associated with one incoming edge. Coordinates access to $v$. 
 	\item \textbf{T-SUM(v)}: $d_{out}(v)$ active leaves; each leave associated with one outgoing edge. Sums flow returned to $v$ in a given pulse. 
 \end{itemize}
-One PS-tree attached to every arc $a\in A$:
+One PS-tree attached to every arc $e\in E$:
 \begin{itemize}
 	\item \textbf{T-EDGE(e)}: $2n$ active leaves; each associated with one pulse. Records amount of flow returned to arc in a given pulse.
 \end{itemize}
@@ -565,7 +569,7 @@ Let T be a PS-tree. Every node of T is represented by $T[height,i]$. $height(roo
 	\item Every leaf in every tree T-IN(v) has a processor $P(Q)$ assigned
 \end{itemize}
 \pause
-Apparently large number of processors can be reduced to $\lvert V \rvert$\footcite{yossi81}.
+Apparently large number of processors can be reduced to $n$\footfullcite{yossi81}.
 \end{frame}
 
 \begin{frame}
@@ -578,8 +582,8 @@ At beginning of each phase:
 		\State UPDATE($j$, $c(e_j)$)
 		\State f($e_j$) = 0
 		\State \textcolor{blue}{P(v):}
-		\State head(v) = 0	\Comment{points to last recorded flow quanta}
-		\State k'(v) = 1		\Comment{smallest index of edge in AVAILABLE(v)}
+		\State head(v) = 0	
+		\State k'(v) = 1	
  	\EndFunction
 	\end{algorithmic}
 \end{frame}
@@ -638,7 +642,7 @@ At beginning of each phase:
 \frametitle{Algorithm 1: Shiloach and Vishkin}
 \framesubtitle{Bounding the number of pulses} 
 \begin{block}{Corollary:}
-The number of pulses is at most $2n$\footcite{yossi81}.
+The number of pulses is at most\footfullcite{yossi81} $2n$.
 \end{block}
 \end{frame}
 
@@ -646,24 +650,24 @@ The number of pulses is at most $2n$\footcite{yossi81}.
 \frametitle{Algorithm 1: Shiloach and Vishkin}
 \framesubtitle{Complexity} 
 	\begin{algorithmic}[1]
-	\Function{MAX-FLOW}{$N=(V,A,s,t,c)$}
+	\Function{MAX-FLOW}{$N=(V,E,s,t,c)$}
 	\State start with some valid flow 
-	\While{$l(t) \neq \infty$} \Comment{\textcolor{OliveGreen}{$O(\lvert V \rvert)$}}	
-		\State Construct residual network $G_r$ \Comment{\textcolor{OliveGreen}{$O(\lvert V \rvert)$, $p=O(\lvert V \rvert)$}}
-		\State Construct layered network $G_l$ from $G_r$ \Comment{\textcolor{OliveGreen}}{$O(\lvert A \rvert/p + \lvert V \rvert)$}
-		\State $f_l$ = MAX-FLOW($G_l$)  \Comment{\textcolor{OliveGreen}{$O(\lvert V \rvert * log \lvert V \rvert)$}}
-		\State $f$ = $f$ + $f_l$ \Comment{\textcolor{OliveGreen}{$O(\lvert V \rvert)$}}
+	\While{$l(t) \neq \infty$} \Comment{\textcolor{OliveGreen}{$O(n)$}}	
+		\State Construct residual network $G_r$ \Comment{\textcolor{OliveGreen}{$O(n)$, $p=On)$}}
+		\State Construct layered network $G_l$ from $G_r$ \Comment{\textcolor{OliveGreen}}{$O(m/p + n)$}
+		\State $f_l$ = MAX-FLOW($G_l$)  \Comment{\textcolor{OliveGreen}{$O(n * log n)$}}
+		\State $f$ = $f$ + $f_l$ \Comment{\textcolor{OliveGreen}{$O(n)$}}
 	\EndWhile
 	\EndFunction
 	\end{algorithmic}
 	
 \pause
-\textcolor{red}{Result}: solves Max-Flow in $O({\lvert V \rvert}^{2} * log \lvert V \rvert)$ time using $\lvert V \rvert$ processors on a CREW PRAM.
+\textcolor{red}{Result}: solves Max-Flow in $O({n}^{2} * log nt)$ time using $n$ processors on a CREW PRAM.
 \end{frame}
 
 \section{Goldberg-Tarjan}
 \begin{frame}
-\frametitle{Algorithm 2: Goldberg and Tarjan\footcite{goldberg89}}
+\frametitle{Algorithm 2: Goldberg and Tarjan\footfullcite{goldberg89}}
 \framesubtitle{General principle}
 \begin{itemize}
 	\item Works on DAGs
@@ -676,7 +680,7 @@ The number of pulses is at most $2n$\footcite{yossi81}.
 \frametitle{Algorithm 2: Goldberg and Tarjan}
 \framesubtitle{Atoms}
 \begin{block}{Definition: Atom}
-An atom $a$ is the maximal quantity of flow that so far moved the exact path $P(s,v)$.\\
+An atom $a$ is the maximal quantity of flow that so far moved along path $P(s,v)$.\\
 \end{block}
 
 \textit{size(a)}: amount of excess flow that $a$ carries \\
@@ -691,7 +695,7 @@ $E^{-1} = \{(w,v)\vert (v,w) \in E \}$ \\
 \frametitle{Algorithm 2: Goldberg and Tarjan}
 \framesubtitle{The INITIALIZE function}
 	\begin{algorithmic}[1]
-	\Function{INITIALIZE}{$N=(V,A,s,t,c)$}
+	\Function{INITIALIZE}{$N=(V,E,s,t,c)$}
 	\ForAll{$e_i = (s,v_i) \in E$}
 		\State create new atom $a_i$
 		\State $size(a_i) = c(e_i)$
@@ -774,15 +778,15 @@ $\forall v \in V \setminus \{s,t\}$ and $v$ not blocked, do in parallel:
 	\end{algorithmic}
 \pause
 \bigskip
-Repeat PUSH until all atoms at $s$ or $t$
+Repeat PUSH until all atoms at arrive $s$ or $t$
 \end{frame}
 
 \begin{frame}
 \frametitle{Algorithm 2: Goldberg and Tarjan}
 \framesubtitle{Observations}
 \begin{itemize}
-	\item atoms can move forward on $(v,w) \in E$, increasing the $f(v,w)$
-	\item or backward on $(w,v)$, decreasing the flow. $w$ becomes blocked. 
+	\item atoms can move forward on $(v,w) \in E$, increasing $f(v,w)$
+	\item or backward on $(w,v)$, decreasing$f(v,w)$ and blocking $w$. 
 	\item $f(v,w)$ never becomes negative: an atom can only move backward on $(w,v)$ if it moved along $(v,w)$ first.
 	\item $f(v,w)$ increases until $w$ is blocked, after which $f(v,w)$ decreases
 \end{itemize}
@@ -852,6 +856,7 @@ $\Rightarrow$ Every atom moves at least one step in each phase.
 	\item $O(n)$ phases required
 	\item $O(nm)$ space required: storing traces of atoms
 \end{itemize}
+\pause
 \textcolor{red}{Result}: solves Max-Flow in $O(n*log n)$ time using $m$ processors  and $O(nm)$ space on a EREW PRAM.
 \end{frame}
 
@@ -881,6 +886,10 @@ for planar networks\\
 \hline
 \end{tabularx}
 \end{table}
+\end{frame}
+
+\begin{frame}
+Thank you for your attention!
 \end{frame}
 
 \begin{frame}[allowframebreaks]
