@@ -22,7 +22,7 @@
 \let\oldfootnotesize\footnotesize
 \renewcommand*{\footnotesize}{\oldfootnotesize\tiny}
 
-\title{Parallel Network Flows}
+\title{Parallel Network Flow Algorithms}
 \subtitle{A follow up seminar to the Parallel Algorithms lecture}
 \author{Martin Kalany }
 \institute
@@ -57,7 +57,7 @@
     \begin{block}{Definition: Flow network}
     A \textcolor{red}{flow network}  \footfullcite{ahuja93} is given by $N = (G,s,t,c)$, where
     \begin{itemize}
-    		\item $G =(V,E)$ is a directed graph
+    		\item $G =(V,E)$ is a directed acyclic graph
     		\item $s$ and $t$, $s \neq t$ are the source and terminal node
     		\item $c:E\rightarrow \mathbb{R}_0^{+}$ assigns a capacity $\forall a \in E$
     		\item $n=\lvert V\rvert$, $m=\lvert E\rvert$
@@ -68,6 +68,7 @@
 		\item $G$ is connected
 		\item $\nexists P(s,t) \in G$ s.t. $c(P) = \infty$
 		\item $G$ is simple, i.e., does not contain loops or parallel arcs
+		\item $\forall e \in V\times V \setminus E: f(e) = 0$
 	\end{itemize}
 \end{frame}
   
@@ -87,7 +88,7 @@
 	\begin{itemize}
 		\item is a \textcolor{red}{maximum flow} if $\lvert f\rvert \geq \lvert f'\rvert$, for any other flow $f'$
 		\item \textcolor{red}{saturates} an arc e if $f(e) = c(e)$
-		\item is a \textcolor{red}{maximal (or blocking) flow} if every directed path P(s,t) contains at least one saturated edge
+		\item is a \textcolor{red}{maximal (or blocking) flow} if every directed path P(s,t) contains at least one saturated arc
 	\end{itemize}
 	\end{block}
 \end{frame}
@@ -273,7 +274,7 @@
 		\begin{itemize}
 			\item Construct residual network: $O(1)$
 			\item Find augmenting path: $O(log^{2}n)$ time and $O(n^{2})$ work
-			\item Number of stages: $O(|f_{max}|)$\\
+			\item Number of stages: $O(f_{max})$\\
 			may be reduced\footfullcite{papa95} to $O(n)$ or even $O(\sqrt{n})$
 		\end{itemize}			
 		\textcolor{blue}{Can we get an "efficient" parallel algorithm?}
@@ -523,8 +524,8 @@
 
 \begin{frame}
 \frametitle{Algorithm 1: Shiloach and Vishkin}
-\framesubtitle{Partial sum trees} 
-\begin{block}{Partial sum tree}
+\framesubtitle{Partial sums trees} 
+\begin{block}{Definition: Partial sums tree}
 $k$ numbers $a_1$,...,$a_k$ are associated with the leftmost $k$ leaves of a complete binary tree with $2^{\lceil log_2(k) \rceil}$ leaves. Remaining nodes are initialized with $0$. \\
 Each internal node stores the sum of its child nodes.
 \end{block}
@@ -542,7 +543,7 @@ Four PS-trees attached to every vertex $v\in V$:
 \end{itemize}
 One PS-tree attached to every arc $e\in E$:
 \begin{itemize}
-	\item \textbf{T-EDGE(e)}: $2n$ active leaves; each associated with one pulse. Records amount of flow returned to arc in a given pulse.
+	\item \textbf{T-EDGE(e)}: $2n$ active leaves; each associated with one pulse. Records amount of flow returned on $e$ in a given pulse.
 \end{itemize}
 \end{frame}
 
@@ -579,7 +580,7 @@ At beginning of each pulse:
 	\begin{algorithmic}[1]
 	\Function{INTIALIZE}{v}
 		\State \textcolor{blue}{P($e_j = v \rightarrow w$):}
-		\State UPDATE($j$, $c(e_j)$)
+		\State UPDATE($j$, $c(e_j)$) T-OUT(v)
 		\State f($e_j$) = 0
 		\State \textcolor{blue}{P(v):}
 		\State head(v) = 0	
@@ -610,7 +611,7 @@ $\forall v \in UNBALANCED$ do in parallel:
 	\If{k' $\leq$ j $\leq$ k}
  	\State UPDATE(j,1) in T-ACCESS(w)
 	\State SUM(j,$S_j$) in T-ACCESS(w)
-	\If{j $<$ k}
+	\If{$j == k$}
 		$q_j$ = $\rho$
 	\Else
 		\State $q_j$ = T-OUT(v)[1,j]
@@ -641,14 +642,18 @@ $\forall v \in UNBALANCED$ do in parallel:
 
 \begin{frame}
 \frametitle{Algorithm 1: Shiloach and Vishkin}
-\framesubtitle{Analysis} 
+\framesubtitle{Analysis\footfullcite{yossi81}} 
 \begin{block}{Corollary:}
-Each PUSH or RETURN operation required $O(log n)$ time steps.
+Each PUSH or RETURN operation requires $O(log n)$ time steps.
 \end{block}
 \pause
 \begin{block}{Corollary:}
-The number of pulses is at most\footfullcite{yossi81} $2n$.
+The number of pulses is at most $2n$.
 \end{block}
+\begin{block}{Corollary:}
+The algorithm requires a CRCW PRAM. However, since all concurrent write operations write the same value, the same performance can be achieved on a CREW PRAM.
+\end{block}
+
 \end{frame}
 
 \begin{frame}
