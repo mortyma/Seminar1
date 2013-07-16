@@ -8,7 +8,7 @@
 \usepackage{verbatim}
 \usetikzlibrary{arrows,shapes}
 \usepackage{hyperref}
-\usepackage[style=verbose,backend=bibtex]{biblatex}
+\usepackage[style=numeric-comp,backend=bibtex]{biblatex}
 \usepackage{comment}
 \usepackage{listings}
 \usepackage{algorithm}
@@ -59,8 +59,8 @@
 \section{Network flows}
 \begin{frame}
 	\frametitle{Network flows}
-    \begin{block}{Definition: Flow network}\footnote{\cite{ahuja93}}
-    A \textcolor{red}{flow network}  is given by $N = (G,s,t,c)$, where
+    \begin{block}{Definition: Flow network}
+    A \textcolor{red}{flow network}  \footfullcite{ahuja93} is given by $N = (G,s,t,c)$, where
     \begin{itemize}
     		\item $G =(V,A)$ is a directed graph
     		\item $s$ and $t$, $s \neq t$ are the source and terminal node
@@ -270,7 +270,7 @@
 			\item Construct residual network: $O(1)$
 			\item Find augmenting path: $O(log^{2}|V|)$ time and $O(|V|^{2})$ work
 			\item Number of stages: $O(|f_{max}|)$\\
-			may be reduced\footcite{papa95} to $O(|V|)$ or even $O(\sqrt{|V|})$
+			may be reduced\footfullcite{papa95} to $O(|V|)$ or even $O(\sqrt{|V|})$
 		\end{itemize}			
 		\pause
 		\textcolor{blue}{Can we get an "efficient" parallel algorithm?}
@@ -280,7 +280,7 @@
 \begin{frame}
 	\frametitle{Computational Complexity}
 	\begin{itemize}
-	\item \textbf{NC}\footcite{papa95} ("Nick's Class"): Problems solvable in $O(log^{k_1}(n))$ time and $O(n^{k_2})$ total work
+	\item \textbf{NC}\footfullcite{papa95} ("Nick's Class"): Problems solvable in $O(log^{k_1}(n))$ time and $O(n^{k_2})$ total work
 	\item alternatively: Language decided by PRAM in $O(log^{k_1}(n))$ time steps with $O(n^{k_2})$ processors available at each step 
 	\item $NC \subseteq P$, but whether $NC \subset P$ or $NC = P$ is unknown 
 	\item $P \setminus NC$: "Inherently sequential"  problems
@@ -868,26 +868,21 @@ $\Rightarrow$ Every atom moves at least one step in each phase.
 \hline
 Algorithm & Bounds & Remarks \\
 \hline
-\rowcolor{c1} Ford-Fulkerson & $O((n+m) * f_{max})$ & Sequential algorithm \\
-\rowcolor{c2} Edmonds-Karp & $O(n*m^2)$ & Sequential algorithm  \\
-\rowcolor{c1} Dinitz& $O(n^2*m)$ & Sequential algorithm on layered networks\\
-\rowcolor{c2} Preflow-Push & $O(n^2*m)$, $O(n*m*log(n^2/m))$ & Various improvements\\
-\rowcolor{c1} Shiloach-Vishkin & $O(n^2*log m)$, $p=O(n)$ & on CREW PRAM\\
-\rowcolor{c2} Goldberg-Tarjan & $O(n*log n)$, $p=O(m)$, $O(nm)$ space & on EREW PRAM \\
-\rowcolor{c1} Vishkin & $O(n*log n)$, $p=O(n)$, $O(n^2)$ space & Combines previous two\\
-\rowcolor{c2} Johnson & $O(log^{3} n)$, $p=O(n^{4})$ or $O(log^{2} n)$, $p=O(n^{6})$ &
+\rowcolor{c1} Ford-Fulkerson\cite{ahuja93} & $O((n+m) * f_{max})$ & Sequential algorithm \\
+\rowcolor{c2} Edmonds-Karp\cite{ahuja93} & $O(n*m^2)$ & Sequential algorithm  \\
+\rowcolor{c1} Dinitz\cite{dinitz70}& $O(n^2*m)$ & Sequential algorithm on layered networks\\
+\rowcolor{c2} Preflow-Push\cite{ahuja93} & $O(n^2*m)$, $O(n*m*log(n^2/m))$ & Various improvements\\
+\rowcolor{c1} Shiloach-Vishkin\cite{yossi81} & $O(n^2*log m)$, $p=O(n)$ & on CREW PRAM\\
+\rowcolor{c2} Goldberg-Tarjan\cite{goldberg89} & $O(n*log n)$, $p=O(m)$, $O(nm)$ space & on EREW PRAM \\
+\rowcolor{c1} Vishkin\cite{vishkin92} & $O(n*log n)$, $p=O(n)$, $O(n^2)$ space & Combines previous two\\
+\rowcolor{c2} Johnson\cite{johnson87} & $O(log^{3} n)$, $p=O(n^{4})$ or $O(log^{2} n)$, $p=O(n^{6})$ &
 for planar networks\\
 \rowcolor{c1} & $	O(log^{2} n)$, $p=O(n^{4})$ & on undirected graphs or if  $\lvert f_{max} \rvert$ is given\\
 \hline
 \end{tabularx}
 \end{table}
 \end{frame}
- 	 
-\nocite{johnson87}
-\nocite{goldberg91}
-\nocite{goldberg98}
-\nocite{vishkin92}
- 	 
+
 \begin{frame}[allowframebreaks]
 \frametitle<presentation>{Literature}    
 \printbibliography
