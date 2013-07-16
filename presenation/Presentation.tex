@@ -13,8 +13,8 @@
 \usepackage{listings}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-%\usepackage{color}
-
+\usepackage{tabularx}
+\usepackage{color, colortbl}
 \addbibresource{../sources}
 
 \definecolor{OliveGreen}{cmyk}{0.64,0,0.95,0.40}
@@ -260,7 +260,7 @@
 		\item Sequential complexity:
 		\begin{itemize}
 			\item Ford-Fulkerson: $O((|A|+|V|)*f_{max})$
-			\item Edmonds-Karp: $O(|V|^{2} * |E|) $
+			\item Edmonds-Karp: $O(n*m^2)$
 			\pause \\	
 			$\Rightarrow$ \textcolor{green}{clearly solvable in polynomial time}
 		\end{itemize}
@@ -636,7 +636,10 @@ At beginning of each phase:
 
 \begin{frame}
 \frametitle{Algorithm 1: Shiloach and Vishkin}
-\framesubtitle{Bounding the number of pulses\footcite{vishkin92}} 
+\framesubtitle{Bounding the number of pulses} 
+\begin{block}{Corollary:}
+The number of pulses is at most $2n$\footcite{yossi81}.
+\end{block}
 \end{frame}
 
 \begin{frame}
@@ -657,15 +660,6 @@ At beginning of each phase:
 \pause
 \textcolor{red}{Result}: solves Max-Flow in $O({\lvert V \rvert}^{2} * log \lvert V \rvert)$ time using $\lvert V \rvert$ processors on a CREW PRAM.
 \end{frame}
-
-\begin{frame}
-\frametitle{Algorithm 1: Shiloach and Vishkin}
-\framesubtitle{Problems in acyclic networks\footcite{vishkin92}} 
-\end{frame}
-
-\begin{comment}
-Just mention briefly
-\end{comment}
 
 \section{Goldberg-Tarjan}
 \begin{frame}
@@ -783,7 +777,6 @@ $\forall v \in V \setminus \{s,t\}$ and $v$ not blocked, do in parallel:
 Repeat PUSH until all atoms at $s$ or $t$
 \end{frame}
 
-
 \begin{frame}
 \frametitle{Algorithm 2: Goldberg and Tarjan}
 \framesubtitle{Observations}
@@ -842,7 +835,6 @@ $\Rightarrow$ Each newly created atom saturates an arc. Each arc may be saturate
 		\end{itemize}
 	\end{itemize}		
 \end{block}
-
 \bigskip
 $\Rightarrow$ Every atom moves at least one step in each phase.
 \pause
@@ -854,7 +846,6 @@ $\Rightarrow$ Every atom moves at least one step in each phase.
 \begin{frame}
 \frametitle{Algorithm 2: Goldberg and Tarjan}
 \framesubtitle{Analysis}
-
 \begin{itemize}
 	\item Assign one processor to each atom
 	\item One phase requires $O(log n)$ steps
@@ -864,10 +855,38 @@ $\Rightarrow$ Every atom moves at least one step in each phase.
 \textcolor{red}{Result}: solves Max-Flow in $O(n*log n)$ time using $m$ processors  and $O(nm)$ space on a EREW PRAM.
 \end{frame}
 
+%\definecolor{c1}{rgb}{0.53,0.81,0.98}
+\definecolor{c1}{rgb}{1,1,1}
+\definecolor{c2}{rgb}{0.88,1,1}
+
 \section{Further results}
 \begin{frame}
-\frametitle{Further results}
+\frametitle{Overview and further results}
+\fontsize{8.5pt}{8}\selectfont
+\begin{table}
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+Algorithm & Bounds & Remarks \\
+\hline
+\rowcolor{c1} Ford-Fulkerson & $O((n+m) * f_{max})$ & Sequential algorithm \\
+\rowcolor{c2} Edmonds-Karp & $O(n*m^2)$ & Sequential algorithm  \\
+\rowcolor{c1} Dinitz& $O(n^2*m)$ & Sequential algorithm on layered networks\\
+\rowcolor{c2} Preflow-Push & $O(n^2*m)$, $O(n*m*log(n^2/m))$ & Various improvements\\
+\rowcolor{c1} Shiloach-Vishkin & $O(n^2*log m)$, $p=O(n)$ & on CREW PRAM\\
+\rowcolor{c2} Goldberg-Tarjan & $O(n*log n)$, $p=O(m)$, $O(nm)$ space & on EREW PRAM \\
+\rowcolor{c1} Vishkin & $O(n*log n)$, $p=O(n)$, $O(n^2)$ space & Combines previous two\\
+\rowcolor{c2} Johnson & $O(log^{3} n)$, $p=O(n^{4})$ or $O(log^{2} n)$, $p=O(n^{6})$ &
+for planar networks\\
+\rowcolor{c1} & $	O(log^{2} n)$, $p=O(n^{4})$ & on undirected graphs or if  $\lvert f_{max} \rvert$ is given\\
+\hline
+\end{tabularx}
+\end{table}
 \end{frame}
+ 	 
+\nocite{johnson87}
+\nocite{goldberg91}
+\nocite{goldberg98}
+\nocite{vishkin92}
  	 
 \begin{frame}[allowframebreaks]
 \frametitle<presentation>{Literature}    
