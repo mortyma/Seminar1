@@ -2,8 +2,12 @@
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{amsthm}
 \usepackage[usenames,dvipsnames]{color}
 \usepackage{comment}
+\usepackage{tikz}
+\usepackage{verbatim}
+\usetikzlibrary{arrows,shapes}
 \usepackage{listings}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
@@ -19,6 +23,21 @@
 \usepackage[style=numeric,backend=bibtex]{biblatex}
 \addbibresource{../sources}
 %\usepackage[style=mla,babel=hyphen,backend=biber]{biblatex}
+
+\tikzstyle{vertex}=[circle,fill=black!25,minimum size=20pt,inner sep=0pt]
+\tikzstyle{edge} = [draw,thick,->,>=latex,shorten >=1pt]
+\tikzstyle{weight} = [font=\small]
+\tikzstyle{selected edge} = [draw,line width=2pt,->,red!75,>=latex]
+\tikzstyle{residual edge} = [draw,thick,->,blue!75,>=latex]
+\tikzstyle{vertexE}=[circle,fill=black!25,minimum size=20pt,inner sep=0pt]
+
+% Declare layers (for more convenience when drawing graphs)
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}[lemma]{Corollary}
+%\newtheorem{proof}[lemma]{Proof}
 
 \title{Parallel Network Flow Algorithms \\ 
 \large A follow up seminar to the Parallel Algorithms lecture\footnote{Jesper Larsson Träff, lecture "Parallel Algorithms", 2012 winter term at TU Wien}}
@@ -76,7 +95,7 @@ The \emph{residual capacity} of $e \in V \times V$ w.r.t. a flow $f$ is defined 
 
 \section{Computitional Complecity}
 \label{sec:cc}
-The algorithmic complexity of the \emph{Ford-Fulkerson} algorithm is given as $O((n+m)*f_{max})$\footnote{$f_{max}$ is from here on used to denote the maximum flow} \cite{ahuja93,papa95}. This was improved by the \emph{Edmonds-Karp} algorithm to $O(n*m^2)$, by using shortest augmenting paths instead of arbitrarily chosen ones. Clearly, the \emph{maximum flow problem} can be solved in \textbf{polynomial time} with a sequential algorithm and is thus $\in P$.
+The algorithmic complexity of the \emph{Ford-Fulkerson} algorithm is given as $O((n+m)*f_{max})$\footnote{$f_{max}$ is from here on used to denote the maximum flow} \cite{ahuja93,papa95}. This was improved by the \emph{Edmonds-Karp} algorithm to $O(n*m^2)$, by using shortest augmenting paths instead of arbitrarily chosen ones. Clearly, the \emph{maximum flow problem} can be solved in polynomial time with a sequential algorithm and is thus $\in P$.
 
 Informally, algorithms may be \emph{efficiently parallelizeable} or \emph{inherently sequential}. The complexity class \textbf{NC}\cite{papa95} ("Nick's Class") contains all problems solvable in $O(log^{k_1}(n))$ time and $O(n^{k_2})$ total work. We give a useful alternate definition:  A language that is decided by PRAM in $O(log^{k_1}(n))$ time steps with $O(n^{k_2})$ processors available at each step is in $NC$. Problems $\in NC$ thus are solvable  in poly-logarithmic time requiring polynomial work (or resources). Problems $P \setminus NC$ are dubbed "inherently sequential", i.e., not parallelizeable efficiently. 
 
@@ -85,6 +104,54 @@ Clearly, $NC \subseteq P$, but whether $NC \subset P$ or $NC = P$ is still unkno
 As an example, the Ford-Fulkerson algorithm can not be parallelized trivially. Although constructing the residual network can be done in constant time $O(1)$ by assigning a processor to each edge $a \in E$ and augmenting paths can be found in $O(log^{2}n$ time and $O(n^{2})$ work by a basic BFS search, the number of stages can not be reduced to less than $O(\sqrt(n))$ \cite{ahuja93}. Thus the total complexity, which is dominated by the number of stages, places the algorithm in $P \setminus NC$.
 	
 As shown in \cite{papa95}, \lstinline|MAX-FLOW| is P-complete and no parallel algorithm $\in NC$ is currently known for solving this problem. It is assumed that the problem is inherently sequential.
+
+\section{Dinitz' scheme}
+\label{sec:dinitz}
+$N = (V,E,s,t,c)$ is a \textbf{layered network}\cite{yossi81} if each vertex $v \in V$ has a layer number $l(v)$ s.t.
+\begin{itemize}
+	\item $l(s) = 0$ and $0 \leq l(v) \leq l(t)$ $\forall v \in V$
+	\item $(e = u \rightarrow v) \in E  \Rightarrow l(v) - l(u) = 1$
+\end{itemize}
+Figure \ref{fig:dinitz} shows a layered network and it's underlying directed acyclic network.
+
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}[scale=1.2, auto,swap]
+   	% draw the vertices
+	\foreach \pos/\name/\layer in {{(0,2)/s/0}, {(1,3)/v_1/1}, {(2.5,3)/v_2/2},
+    	                        {(1,1)/v_3/1}, {(2.5,1)/v_4/2}, {(3.5,2)/t/3}}
+    \node[vertex,label={[color=blue]80:$\layer$}] (\name) at \pos {$\name$};
+        
+    %\node[vertex,label={[color=blue]80:$+12$}] (v_1) at (1.5,3) {$v_1$};
+    % Connect vertices with edges and draw weights
+    \foreach \source/ \dest in {s/v_1, s/v_3,v_3/v_1,
+                                        v_1/v_2, v_4/v_2, v_3/v_4,
+                                        v_2/t, v_4/t}
+     \path[edge] (\source) -- (\dest);
+        	
+     %v_1/v_4/9
+     \path[edge] ([xshift= -2pt, yshift= 5pt] v_4.center) -- ([xshift= 5pt, yshift= -2pt] v_1.center);
+     \path[edge] ([xshift = 2pt, yshift= -5pt] v_1.center) -- ([xshift= -5pt, yshift= 2pt] v_4.center);
+  
+	% For convenience we use a background layer to highlight edges
+    % This way we don't have to worry about the highlighting covering
+	% weight labels. 
+	\begin{pgfonlayer}{background}
+    	\foreach \source /\dest in {s/v_3,v_2/t,s/v_1,v_1/v_2,v_3/v_4,v_4/t}
+	      	\path[selected edge, color=blue] (\source) -- (\dest);		
+	    \path[selected edge, color=blue] ([xshift = 2pt, yshift= -5pt] v_1.center) -- ([xshift= -5pt, yshift= 2pt] v_4.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\end{center}
+\caption{A layered network (in blue) with layer numbers and it's underlying network}
+\label{fig:dinitz}
+\end{figure}
+
+\begin{lemma}
+\textbf{Dinitz' scheme}\cite{dinitz70} \\
+A maximum flow problem in a general network can be transformed into $O(n)$ maximal flow problems in layered networks.
+\end{lemma}
+
 
 \section{Algorithm of Shiloach and Vishkin}
 \label{sec:shiloach}
