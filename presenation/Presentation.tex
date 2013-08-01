@@ -57,7 +57,7 @@
     \begin{block}{Definition: Flow network}
     A \textcolor{red}{flow network}  \footfullcite{ahuja93} is given by $N = (G,s,t,c)$, where
     \begin{itemize}
-    		\item $G =(V,E)$ is a directed acyclic graph
+    		\item $G =(V,E)$ is a directed graph
     		\item $s$ and $t$, $s \neq t$ are the source and terminal node
     		\item $c:E\rightarrow \mathbb{R}_0^{+}$ assigns a capacity $\forall a \in E$
     		\item $n=\lvert V\rvert$, $m=\lvert E\rvert$
@@ -66,9 +66,7 @@
     \textbf{Assumptions:}
 	\begin{itemize}
 		\item $G$ is connected
-		\item $\nexists P(s,t) \in G$ s.t. $c(P) = \infty$
 		\item $G$ is simple, i.e., does not contain loops or parallel arcs
-		\item $\forall e \in V\times V \setminus E: f(e) = 0$
 	\end{itemize}
 \end{frame}
   
@@ -80,6 +78,7 @@
 		\item \textbf{Capacity constraints:} $f(e) \leq c(e)$ $\forall e \in E$
 		\item \textbf{Flow conservation:} 
 		$ \sum\limits_{v \in V} f(u,v) =  0 \Leftrightarrow IN(f,v) = OUT(f,v)$ $\forall v \in V \setminus \{s,t\}$
+		\item \textbf{Skew symmetry:} $f(v,w) = -f(w,v)$
 		\item \textbf{Value of a flow:} $\lvert f\rvert = f(V,t)$ 
 	\end{itemize}
 	\end{block}
@@ -98,13 +97,10 @@
 	\begin{block}{Definition: Residual capacity}
 		The \textcolor{red}{residual capacity} of $e \in V \times V$ w.r.t. a flow $f$ is defined as $c_r(e) = c(e) - f(e)$. \\
 	\end{block}
-	
-	\pause
 	\begin{block}{Definition: Residual network}
 		$G_r = (V, E_r)$ with $E_r = \left\{e \in V \times V \lvert c_r(e) > 0\right\}$
 	\end{block}
-	
-	\pause
+
 	\begin{block}{Definition: Augmenting path}
 		A path $P$ from $s$ to $t$ in $G_r$ is called an \textcolor{red}{augmenting} path and can be used to increase the flow $f$.
 	\end{block}
@@ -310,10 +306,7 @@
 
 \begin{frame}
 \frametitle{Dinitz' scheme}	
-	\begin{block}{Lemma: Dinitz' scheme\footfullcite{dinitz70}}
-	A maximum flow problem in a \emph{general network} can be transformed into \emph{$O(n)$ maximal flow problems in layered networks}.
-	\end{block}
-	
+
 	\begin{figure}
 	\begin{tikzpicture}[scale=1.2, auto,swap]
     	% draw the vertices
@@ -342,6 +335,10 @@
 	    \end{pgfonlayer}
 	\end{tikzpicture}
 	\end{figure}
+	\pause
+	\begin{block}{Lemma: Dinitz' scheme\footfullcite{dinitz70}}
+	A maximum flow problem in a \emph{general network} can be transformed into \emph{$O(n)$ maximal flow problems in layered networks}.
+	\end{block}
 \end{frame}
 
 \begin{frame}
@@ -351,7 +348,7 @@
 	\Function{MAX-FLOW}{$N=(V,E,s,t,c)$}
 	\State start with some valid flow 
 	\While{$l(t) \neq \infty$} \Comment{\textcolor{OliveGreen}{$O(n)$}}	
-		\State Construct residual network $G_r$ \Comment{\textcolor{OliveGreen}{$O(n)$, $p=On)$}}
+		\State Construct residual network $G_r$ \Comment{\textcolor{OliveGreen}{$O(n)$, $p=O(n)$}}
 		\State Construct layered network $G_l$ from $G_r$ \Comment{\textcolor{OliveGreen}}{$O(m/p + n)$}
 		\State $f_l$ = MAX-FLOW($G_l$)  \Comment{next slides}
 		\State $f$ = $f$ + $f_l$ \Comment{\textcolor{OliveGreen}{$O(n)$}}
@@ -580,7 +577,7 @@ At beginning of each pulse:
 	\begin{algorithmic}[1]
 	\Function{INTIALIZE}{v}
 		\State \textcolor{blue}{P($e_j = v \rightarrow w$):}
-		\State UPDATE($j$, $c(e_j)$) T-OUT(v)
+		\State UPDATE($j$, $c_r(e_j)$) T-OUT(v)
 		\State f($e_j$) = 0
 		\State \textcolor{blue}{P(v):}
 		\State head(v) = 0	
@@ -617,11 +614,10 @@ $\forall v \in UNBALANCED$ do in parallel:
 		\State CLEAR(j) in T-ACCESS(w)
 		\State EXCESS(w) = T-IN(w)[root] - TOTAL(w)
 		\EndIf
-		\State \textcolor{blue}{P(v):} k = k'
-		\State \textcolor{blue}{P($e_d = u \rightarrow w$):}
+		\State \textcolor{blue}{P(v):} k' = k
+		\State \textcolor{blue}{P($e_d = v \rightarrow w$):}
 		\If{EXCESS(v) $>$ 0}
 			\State block v
-			\State UPDATE(d,0) in T-OUT(v)
 		\EndIf
  	\EndFunction
 	\end{algorithmic}
@@ -633,7 +629,6 @@ $\forall v \in UNBALANCED$ do in parallel:
 \begin{block}{Corollary:}
 Each PUSH or RETURN operation requires $O(log n)$ time steps.
 \end{block}
-\pause
 \begin{block}{Corollary:}
 The number of pulses is at most $2n$.
 \end{block}
@@ -650,7 +645,7 @@ The algorithm requires a CRCW PRAM. However, since all concurrent write operatio
 	\Function{MAX-FLOW}{$N=(V,E,s,t,c)$}
 	\State start with some valid flow 
 	\While{$l(t) \neq \infty$} \Comment{\textcolor{OliveGreen}{$O(n)$}}	
-		\State Construct residual network $G_r$ \Comment{\textcolor{OliveGreen}{$O(n)$, $p=On)$}}
+		\State Construct residual network $G_r$ \Comment{\textcolor{OliveGreen}{$O(n)$, $p=O(n)$}}
 		\State Construct layered network $G_l$ from $G_r$ \Comment{\textcolor{OliveGreen}}{$O(m/p + n)$}
 		\State $f_l$ = MAX-FLOW($G_l$)  \Comment{\textcolor{OliveGreen}{$O(n * log n)$}}
 		\State $f$ = $f$ + $f_l$ \Comment{\textcolor{OliveGreen}{$O(n)$}}
@@ -745,7 +740,7 @@ $\forall v \in V \setminus \{s,t\}$ and $v$ not blocked, do in parallel:
 			\State $trace(a_i) = trace(a_i) + w_j$
 		\EndFor 
 	\EndFor
-	\If{$forall (v,w_j):$ saturated}
+	\If{$\forall (v,w_j):$ saturated}
 		\State mark $v$ to block
 	\EndIf	
 	\State $\forall v_i$ marked to block: $block(v_i)$
@@ -768,7 +763,7 @@ Repeat PUSH until all atoms arrive at $s$ or $t$
 \framesubtitle{Observations}
 \begin{itemize}
 	\item atoms can move forward on $(v,w) \in E$, increasing $f(v,w)$
-	\item or backward on $(w,v)$, decreasing$f(v,w)$ and blocking $w$. 
+	\item or backward on $(w,v)$, decreasing $f(v,w)$ and blocking $w$. 
 	\item $f(v,w)$ never becomes negative: an atom can only move backward on $(w,v)$ if it moved along $(v,w)$ first.
 	\item $f(v,w)$ increases until $w$ is blocked, after which $f(v,w)$ decreases
 \end{itemize}
@@ -778,7 +773,7 @@ Repeat PUSH until all atoms arrive at $s$ or $t$
 \frametitle{Algorithm 2: Goldberg and Tarjan}
 \framesubtitle{Analysis}
 \begin{block}{Lemma:}
-	The number of created atoms is $\leq \lvert E\rvert$.
+	The number of created atoms is $\leq m$.
 \end{block}
 \pause
 \textbf{Proof:} Atoms created in \\
@@ -787,7 +782,7 @@ Repeat PUSH until all atoms arrive at $s$ or $t$
 	\item PUSH: Splitting an atom. New atom $a'$: $size(a') = c_r(v,w)$
 \end{itemize}
 \bigskip
-\pause
+
 $\Rightarrow$ Each newly created atom saturates an arc. Each arc may be saturated only once.
 \end{frame}
 
@@ -803,8 +798,8 @@ $\Rightarrow$ Each newly created atom saturates an arc. Each arc may be saturate
 	\item An atom $a_i$ only moves backward on $(v,w) \in E$ once $w$ is blocked.
 	\item $\Rightarrow w \notin path(a_i)$.
 	\item $\Rightarrow a_i$ never visits $w$ again.
-	\item $\Rightarrow \forall w \in E \setminus \{t\}: trace(a_i)$ contains $(v,w)$ at most once
-	\item $\Rightarrow \forall w \in E \setminus \{s,t\}: trace(a_i)$ contains $(w,v)$ at most once
+	\item $\Rightarrow \forall w \in V \setminus \{t\}: trace(a_i)$ contains $(v,w)$ at most once
+	\item $\Rightarrow \forall w \in V \setminus \{s,t\}: trace(a_i)$ contains $(w,v)$ at most once
 \end{itemize}
 \end{frame}
 
