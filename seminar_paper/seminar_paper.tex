@@ -249,11 +249,27 @@ $\forall v \in UNBALANCED$ do in parallel:
 \begin{algorithm}
 \caption{Shiloach-Vishkin: RETURN}
 \label{algo:sv_return}
-%TODO
+\begin{algorithmic}[1]
+	\Function{RETURN}{v, EXCESS(v)}
+		\State \textcolor{blue}{P(v):}
+		\State FIND (T-IN(v)[root] - EXCESS(v), k, $\rho$) in T-IN(v)
+		\State EXCESS(v) = 0
+		\State \textcolor{blue}{$P(Q_j = (e_j = u \rightarrow v, q_j))$:}
+		\State $d_j \rightarrow q_j$ for $k < j \leq head(v)$
+		\State $d_j \rightarrow q_j - \rho$ if $j = k$
+		\State UPDATE(j, 0) in T-IN(v) for $k < j \leq head(v)$
+		\State UPDATE(j, $\rho$) in T-IN(v) if $j = k$
+		\State UPDATE($r_j$,$d_j$) in T-EDGE($e_j$)
+		\State $f(e_j)$ = $f(e_j)$ - T-EDGE($e_j$)[root]
+		\State UPDATE($l_j$, T-EDGE($e_j$)[root] in T-SUM(u)
+		\State EXCESS(u) = EXCESS(u) + T-SUM(u)[root]
+		\State CLEAR($r_j$) in T-EDGE($e_j$)
+		\State CLEAR($l_j$) in T-SUM(u)
+		\State \textcolor{blue}{P(v):}
+		\State head(v) = k
+	\EndFunction
+\end{algorithmic}
 \end{algorithm}
-
-
-
 
 \section{Algorithm of Goldberg and Tarjan}
 \label{sec:goldberg}
