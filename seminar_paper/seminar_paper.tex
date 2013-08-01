@@ -152,7 +152,24 @@ Figure \ref{fig:dinitz} shows a layered network and it's underlying directed acy
 A maximum flow problem in a general network can be transformed into $O(n)$ maximal flow problems in layered networks.
 \end{lemma}
 
-A layered network can easily be constructed from a directed acyclic network by performing breath-first search in  $O(log^{2}n)$ time. It follows that an algorithm that finds a maximal/blocking flow in a layered network can solve \lstinline|MAX-FLOW| in $O(n)$ iterations.
+A layered network can easily be constructed from a directed acyclic network by performing breath-first search in  $O(log^{2}n)$ time. It follows that an algorithm that finds a maximal/blocking flow in a layered network can solve \lstinline|MAX-FLOW| in $O(n)$ iterations. The basic scheme is given in Algorithm \ref{algo:dinitz}
+
+%TODO: remove comments?
+\begin{algorithm}
+\caption{Dinitz' scheme}
+\label{algo:dinitz}
+\begin{algorithmic}[1]
+	\Function{MAX-FLOW}{$N=(V,E,s,t,c)$}
+	\State start with some valid flow 
+	\While{$l(t) \neq \infty$} \Comment{\textcolor{OliveGreen}{$O(n)$}}	
+		\State Construct residual network $G_r$ \Comment{\textcolor{OliveGreen}{$O(n)$, $p=O(n)$}}
+		\State Construct layered network $G_l$ from $G_r$ \Comment{\textcolor{OliveGreen}}{$O(m/p + n)$}
+		\State $f_l$ = MAX-FLOW($G_l$)  \Comment{tbd}
+		\State $f$ = $f$ + $f_l$ \Comment{\textcolor{OliveGreen}{$O(n)$}}
+	\EndWhile
+	\EndFunction
+\end{algorithmic}
+\end{algorithm}
 
 \section{Algorithm of Shiloach and Vishkin}
 \label{sec:shiloach}
