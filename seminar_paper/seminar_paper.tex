@@ -1,4 +1,4 @@
-\documentclass[a4paper,11pt, twocolumn]{article}
+\documentclass[a4paper,10pt, twocolumn]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -10,6 +10,10 @@
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{epstopdf}
+\usepackage{enumitem}
+\setlist{nolistsep}
+
+
 %page boarders
 \usepackage[top=3cm, bottom=3cm, left=2cm, right=2cm]{geometry}
 \usepackage[style=numeric,backend=bibtex]{biblatex}
@@ -31,6 +35,43 @@
 
 \section{Network flows}
 \label{sec:networkFlows}
+A \textbf{flow network}\cite{ahuja93} is given by $N = (G,s,t,c)$, where
+\begin{itemize}
+	\item $G =(V,E)$ is a directed graph
+    \item $s$ and $t$, $s \neq t$ are the source and terminal node
+   	\item $c:E\rightarrow \mathbb{R}_0^{+}$ assigns a capacity $\forall a \in E$
+   	\item $n=\lvert V\rvert$, $m=\lvert E\rvert$
+\end{itemize}
+
+Furthermore, the following assumptions are made:
+\begin{itemize}
+	\item $G$ is connected
+	\item $G$ is simple, i.e., does not contain loops or parallel arcs
+	\item $\nexists P(s,t)$ with infinite capacity
+\end{itemize}
+
+\medskip
+$f:E \rightarrow \mathbb{R}_0^{+}$ is a \textbf{flow} if it satisfies:
+\begin{itemize}
+	\item \emph{Capacity constraints:} $f(e) \leq c(e)$ $\forall e \in E$
+	\item \emph{Flow conservation:} 
+	$ \sum\limits_{v \in V} f(u,v) =  0 \Leftrightarrow IN(f,v) = OUT(f,v)$ $\forall v \in V \setminus \{s,t\}$
+	\item \emph{Skew symmetry:} $f(v,w) = -f(w,v)$
+	\item \emph{Value of a flow:} $\lvert f\rvert = f(V,t)$ 
+\end{itemize}
+
+A flow $f$
+\begin{itemize}
+	\item is a \emph{maximum flow} if $\lvert f\rvert \geq \lvert f'\rvert$, for any other flow $f'$
+	\item \emph{saturates} an arc e if $f(e) = c(e)$
+	\item is a \emph{maximal (or blocking) flow} if every directed path P(s,t) contains at least one saturated arc
+\end{itemize}
+\medskip
+The \emph{residual capacity} of $e \in V \times V$ w.r.t. a flow $f$ is defined as $c_r(e) = c(e) - f(e)$. $G_r = (V, E_r)$ is the \emph{residual network}, where $E_r = \left\{e \in V \times V \lvert c_r(e) > 0\right\}$. A path $P$ from $s$ to $t$ in $G_r$ is called an \emph{augmenting path} and can be used to increase the flow $f$.
+
+
+
+
 
 \section{Computitional Complecity}
 \label{sec:cc}
