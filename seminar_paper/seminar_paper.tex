@@ -174,8 +174,166 @@ A layered network can easily be constructed from a directed acyclic network by p
 \section{Algorithm of Shiloach and Vishkin}
 \label{sec:shiloach}
 
+\begin{algorithm}
+\caption{Shiloach-Vishkin}
+\label{algo:sv}
+\begin{algorithmic}[1]
+	\Function{MAX-FLOW}{$G_l$}
+		\State EXCESS(s) = $\Sigma_{v \in L_1}$ c(s$\rightarrow$v)
+		\State PUSH(s, EXCESS(s))
+		\State i = 1
+		\While{$\exists$ v $\in$ UNBALANCED}
+			\State i++
+			\If{$v$ is not blocked}
+				\State PUSH(v, EXCESS(v))
+			\EndIf
+			\State RETURN(v, EXCESS(v))
+		\EndWhile
+	\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Shiloach-Vishkin: INITIALIZE}
+\label{algo:sv_init}
+At beginning of each pulse:	
+\begin{algorithmic}[1]
+	\Function{INTIALIZE}{v}
+		\State \textcolor{blue}{P($e_j = v \rightarrow w$):}
+		\State UPDATE($j$, $c_r(e_j)$) T-OUT(v)
+		\State f($e_j$) = 0
+		\State \textcolor{blue}{P(v):}
+		\State head(v) = 0	
+		\State k'(v) = 1	
+ 	\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Shiloach-Vishkin: PUSH}
+\label{algo:sv_push}
+$\forall v \in UNBALANCED$ do in parallel:
+\begin{algorithmic}[1]
+	\Function{PUSH}{v,EXCESS(v)}
+		\State \textcolor{blue}{P(v):}
+		\State $\alpha$ = min\{EXCESS(v), T-OUT(v)[root]\} 
+		\State EXCESS(v) = EXCESS(v) - $\alpha$
+		\State FIND($\alpha$, k, $\rho$) in T-OUT(v)
+		\State \textcolor{blue}{P($e_j = v \rightarrow w$):}
+		\If{k' $\leq$ j $\leq$ k}
+ 		\State UPDATE(j,1) in T-ACCESS(w)
+		\State SUM(j,$S_j$) in T-ACCESS(w)
+		\If{$j == k$}
+			$q_j$ = $\rho$
+		\Else
+			\State $q_j$ = T-OUT(v)[1,j]
+		\EndIf
+		\State $f(e_j)$ = $f(e_j)$ + $q_j$
+		\State TOTAL(w) = T-IN(w)[root]
+		\State UPDATE(head(w) + $S_j$, $q_j$) in T-IN(w)
+		\State UPDATE(j, T-OUT(v)[1,j] - $q_j$) in T-OUT(v)
+		\State head(w) = head(w) + T-ACCESS(w)[root] 
+		\State CLEAR(j) in T-ACCESS(w)
+		\State EXCESS(w) = T-IN(w)[root] - TOTAL(w)
+		\EndIf
+		\State \textcolor{blue}{P(v):} k' = k
+		\State \textcolor{blue}{P($e_d = v \rightarrow w$):}
+		\If{EXCESS(v) $>$ 0}
+			\State block v
+		\EndIf
+ 	\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+
+\begin{algorithm}
+\caption{Shiloach-Vishkin: RETURN}
+\label{algo:sv_return}
+%TODO
+\end{algorithm}
+
+
+
+
 \section{Algorithm of Goldberg and Tarjan}
 \label{sec:goldberg}
+
+\begin{algorithm}
+\caption{Goldberg-Tarjan: INITIALIZE}
+\label{algo:gt_init}
+\begin{algorithmic}[1]
+	\Function{INITIALIZE}{$N=(V,E,s,t,c)$}
+	\ForAll{$e_i = (s,v_i) \in E$}
+		\State create new atom $a_i$
+		\State $size(a_i) = c(e_i)$
+		\State $position(a_i) = v_i$
+		\State $trace(a_i) = (s,v_i)$		
+	\EndFor
+	\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Goldberg-Tarjan: PUSH}
+\label{algo:gt_push}
+$\forall v \in V \setminus \{s,t\}$ and $v$ not blocked, do in parallel:
+\begin{algorithmic}[1]
+	\Function{PUSH}{$v$}
+	\State Let $a_1 \dots a_k$ be atoms at vertex $v$
+	\State Let $(v,w_1) \dots (v,w_l)$ be admissible arcs at $v$
+	\State $\forall 1 \leq j \leq k: S(j) = \Sigma_{i=1}^{j} size(a_i)$
+	\State $\forall 1 \leq j \leq l: R(j) = \Sigma_{i=1}^{j} c_r(v,w_i)$
+	\State Assign $a_i$ to $(v, w_j)$:
+	\If {$S(i) - size(a_i) \geq R(j) - c_r(v, w_j)$}
+		\If{$S(i) \leq R(j)$}
+			\State assign amount $size(a_i)$ of $a_i$ to $(v,w_j)$
+		\Else
+			\State assign amount $R(j)-S(i)+size(a_i)$ of $a_i$ to $(v,w_j)$
+		\EndIf
+	\EndIf
+	\If {$S(i) - size(a_i) < R(j) - c_r(v, w_j)$}
+		\If{$S(i) > R(j)$}
+			\State assign amount $c_r(v,w_j)$ of $a_i$ to $(v,w_j)$
+		\Else
+			\State assign amount $S(i)-R(j)+c_r(v,w_j)$ of $a_i$ to $(v,w_j)$
+		\EndIf
+	\EndIf
+	\If{$a_i$ assigned to more than 1 $(v,w_j)}$
+		\ForAll{$(v,w_j)$ assigned to $a_i$}
+			\If{assignment saturates $(v,w_j)$}
+				\State create new atom $a_k$ 
+				\State $size(a_k$) = quanta assigned to $(v,w_j)$
+				\State $trace(a_k) = trace(a_i)$ 
+				\State $position(a_k) = position(a_i)$
+			\EndIf
+		\EndFor
+	\EndIf	
+	\ForAll{$(v,w_j)$}
+		\ForAll{$a_i \leftrightarrow (v,w_j)$}
+			\State $f(v,w_j) = f(v,w_j) + size(a_i)$
+			\State $location(a_i) = w_j$
+			\State $trace(a_i) = trace(a_i) + w_j$
+		\EndFor 
+	\EndFor
+	\If{$\forall (v,w_j):$ saturated}
+		\State mark $v$ to block
+	\EndIf	
+	\State $\forall v_i$ marked to block: $block(v_i)$
+	\ForAll{$w \in V$ and $w$ blocked}
+		\ForAll{$a$ at $w$}
+			\State Let $(v_a, w)$ be last arc on $trace(a)$
+			\State $f(v_a, w) = f(v_a, w) - size(a)$
+			\State $location(a) = v_a$
+			\State $trace(a) = trace(a) - (v_a, w)$
+		\EndFor
+	\EndFor	
+	\EndFunction
+\end{algorithmic}
+\bigskip
+Repeat PUSH until all atoms arrive at $s$ or $t$
+\end{algorithm}
+
+
 
 \section{Further results}
 \label{sec:further}
