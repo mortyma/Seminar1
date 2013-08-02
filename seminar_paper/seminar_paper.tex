@@ -90,8 +90,10 @@ A flow $f$
 \medskip
 The \emph{residual capacity} of $e \in V \times V$ w.r.t. a flow $f$ is defined as $c_r(e) = c(e) - f(e)$. $G_r = (V, E_r)$ is the \emph{residual network}, where $E_r = \left\{e \in V \times V \lvert c_r(e) > 0\right\}$. A path $P$ from $s$ to $t$ in $G_r$ is called an \emph{augmenting path} and can be used to increase the flow $f$.
 
-\section{Algorithm of Ford-Fulkerson}
+\subsection{Algorithm of Ford-Fulkerson}
 \label{sec:fordfulkerson}
+The algorithm of Ford and Fulkerson \cite{ahuja93} is an intuitive sequential algorithm that solves \lstinline|MAX-FLOW|: starting from a null flow, increase the flow along an augmenting path as long as such a path exists. Note that this algorithm is restricted to integer capacities:  $c:E\rightarrow \mathbb{N}_0^{+}$ $\forall a \in E$
+
 
 \section{Computitional Complexity}
 \label{sec:cc}
