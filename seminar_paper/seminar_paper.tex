@@ -95,6 +95,8 @@ The \emph{residual capacity} of $e \in V \times V$ w.r.t. a flow $f$ is defined 
 \label{sec:fordfulkerson}
 The algorithm of Ford and Fulkerson \cite{ahuja93} is an intuitive sequential algorithm that solves \lstinline|MAX-FLOW|: starting from a null flow, increase the flow along an augmenting path as long as such a path exists. Note that this algorithm is restricted to integer capacities:  $c:E\rightarrow \mathbb{N}_0^{+}$ $\forall a \in E$.
 
+\section{Model of Computation}
+\label{sec:model}
 
 \section{Computitional Complexity}
 \label{sec:cc}
@@ -150,10 +152,10 @@ Figure \ref{fig:dinitz} shows a layered network and it's underlying directed acy
 \label{fig:dinitz}
 \end{figure}
 
-\begin{lemma}
+\begin{corollary}
 \textbf{Dinitz' scheme} \cite{dinitz70} \\
 A maximum flow problem in a general network can be transformed into $O(n)$ maximal flow problems in layered networks.
-\end{lemma}
+\end{corollary}
 
 A layered network can easily be constructed from a directed acyclic network by performing breath-first search in  $O(log^{2}n)$ time. It follows that an algorithm that finds a maximal/blocking flow in a layered network can solve \lstinline|MAX-FLOW| in $O(n)$ iterations. The basic scheme is given in Algorithm \ref{algo:dinitz}
 
@@ -176,6 +178,18 @@ A layered network can easily be constructed from a directed acyclic network by p
 
 \section{Algorithm of Shiloach and Vishkin}
 \label{sec:shiloach}
+The Shiloach-Vishkin algorithm is based on Dinitz' scheme as shown in Section \ref{sec:dinitz}. This section focuses on the implementation of an algorithm to solve \lstinline|MAX-FLOW| for a given layered network.
+
+The following notation will be used:
+\begin{itemize}
+	\item \lstinline|EXCESS(v)|: The amount of excessive flow at node $v$. \lstinline|EXCESS(v)| = $IN(f,v) - OUT(f,v) \geq 0$.
+	\item \lstinline|UNBALANCED|: The set of vertices that hold some excess flow. \lstinline|UNBALANCED| = $\{v \in V \lvert EXCESS(v) > 0 \}$. The implementation uses a queue to maintain FIFO order on the set of unbalanced vertices.
+	\item \lstinline|blocked|: A vertex v is blocked if for all it's outgoing edges $e_i = (v, u_i)$, $e_i$ is either saturated or $u_i$ is blocked\footnote{The sink vertex $t$ is never blocked}. 
+\end{itemize}
+
+The algorithm operates in \emph{pulses}: In the first pulse, all outgoing edges of $s$ or saturated: $\forall e_i = (s, v_i):$ $f(e_i) = c(e_i)$. The set of unbalanced vertices at the end of pulse 1 is thus the set of all neighbours of $s$: \lstinline|UNBALANCED| = $\{v_i\lvert \exists (s, v_i) \in E \}$. In each subsequent pulse, the unbalanced vertices try to push forward\footnote{i.e., to the next layer of the network} as much of their excessive flow as possible. Any remaining excessive flow will be returned backward. All balanced vertices remain idle during the pulses. The algorithm terminates as soon as no unbalanced vertices are available, implying that all flow reach the source $s$ or sink $t$.
+
+Algorithm \ref{algo:sv} shows the routine for solving \lstinline|MAX-FLOW| in a given layered network. Functions \lstinline|PUSH| and \lstinline|RETURN| are depicted in Algorithm \ref{algo:sv_push} and Algorithm \ref{algo:sv_return}, respectively and will be explained in detail in the remainder of this section. The algorithm maintains the number of the current pulse in $i$.
 
 \begin{algorithm}
 \caption{Shiloach-Vishkin}
@@ -184,17 +198,106 @@ A layered network can easily be constructed from a directed acyclic network by p
 	\Function{MAX-FLOW}{$G_l$}
 		\State EXCESS(s) = $\Sigma_{v \in L_1}$ c(s$\rightarrow$v)
 		\State PUSH(s, EXCESS(s))
-		\State i = 1
+		i = 1;
 		\While{$\exists$ v $\in$ UNBALANCED}
 			\State i++
-			\If{$v$ is not blocked}
-				\State PUSH(v, EXCESS(v))
-			\EndIf
+			\ForAll {$v \in UNBALANVED$}			
+				\If{$v$ is not blocked}
+					\State PUSH(v, EXCESS(v))
+				\EndIf
+			\EndFor
 			\State RETURN(v, EXCESS(v))
 		\EndWhile
 	\EndFunction
 \end{algorithmic}
 \end{algorithm}
+
+\subsection{Partial Sums trees}
+\label{sec:sv_pstrees}
+A \emph{partial sums tree}\footnote{Abbreviated PS-tree from here on.} is a complete binary tree with the leftmost $k$ leaves associated with $k$ numbers $a_1,...,a_k$. A partial sums tree is of height $h = \lceil log_2(k) \rceil$ and has $w = 2^{\lceil log_2(k) \rceil}$ leaves. The remaining $w - k$ rightmost leaves are associated with 0. Each internal node of a partial sums tree stores the sum of it's child nodes. Thus, the root node stores the sum of all leaves of the tree. Figure \ref{fig:pstree} provides an example.
+
+\begin{figure}[H]
+\begin{center}
+  \begin{tikzpicture}[scale=0.8,label distance=-3mm,>= latex, node distance = 2cm,level/.style={sibling distance=40mm/#1}]
+    \tikzstyle{every node}=[draw=none,fill=none, minimum size=5mm,font=\footnotesize];
+
+   \node (pr) {$23$}
+   	child {node (p13) {$17$}
+	  	child {node (p9) {$8$} 
+    	 	child {node (p1) {$5$}}
+      		child {node (p2) {$3$}}
+    		}
+  		child {node (p10) {$9$} 
+    	  	child {node (p3) {$2$}}
+      		child {node (p4) {$7$}}
+   		 }
+   	}
+   	child {node (p14) {$6$} 
+   		child {node (p11) {$6$} 
+      		child {node (p5) {$6$}}
+		    child {node (p6) {$0$}}
+    		}
+   		child {node (p12) {$0$} 
+      		child {node (p7) {$0$}}
+      		child {node (p8) {$0$}}
+      	}
+    };
+\end{tikzpicture}
+\end{center}
+\caption{A partial sums tree with $k=5$}
+\label{fig:pstree}
+\end{figure}
+
+A \emph{flow quantum} is a 3-tuple $(p, e, f)$, where $p$ is the number of the pulse during which some flow of value $f$ reached a vertex $v$ via edge $e$.
+
+For the parallel implementation of \lstinline|PUSH| and \lstinline|RETURN|, several PS-trees will be used. Four PS-trees are attached to every vertex $v \in V$:
+\begin{itemize}
+	\item T-OUT(v): Each active leave $a_i$ is associated with an outgoing edge $e_i = (v, w_i)$. $a_i = c(e_i) - f(e_i)$ ,i.e., $a_i$ stores the residual capacity of $e_i$. T-OUT(v) has $d_{out}(v)$\footnote{As usual, $d_{in}(v)$ and $d_{out}(v)$ designate the in- and out-degree of a vertex} active leaves.
+	\item T-IN(v): Records flow quanta reaching $v$. T-IN(v) has $2n*d_{in}(v)$ active leaves to be able to record the pulse\footnote{As shown in Section \ref{sec:sv_complexity}, the number of pulses is bounded by $O(2n)$} and edge for each flow quantum that reaches $v$. 
+	\item T-ACCESS(v): Each of the $d_{in}(v)$ active leaves is associated with one edge entering $v$. Used to coordinate access to $v$.
+	\item T-SUM(v): Sums up the flow returned to $v$ in a given pulse. $d_{out}(v)$ active leaves. 
+\end{itemize}
+One PS-tree is attached to every arc $e \in E$:
+\begin{itemize}
+	\item T-EDGE(v): $2n$ active leaves, each of which is associated with one pulse to record the amount of flow returned on $e$ in a given pulse.
+\end{itemize}
+
+Let T be a PS-tree. Every node of T is represented by $T[height, i]$, where $height(root) = \lceil log_"(k) \rceil$ and $heigt(a_i) = 1$ , $\forall$ leaves $a_i$. Additionally, $T[root]$ designates the root node of T. We define the following operations on T:
+\begin{itemize}
+	\item CLEAR(i): The value of all nodes on the path $P(T[1,i],root)$ is set to 0. Note that executing this operation for less than all leaves will result in an invalid PS-tree. When executing the operation for all leaves, several processes will attempt to write to the same node. Thus a CRCW-PRAM is required.
+%TODO: more detailed explaination of required PRAM
+	\item UPDATE(i,$a_i$): The value of the $i^{th}$ leave is set to $a_i$ and the values of all nodes on the path $P(T[1,i],root)$ are updated.
+	\item SUM(i, $S_i$): Calculate the sum of leave nodes up to $a_i$. $S_i = a_1,...,a_i$.
+	\item FIND($\alpha$, k, $\rho$): Given $\alpha$, find $k$ and $\rho$ s.t. $a_1+...+a_{k-1} < \alpha \leq a_1+...+a_k$ and $\rho = \alpha - (a_1+...+a_{k-1}$.
+\end{itemize}  
+
+\subsection{Parallel Implementation}
+\label{sec:sv_parImpl}
+We use the following processor assignment:
+\begin{itemize}
+	\item Each vertex $v \in V$ has a processor $(P(v)$ assigned
+	\item Each edge $e \in E$ has a processor $(P(e)$ assigned
+	\item Each flow quantum $Q$ has a processor $P(Q)$ assigned. In other words, each leaf in each of the $2n * d_{in}(v)$ T-IN(v) PS-trees has a processor $P(Q)$ assigned.
+\end{itemize}
+
+The following lemma states that the apparently large number of required processors can be reduced to $n$. However, the above assignment is useful for a clear presentation of the algorithms.
+
+\begin{lemma}
+An allocation of processors to jobs s.t. $n$ processors are sufficient is possible. 
+\end{lemma}
+
+\begin{proof}
+%TODO
+TODO
+\end{proof}
+
+In addition to the four PS-trees attached to each vertex $v$, $v$ keeps two pointers:
+\begin{itemize}
+	\item head(v): %TODO
+	\item k':
+\end{itemize}
+
+In Algorithms \ref{algo:sv_init}, \ref{algo:sv_push} and \ref{algo:sv_return}, the notation \textcolor{blue}{P():} is used to indicate that the following instructions are carried out only by the specified processors. Algorithm \ref{algo:sv_init} shows the initialization routine executed at the beginning of each pulse. Each processor assigned to an edge $e_j = (v, w)$ updates the PS-tree T-OUT attached to $v$ s.t. it's leave $a_j$ is assigned the residual capacity of $e_j$. $f(e_j$) is set to 0. In the next step, each processor assigned to a vertex $v$ initializes the pointers TODO
 
 \begin{algorithm}
 \caption{Shiloach-Vishkin: INITIALIZE}
@@ -273,6 +376,9 @@ $\forall v \in UNBALANCED$ do in parallel:
 	\EndFunction
 \end{algorithmic}
 \end{algorithm}
+
+\subsection{Complexity}
+\label{sec:sv_complexity}
 
 \section{Algorithm of Goldberg and Tarjan}
 \label{sec:goldberg}
