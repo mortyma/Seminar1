@@ -97,6 +97,7 @@ The algorithm of Ford and Fulkerson \cite{ahuja93} is an intuitive sequential al
 
 \section{Model of Computation}
 \label{sec:model}
+We use the \textbf{PRAM} Model\footnote{Parallel Random Access Machine} as the model of computation. Specifically, a \textbf{MIMD} - Multiple Instructions Multiple Data - variant is used, where each processor $p$ executes a distinct set of instructions on distinct data. Instructions are executed in lock-step and any necessary padding is assumed to be done automatically. 
 
 \section{Computitional Complexity}
 \label{sec:cc}
@@ -275,8 +276,8 @@ Let T be a PS-tree. Every node of T is represented by $T[height, i]$, where $hei
 \label{sec:sv_parImpl}
 We use the following processor assignment:
 \begin{itemize}
-	\item Each vertex $v \in V$ has a processor $(P(v)$ assigned
-	\item Each edge $e \in E$ has a processor $(P(e)$ assigned
+	\item Each vertex $v \in V$ has a processor $P(v)$ assigned
+	\item Each edge $e \in E$ has a processor $P(e)$ assigned
 	\item Each flow quantum $Q$ has a processor $P(Q)$ assigned. In other words, each leaf in each of the $2n * d_{in}(v)$ T-IN(v) PS-trees has a processor $P(Q)$ assigned.
 \end{itemize}
 
@@ -293,11 +294,11 @@ TODO
 
 In addition to the four PS-trees attached to each vertex $v$, $v$ keeps two pointers:
 \begin{itemize}
-	\item head(v): %TODO
-	\item k':
+	\item head(v): Points to the rightmost significant leave in T-in($v$). The rightmost significant (i.e., the rightmost leave with a value $\neq 0$) is associated with the flow quanta that was the last to reach $v$. head(v) will be used to return excess flow. 
+	\item $k'$: The outgoing edges of $v$ are assumed to be ordered arbitrarily. $k'$ points to the first outgoing edge\footnote{the edge with the smallest index w.r.t. the given ordering} that is not yet saturated. In other words, $k'$ points to the next edge that can be utilized to push excess flow from $v$.  
 \end{itemize}
 
-In Algorithms \ref{algo:sv_init}, \ref{algo:sv_push} and \ref{algo:sv_return}, the notation \textcolor{blue}{P():} is used to indicate that the following instructions are carried out only by the specified processors. Algorithm \ref{algo:sv_init} shows the initialization routine executed at the beginning of each pulse. Each processor assigned to an edge $e_j = (v, w)$ updates the PS-tree T-OUT attached to $v$ s.t. it's leave $a_j$ is assigned the residual capacity of $e_j$. $f(e_j$) is set to 0. In the next step, each processor assigned to a vertex $v$ initializes the pointers TODO
+In Algorithms \ref{algo:sv_init}, \ref{algo:sv_push} and \ref{algo:sv_return}, the notation \textcolor{blue}{P():} is used to indicate that the following instructions are carried out only by the specified processors. Algorithm \ref{algo:sv_init} shows the initialization routine executed at the beginning of each pulse. Each processor assigned to an edge $e_j = (v, w)$ updates the PS-tree T-OUT attached to $v$ s.t. it's leave $a_j$ is assigned the residual capacity of $e_j$. $f(e_j$) is set to 0. In the next step, each processor assigned to a vertex $v$ initializes it's pointers $head(v)$ and $k'(v)$.
 
 \begin{algorithm}
 \caption{Shiloach-Vishkin: INITIALIZE}
