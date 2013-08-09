@@ -97,7 +97,7 @@ The algorithm of Ford and Fulkerson \cite{ahuja93} is an intuitive sequential al
 
 \section{Model of Computation}
 \label{sec:model}
-We use the \textbf{PRAM} Model\footnote{Parallel Random Access Machine} as the model of computation. Specifically, a \textbf{MIMD} - Multiple Instructions Multiple Data - variant is used, where each processor $p$ executes a distinct set of instructions on distinct data. Instructions are executed in lock-step and any necessary padding is assumed to be done automatically. 
+We use the \textbf{PRAM} Model\footnote{Parallel Random Access Machine} as the model of computation. Specifically, a \textbf{MIMD} - Multiple Instructions Multiple Data - variant is used, where each processor $p$ executes a distinct set of instructions on distinct data. Instructions are executed in lock-step and any necessary padding of instructions is assumed to be done automatically. 
 
 \section{Computitional Complexity}
 \label{sec:cc}
@@ -254,7 +254,7 @@ A \emph{flow quantum} is a 3-tuple $(p, e, f)$, where $p$ is the number of the p
 For the parallel implementation of \lstinline|PUSH| and \lstinline|RETURN|, several PS-trees will be used. Four PS-trees are attached to every vertex $v \in V$:
 \begin{itemize}
 	\item T-OUT(v): Each active leave $a_i$ is associated with an outgoing edge $e_i = (v, w_i)$. $a_i = c(e_i) - f(e_i)$ ,i.e., $a_i$ stores the residual capacity of $e_i$. T-OUT(v) has $d_{out}(v)$\footnote{As usual, $d_{in}(v)$ and $d_{out}(v)$ designate the in- and out-degree of a vertex} active leaves.
-	\item T-IN(v): Records flow quanta reaching $v$. T-IN(v) has $2n*d_{in}(v)$ active leaves to be able to record the pulse\footnote{As shown in Section \ref{sec:sv_complexity}, the number of pulses is bounded by $O(2n)$} and edge for each flow quantum that reaches $v$. 
+	\item T-IN(v): Records flow quanta reaching $v$. T-IN(v) has $2n*d_{in}(v)$ active leaves to be able to record the pulse\footnote{As shown in Section \ref{sec:sv_analysis}, the number of pulses is bounded by $O(2n)$} and edge for each flow quantum that reaches $v$. 
 	\item T-ACCESS(v): Each of the $d_{in}(v)$ active leaves is associated with one edge entering $v$. Used to coordinate access to $v$.
 	\item T-SUM(v): Sums up the flow returned to $v$ in a given pulse. $d_{out}(v)$ active leaves. 
 \end{itemize}
@@ -263,7 +263,7 @@ One PS-tree is attached to every arc $e \in E$:
 	\item T-EDGE(v): $2n$ active leaves, each of which is associated with one pulse to record the amount of flow returned on $e$ in a given pulse.
 \end{itemize}
 
-Let T be a PS-tree. Every node of T is represented by $T[height, i]$, where $height(root) = \lceil log_"(k) \rceil$ and $heigt(a_i) = 1$ , $\forall$ leaves $a_i$. Additionally, $T[root]$ designates the root node of T. We define the following operations on T:
+Let T be a PS-tree. Every node of T is represented by $T[height, i]$, where $height(root) = \lceil log_2(k) \rceil$ and $heigt(a_i) = 1$ , $\forall$ leaves $a_i$. Additionally, $T[root]$ designates the root node of T. We define the following operations on T:
 \begin{itemize}
 	\item CLEAR(i): The value of all nodes on the path $P(T[1,i],root)$ is set to 0. Note that executing this operation for less than all leaves will result in an invalid PS-tree. When executing the operation for all leaves, several processes will attempt to write to the same node. Thus a CRCW-PRAM is required.
 %TODO: more detailed explaination of required PRAM
@@ -315,6 +315,8 @@ At beginning of each pulse:
  	\EndFunction
 \end{algorithmic}
 \end{algorithm}
+
+TODO: explain algorithms
 
 \begin{algorithm}
 \caption{Shiloach-Vishkin: PUSH}
@@ -378,8 +380,19 @@ $\forall v \in UNBALANCED$ do in parallel:
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Complexity}
-\label{sec:sv_complexity}
+\subsection{Analysis}
+\label{sec:sv_analysis}
+The comments in Algorithm \ref{algo:dinitz} state the complexity of the steps: According to Dinitz' scheme, the while-loop is bounded by $O(n)$ iterations. Constructing the residual network $G_r$ can trivially be done in $O(n)$ using n processors, since $m = O(n^{2})$. Breath-first search can be used to construct a layered network $G_l$ out of $G_r$. Efficient parallel implementations of BFS run in $O(m/p +n)$ time using n processors. Adding the found \lstinline|MAX-FLOW| of a layered network to the global \lstinline|MAX-FlOW| can again be done in $O(n)$ time. It remains the calculate the complexity of finding a \lstinline|MAX-FlOW| in a layered network $G_l$, as shown in Algorithm \ref{algo:sv}.
+
+Each \lstinline|PUSH| or \lstinline|RETURN| operation requires $O(log n)$ steps, since they do not contain any loops and statements operate on paths from a leave to the root of a binary tree of height $\lceil log_2(k) \rceil$.
+\begin{lemma}
+The number of pulses in each round is at most $2n$
+\end{lemma}
+\begin{proof}
+TODO
+\end{proof}
+
+It follows that each round is executed in $O(n*log n)$ time and thus the algorithm overall has a time complexity of $O(n^{2} * log n)$. As shown in Section \ref{sec:sv_pstrees}, a CRCW PRAM is required for the operations on PS-tress. However, Shiloach and Vishkin claim\cite{yossi81}, that a CREW PRAM is sufficient to execute the algorithm within the given bounds, since any concurrent write to a specific memory location will attempt to write the same value. Unfortunately, the paper does not substantiate this claim. 
 
 \section{Algorithm of Goldberg and Tarjan}
 \label{sec:goldberg}
