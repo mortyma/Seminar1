@@ -392,7 +392,7 @@ The number of pulses in each round is at most $2n$
 TODO
 \end{proof}
 
-It follows that each round is executed in $O(n*log n)$ time and thus the algorithm overall has a time complexity of $O(n^{2} * log n)$. As shown in Section \ref{sec:sv_pstrees}, a CRCW PRAM is required for the operations on PS-tress. However, Shiloach and Vishkin claim\cite{yossi81}, that a CREW PRAM is sufficient to execute the algorithm within the given bounds, since any concurrent write to a specific memory location will attempt to write the same value. Unfortunately, the paper does not substantiate this claim. 
+It follows that each round is executed in $O(n*log n)$ time and thus the algorithm overall has a time complexity of $O(n^{2} * log n)$. As shown in Section \ref{sec:sv_pstrees}, a CRCW PRAM is required for the operations on PS-trees. However, Shiloach and Vishkin claim\cite{yossi81}, that a CREW PRAM is sufficient to execute the algorithm within the given bounds, since any concurrent write to a specific memory location will attempt to write the same value. Unfortunately, the paper does not substantiate this claim. 
 
 \section{Algorithm of Goldberg and Tarjan}
 \label{sec:goldberg}
