@@ -396,6 +396,17 @@ It follows that each round is executed in $O(n*log n)$ time and thus the algorit
 
 \section{Algorithm of Goldberg and Tarjan}
 \label{sec:goldberg}
+The Goldberg-Tarjan algorithm solves \lstinline|MAX-FLOW| on directed acyclic graphs. Contrary to the Shiloach-Vishkin algorithm presented in Section \ref{sec:shiloach}, it is not based on Dinitz' scheme (see Section \ref{sec:dinitz}. The algorithm constructs a blocking flow by moving flow through the network while maintaining a blocking pre-flow. Intuitively, the flow quanta do a depth-first search from $s$ to $t$ in a dynamic graph, where edges become saturated and vertices become blocked.
+
+An \textbf{atom} a is defined as the maximal quantity of flow that so far moved along the same path $P(s,v)$. An atom a can move along forwards on an edge $e \in E$, or backwards along the same edge. Formally, the backward edges are defined as $E^{-1} = \{(w,v)\vert (v,w) \in E \}$. Furthermore, an atom a has the following properties:
+\begin{itemize}
+	\item \textbf{size(a)}: the amount of excess flow that a carries.
+	\item \textbf{position(a)}: the vertex $v \in V$ the atom is currently located at.
+	\item \textbf{trace(a)}: The trace, i.e., the sequence of edges the atom a moved so far. $P_t(s, position(a))$ in $E \cup  E^{-1}$. 
+	\item \textbf{path(a)}: The simple Path $P_s(s, position(a))$ in $E$. $(v,w) \in P_s$ if $(v,w) \in P_t \and (w,v) \not\in P_t$. In other words, if an atom a traversed an edge $(v,w)$ both forwards and backwards, $(v,w) \in P_t$ but $(v,w) \not\in P_s$.  
+\end{itemize}
+
+TODO: explain algorithms
 
 \begin{algorithm}
 \caption{Goldberg-Tarjan: INITIALIZE}
@@ -472,6 +483,57 @@ $\forall v \in V \setminus \{s,t\}$ and $v$ not blocked, do in parallel:
 Repeat PUSH until all atoms arrive at $s$ or $t$
 \end{algorithm}
 
+\subsection{Correctness}
+\label{sec:gt_correctness}
+The following observations are important for the analysis of the algorithm:
+\begin{itemize}
+	\item Atoms can move forward on an edge $e=(v,w) \in E$, increasing the flow $f(v,w)$.
+	\item or backward on $e^{-1}=(w,v)$, decreasing $f(v,w)$ and blocking $w$. 
+	\item The flow along an edge $f(v,w)$ never becomes negative: an atom can only move backward on $e^{-1}=(w,v)$ if it moved along $e=(v,w)$ first.
+	\item $f(v,w)$ increases until $w$ is blocked, after which $f(v,w)$ decreases.
+\end{itemize}
+
+TODO: proof correctness
+
+
+\subsection{Analysis}
+\label{sec:gt_analysis}
+\begin{lemma}
+The number of created atoms is $\leq m$.
+\end{lemma}
+\begin{proof}
+Atoms created in algorithm
+\begin{itemize}
+	\item INITIALIZE: $\lvert (s,v_i) \in E \rvert$. $size(a_i) = c(s,v_i)$
+	\item PUSH: Splitting an atom: The newly created atom $a'$: $size(a') = c_r(v,w)$ is assigned the residual capacity of an edge $(v,w)$.
+\end{itemize}
+Clearly, each newly created atom in \lstinline|INITIALIZE| and \lstinline|PUSH| saturates an arc. Each arc may be saturated only once, which implies the claim.
+\end{proof}
+
+\begin{lemma}
+$\forall a_i:$ at any time, $\lvert trace(a_i) \rvert \leq 2n-3$ arcs.
+\end{lemma}
+\begin{proof}
+\item An atom $a_i$ only moves backwards on $(v,w) \in E$ once $w$ is blocked. Since $a_i$ moved forwards and backwards on $(v,w)$, $w \notin P_s(a_i)$. $a_i$ never visits $w$ again, since $w$ is now blocked. This implies the following two statements about $trace(a_i$):
+\begin{itemize}
+	\item $\forall w \in V \setminus \{t\}: trace(a_i)$ contains $(v,w)$ at most once, since an atom $a_i$ may traverse an arc in forward direction at most once. Any arc $(w,t)$ can not be on the trace. Otherwise $a_i$ would have reached the sink node $t$.
+	\item $\forall w \in V \setminus \{s,t\}: trace(a_i)$ contains $(w,v)$ at most once, since an atom $a_i$ may traverse an arc in backward direction at most once. Any arc $(t,w)$ can not be on the trace by the same argument as above.  Any arc $(s,w)$ can not be on the trace since this would imply that the an $a_i$ first moved forwards on an arc $(w,s)$.
+\end{itemize}
+\end{proof}
+
+A \emph{phase} of the algorithm is defined as follows:
+\begin{itemize}
+	\item \textit{phase $1$:} INITIALIZE
+	\item \textit{phase $i$:} starts at end of phase $i-1$ and ends as soon as all atoms from phase $i-1$ and all atoms created since the end of phase $i-1$ moved along at least one arc.
+\end{itemize}		
+This implies that every atom moves at least one step during each phase.
+\begin{corollary}
+The algorithm terminates after at most $2n-3$ phases.
+\end{corollary}
+\begin{proof}
+TODO
+\end{proof}
+By assigning a processor to each atom, each phase requires $O(log n)$ steps and $O(n)$ phases are required. The space complexity of the algorithm is $O(nm)$, which is dominated by storing the traces of $O(m)$ atoms, each of length $O(n$). Thus, the algorithm of Goldberg-Tarjan solves the \lstinline|MAX-FLOW| problem on directed acyclic networks in $O(n*log n)$ time using $m$ processors and $O(nm)$ space on an EREW PRAM\cite{goldberg89}.
 
 
 \section{Further results}
@@ -499,7 +561,7 @@ for planar networks\\
 \end{table*}
 
 
-\section{bla}
+\section{Conclusion}
 text \cite{ahuja93} \cite{papa95} \cite{yossi81} \cite{vishkin92} \cite{goldberg89} \cite{goldberg91} \cite{goldberg98} \cite{johnson87} \cite{schieber89} \cite{cherivan89} 
 
 %\pagebreak
