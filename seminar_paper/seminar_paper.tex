@@ -49,6 +49,8 @@
 
 \section{Abstract}
 \label{sec:abstract}
+We discuss the possibilities of parallelizing the problem of finding a maximum flow in a given flow network. Although intuitive sequential algorithms have been known for a long time, only in 1990 (TODO: check date) theoretical analysis of the problem was able to ascertain the inherently sequential nature of the problem\footnote{ assuming that $P \neq NP$.}, i.e., that no parallel algorithm that solves the problem in poly-logarithmic time with polynomially bounded resource consumption exists. Before this fundamental results, significant efforts were put into finding efficient parallel algorithms for this problem based on the PRAM model. We explain two fundamental results and compare them with later and improved developments.
+
 
 \section{Introduction}
 \label{sec:intro}
@@ -93,7 +95,76 @@ The \emph{residual capacity} of $e \in V \times V$ w.r.t. a flow $f$ is defined 
 
 \subsection{Algorithm of Ford-Fulkerson}
 \label{sec:fordfulkerson}
-The algorithm of Ford and Fulkerson \cite{ahuja93} is an intuitive sequential algorithm that solves \lstinline|MAX-FLOW|: starting from a null flow, increase the flow along an augmenting path as long as such a path exists. Note that this algorithm is restricted to integer capacities:  $c:E\rightarrow \mathbb{N}_0^{+}$ $\forall a \in E$.
+The algorithm of Ford and Fulkerson \cite{ahuja93} is an intuitive sequential algorithm that solves \lstinline|MAX-FLOW|: starting from a null flow, increase the flow along an augmenting path as long as such a path exists. This is done by finding a path from $s$ to $t$ in the residual network along which the flow can be increased further. 
+
+Figure \ref{fig:fordfulkerson1} depicts the flow network for which \lstinline|MAX-FLOW| is to be solved and an augmenting path\footnote{The residual network is equal to the given network in the first step.}. Note that this path may be chosen arbitrarily. Figure \ref{fig:fordfulkerson2} shows the residual network resulting from the situation in Figure \ref{fig:fordfulkerson1} and the next augmenting path. 
+
+Note that this algorithm is restricted to integer capacities:  $c:E\rightarrow \mathbb{N}_0^{+}$ $\forall a \in E$. For a more detailed explanation and theoretical analysis, refer to \cite{ahuja93}.
+
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}[scale=1.2, auto,swap]
+    % draw the vertices
+	\foreach \pos/\name in {{(0,2)/s}, {(1,3)/v_1}, {(2.5,3)/v_2},
+   	                        {(1,1)/v_3}, {(2.5,1)/v_4}, {(3.5,2)/t}}
+    \node[vertex] (\name) at \pos {$\name$};
+   	% Connect vertices with edges and draw weights
+   	\foreach \source/ \dest /\weight in {s/v_1/2, s/v_3/8,v_3/v_1/5,
+                                         v_1/v_2/7, v_4/v_2/15, v_3/v_4/5,
+                                         v_2/t/2, v_4/t/5}
+       	\path[edge] (\source) -- node[weight] {$\weight$} (\dest);
+        	
+       	%v_1/v_4/9
+       	\path[edge] ([xshift= -2pt, yshift= 5pt] v_4.center) -- node[weight] {6}  ([xshift= 5pt, yshift= -2pt] v_1.center);
+       	\path[edge] ([xshift = 2pt, yshift= -5pt] v_1.center) -- node[weight] {9}  ([xshift= -5pt, yshift= 2pt] v_4.center);
+  
+	% For convenience we use a background layer to highlight edges
+   	% This way we don't have to worry about the highlighting covering
+	% weight labels. 
+	\begin{pgfonlayer}{background}
+   	    \foreach \source /\dest  /\weight in {s/v_3/5,v_4/t/5}
+	        \path[selected edge] (\source) -- node[weight,above] {$\weight$}(\dest);		
+            \path[selected edge] ([xshift = 2pt, yshift= -5pt] v_1.center) -- node[weight,left] {5}  ([xshift= -5pt, yshift= 2pt] v_4.center);
+            \path[selected edge] (v_3) -- node[weight,left] {$5$}(v_1);
+   	\end{pgfonlayer}
+\end{tikzpicture}
+\end{center}
+\caption{Algorithm of Ford-Fulkerson: Initial network (black) and first augmenting path (red)}
+\label{fig:fordfulkerson1}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}[scale=1.2, auto,swap]
+   	% draw the vertices
+    \foreach \pos/\name in {{(0,2)/s}, {(1,3)/v_1}, {(2.5,3)/v_2},
+    	                        {(1,1)/v_3}, {(2.5,1)/v_4}, {(3.5,2)/t}}
+    \node[vertex] (\name) at \pos {$\name$};
+   	% Connect vertices with edges and draw weights
+   	\foreach \source/ \dest /\weight in {s/v_1/2, v_1/v_3/5, t/v_4/5,
+                                         v_1/v_2/7, v_4/v_2/15, v_3/v_4/5,
+                                         v_2/t/2}
+       	\path[residual edge] (\source) -- node[weight] {$\weight$} (\dest);
+
+        	%s/v_3/8,
+       	\path[residual edge] ([xshift= -2pt, yshift= 5pt] v_3.center) -- node[weight] {5}  ([xshift= 5pt, yshift= -2pt] s.center);
+       	\path[residual edge] ([xshift = 2pt, yshift= -5pt] s.center) -- node[weight] {3}  ([xshift= -5pt, yshift= 2pt] v_3.center);
+        	%v_1/v_4/9
+       	\path[residual edge] ([xshift= -2pt, yshift= 5pt] v_4.center) -- node[weight] {11}  ([xshift= 5pt, yshift= -2pt] v_1.center);
+       	\path[residual edge] ([xshift = 2pt, yshift= -5pt] v_1.center) -- node[weight] {4}  ([xshift= -5pt, yshift= 2pt] v_4.center);       	
+        	
+       	\begin{pgfonlayer}{background}
+   	    \foreach \source /\dest  /\weight in {s/v_1/2,v_1/v_2/2,v_2/t/2}
+            \path[selected edge] (\source) -- node[weight,above] {$\weight$}(\dest);			            
+   	\end{pgfonlayer}
+\end{tikzpicture}
+\end{center}
+\caption{Algorithm of Ford-Fulkerson: Residual network (blue) and augmenting path (red)}
+\label{fig:fordfulkerson2}
+\end{figure}	
+
+
+
 
 \section{Model of Computation}
 \label{sec:model}
