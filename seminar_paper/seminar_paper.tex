@@ -261,7 +261,7 @@ The following notation will be used:
 
 The algorithm operates in \emph{pulses}: In the first pulse, all outgoing edges of $s$ or saturated: $\forall e_i = (s, v_i):$ $f(e_i) = c(e_i)$. The set of unbalanced vertices at the end of pulse 1 is thus the set of all neighbours of $s$: \lstinline|UNBALANCED| = $\{v_i\lvert \exists (s, v_i) \in E \}$. In each subsequent pulse, the unbalanced vertices try to push forward\footnote{i.e., to the next layer of the network} as much of their excessive flow as possible. Any remaining excessive flow will be returned backward. All balanced vertices remain idle during the pulses. The algorithm terminates as soon as no unbalanced vertices are available, implying that all flow reach the source $s$ or sink $t$.
 
-Algorithm \ref{algo:sv} shows the routine for solving \lstinline|MAX-FLOW| in a given layered network. Functions \lstinline|PUSH| and \lstinline|RETURN| are depicted in Algorithm \ref{algo:sv_push} and Algorithm \ref{algo:sv_return}, respectively and will be explained in detail in the remainder of this section. The algorithm maintains the number of the current pulse in $i$.
+Algorithm \ref{algo:sv} shows an abstract routine for solving \lstinline|MAX-FLOW| in a given layered network. Parallel implementations of functions \lstinline|PUSH| and \lstinline|RETURN| are depicted in Algorithm \ref{algo:sv_push} and Algorithm \ref{algo:sv_return}, respectively and will be explained in detail in the remainder of this section. The algorithm maintains the number of the current pulse in $i$.
 
 \begin{algorithm}
 \caption{Shiloach-Vishkin}
@@ -271,9 +271,9 @@ Algorithm \ref{algo:sv} shows the routine for solving \lstinline|MAX-FLOW| in a 
 		\State EXCESS(s) = $\Sigma_{v \in L_1}$ c(s$\rightarrow$v)
 		\State PUSH(s, EXCESS(s))
 		i = 1;
-		\While{$\exists$ v $\in$ UNBALANCED}
+		\While{$\exists$ v $\in UNBALANCED$}
 			\State i++
-			\ForAll {$v \in UNBALANVED$}			
+			\ForAll {$v \in UNBALANCED$}			
 				\If{$v$ is not blocked}
 					\State PUSH(v, EXCESS(v))
 				\EndIf
@@ -352,16 +352,7 @@ We use the following processor assignment:
 	\item Each flow quantum $Q$ has a processor $P(Q)$ assigned. In other words, each leaf in each of the $2n * d_{in}(v)$ T-IN(v) PS-trees has a processor $P(Q)$ assigned.
 \end{itemize}
 
-The following lemma states that the apparently large number of required processors can be reduced to $n$. However, the above assignment is useful for a clear presentation of the algorithms.
-
-\begin{lemma}
-An allocation of processors to jobs s.t. $n$ processors are sufficient is possible. 
-\end{lemma}
-
-\begin{proof}
-%TODO
-TODO
-\end{proof}
+The total number of required processors is $O(nm)$, which is dominated by the assignment of one processor for each flow quantum. This large number of required processors can be reduced to $n$, which we will prove in Section \ref{sec:sv_nr_procs}. We will however use the above assignment of processors to present the essentials of the algorithm in cleaner way.   
 
 In addition to the four PS-trees attached to each vertex $v$, $v$ keeps two pointers:
 \begin{itemize}
@@ -425,7 +416,6 @@ $\forall v \in UNBALANCED$ do in parallel:
 \end{algorithmic}
 \end{algorithm}
 
-
 \begin{algorithm}
 \caption{Shiloach-Vishkin: RETURN}
 \label{algo:sv_return}
@@ -451,19 +441,55 @@ $\forall v \in UNBALANCED$ do in parallel:
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Analysis}
-\label{sec:sv_analysis}
-The comments in Algorithm \ref{algo:dinitz} state the complexity of the steps: According to Dinitz' scheme, the while-loop is bounded by $O(n)$ iterations. Constructing the residual network $G_r$ can trivially be done in $O(n)$ using n processors, since $m = O(n^{2})$. Breath-first search can be used to construct a layered network $G_l$ out of $G_r$. Efficient parallel implementations of BFS run in $O(m/p +n)$ time using n processors. Adding the found \lstinline|MAX-FLOW| of a layered network to the global \lstinline|MAX-FlOW| can again be done in $O(n)$ time. It remains the calculate the complexity of finding a \lstinline|MAX-FlOW| in a layered network $G_l$, as shown in Algorithm \ref{algo:sv}.
+\subsection{Complexity of sequential algorithm}
+The parallel algorithm presented above can easily be turned into a sequential algorithm by executing it with only one processor: This one processor handles all vertices that are unbalanced at the beginning of a pulse, one at a time in an arbitrary order. However, the order of unbalanced vertices of different pulses needs to be enforced. A simple queue thus suffices to implement the set of unbalanced vertices \lstinline|UNBALANCED| used in Algorithm \ref{algo:sv}.
 
-Each \lstinline|PUSH| or \lstinline|RETURN| operation requires $O(log n)$ steps, since they do not contain any loops and statements operate on paths from a leave to the root of a binary tree of height $\lceil log_2(k) \rceil$.
 \begin{lemma}
-The number of pulses in each round is at most $2n$
+The complexity of the sequential algorithm is $O(n^{3})$\cite{yossi81}.
+\end{lemma}
+\begin{proof}
+All the elementary operations of the algorithm will be associated to either edges or (vertex, pulse) pairs s.t. each edge or pair is assigned only a constant number of elementary operations. As we will show in Section \ref{sec:sv_nr_pulses}, the number of pulses is bounded by $2n$, which implies an $O(n^{2})$\footnote{Note that since $m < n^2$, the $m$ term is dominated by the $n$ term.} bound for the number of (vertex, pulse) pairs for one layered network, yielding a complexity of $O(n^{3})$ for the whole algorithm.
+
+\begin{itemize}
+	\item If an edge $e$ becomes saturated during a \emph{PUSH(v, EXCESS(v))}, the resulting operations (which are a constant number) are charged to $e$. In each pulse $p_i$ only one edge $e$ emanating from a vertex $v$ will be used to push along flow without $e$ becoming saturated and thus the elementary operations are charged to the corresponding pair $(v, p_i)$. This implies a bound of $O(n^2)$ elementary operations involved all PUSH operations required to solve the \lstinline|MAX-FLOW| problem in a layered network.
+	\item The elementary operations of \emph{RETURN(v, EXCESS(v)} will be charged either to related PUSH operations or again to a (vertex, pulse) pair. When some flow is returned from vertex $v$ at pulse $p_i$, the flow cancels out flow quanta that were pushed to $v$ at some pulse $p_j$ with $j<=i$ and the corresponding push-operation is charged. The returned flow may furthermore cause a change in at most one flow quantum, in which case the elementary operations are assigned to the pair $(v, p_j)$. By the same argument as before, we get a $O(n^{2})$ bound on the number of elementary operations involved in all RETURN operations.
+\end{itemize}
+
+These charging rules yield an $O(n^{2})$ bound on the number of elementary operations involved in pushing and returning flow while solving \lstinline|MAX-FLOW| for a layered network, which implies an overall complexity of $O(n^{3}$ for the whole algorithm. 
+
+
+
+
+\end{proof}
+
+\subsection{Processor efficient parallel implementation}
+\label{sec:sv_nr_procs}
+It remains to prove the claim from the start of this section, namely that the algorithm can be executed with $n$ processors without affecting complexity.
+\begin{lemma}
+An allocation of processors to jobs s.t. $n$ processors are sufficient is possible without effecting the complexity of the algorithm. 
 \end{lemma}
 \begin{proof}
 TODO
 \end{proof}
 
+\subsection{Bounding the number of pulses}
+\label{sec:sv_nr_pulses}
+\begin{lemma}
+The number of pulses in each round is at most $2n$
+\end{lemma}
+\begin{proof}
+TODO
+\end{proof} 
+
+\subsection{Analysis}
+\label{sec:sv_analysis}
+The comments in Algorithm \ref{algo:dinitz} state the complexity of the steps: According to Dinitz' scheme, the while-loop is bounded by $O(n)$ iterations. Constructing the residual network $G_r$ can trivially be done in $O(n)$ using n processors, since $m = O(n^{2})$. Breath-first search can be used to construct a layered network $G_l$ out of $G_r$. Efficient parallel implementations of BFS run in $O(m/p +n)$ time using n processors. Adding the found \lstinline|MAX-FLOW| of a layered network to the global \lstinline|MAX-FlOW| can again be done in $O(n)$ time. It remains the calculate the complexity of finding a \lstinline|MAX-FlOW| in a layered network $G_l$, as shown in Algorithm \ref{algo:sv}.
+
+Each \lstinline|PUSH| or \lstinline|RETURN| operation requires $O(log n)$ steps, since they do not contain any loops and statements operate on paths from a leave to the root of a binary tree of height $\lceil log_2(k) \rceil$.
+
 It follows that each round is executed in $O(n*log n)$ time and thus the algorithm overall has a time complexity of $O(n^{2} * log n)$. As shown in Section \ref{sec:sv_pstrees}, a CRCW PRAM is required for the operations on PS-trees. However, Shiloach and Vishkin claim\cite{yossi81}, that a CREW PRAM is sufficient to execute the algorithm within the given bounds, since any concurrent write to a specific memory location will attempt to write the same value. Unfortunately, the paper does not substantiate this claim. 
+
+
 
 \section{Algorithm of Goldberg and Tarjan}
 \label{sec:goldberg}
