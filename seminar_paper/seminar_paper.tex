@@ -585,7 +585,7 @@ Clearly, each newly created atom in \lstinline|INITIALIZE| and \lstinline|PUSH| 
 $\forall a_i:$ at any time, $\lvert trace(a_i) \rvert \leq 2n-3$ arcs.
 \end{lemma}
 \begin{proof}
-\item An atom $a_i$ only moves backwards on $(v,w) \in E$ once $w$ is blocked. Since $a_i$ moved forwards and backwards on $(v,w)$, $w \notin P_s(a_i)$. $a_i$ never visits $w$ again, since $w$ is now blocked. This implies the following two statements about $trace(a_i$):
+An atom $a_i$ only moves backwards on $(v,w) \in E$ once $w$ is blocked. Since $a_i$ moved forwards and backwards on $(v,w)$, $w \notin P_s(a_i)$. $a_i$ never visits $w$ again, since $w$ is now blocked. This implies the following two statements about $trace(a_i$):
 \begin{itemize}
 	\item $\forall w \in V \setminus \{t\}: trace(a_i)$ contains $(v,w)$ at most once, since an atom $a_i$ may traverse an arc in forward direction at most once. Any arc $(w,t)$ can not be on the trace. Otherwise $a_i$ would have reached the sink node $t$.
 	\item $\forall w \in V \setminus \{s,t\}: trace(a_i)$ contains $(w,v)$ at most once, since an atom $a_i$ may traverse an arc in backward direction at most once. Any arc $(t,w)$ can not be on the trace by the same argument as above.  Any arc $(s,w)$ can not be on the trace since this would imply that the an $a_i$ first moved forwards on an arc $(w,s)$.
@@ -597,13 +597,11 @@ A \emph{phase} of the algorithm is defined as follows:
 	\item \textit{phase $1$:} INITIALIZE
 	\item \textit{phase $i$:} starts at end of phase $i-1$ and ends as soon as all atoms from phase $i-1$ and all atoms created since the end of phase $i-1$ moved along at least one arc.
 \end{itemize}		
-This implies that every atom moves at least one step during each phase.
+This implies that every atom moves at least one step (forward or backward) during each phase and justifies the following corollary:
 \begin{corollary}
 The algorithm terminates after at most $2n-3$ phases.
 \end{corollary}
-\begin{proof}
-TODO
-\end{proof}
+
 By assigning a processor to each atom, each phase requires $O(log n)$ steps and $O(n)$ phases are required. The space complexity of the algorithm is $O(nm)$, which is dominated by storing the traces of $O(m)$ atoms, each of length $O(n$). Thus, the algorithm of Goldberg-Tarjan solves the \lstinline|MAX-FLOW| problem on directed acyclic networks in $O(n*log n)$ time using $m$ processors and $O(nm)$ space on an EREW PRAM\cite{goldberg89}.
 
 
