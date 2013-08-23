@@ -442,6 +442,7 @@ $\forall v \in UNBALANCED$ do in parallel:
 \end{algorithm}
 
 \subsection{Complexity of sequential algorithm}
+\label{sec:sv_seq}
 The parallel algorithm presented above can easily be turned into a sequential algorithm by executing it with only one processor: This one processor handles all vertices that are unbalanced at the beginning of a pulse, one at a time in an arbitrary order. However, the order of unbalanced vertices of different pulses needs to be enforced. A simple queue thus suffices to implement the set of unbalanced vertices \lstinline|UNBALANCED| used in Algorithm \ref{algo:sv}.
 
 \begin{lemma}
@@ -456,20 +457,15 @@ All the elementary operations of the algorithm will be associated to either edge
 \end{itemize}
 
 These charging rules yield an $O(n^{2})$ bound on the number of elementary operations involved in pushing and returning flow while solving \lstinline|MAX-FLOW| for a layered network, which implies an overall complexity of $O(n^{3}$ for the whole algorithm. 
-
-
-
-
 \end{proof}
 
 \subsection{Processor efficient parallel implementation}
 \label{sec:sv_nr_procs}
-It remains to prove the claim from the start of this section, namely that the algorithm can be executed with $n$ processors without affecting complexity.
 \begin{lemma}
 An allocation of processors to jobs s.t. $n$ processors are sufficient is possible without effecting the complexity of the algorithm. 
 \end{lemma}
 \begin{proof}
-TODO
+The \textbf{Work-time framework} as presented in \cite{vishkin92} allows for a simple justification of the lemma: the number of rounds is $O(n^2 log n)$: One pulse can be executed in $O(log n)$ time steps (no loops, operations on binary trees only). Since we need at most $2n$ pulses\footnote{see Section \ref{sec:sv_nr_pulses} for the proof.} for solving \lstinline|MAX-FLOW| each of the $O(n)$ layered networks\footnote{according to Dinitz' scheme, as explained in Section \ref{sec:dinitz}.}, the total number of time steps is $T = O(n^{2} log n)$. By similar arguments as we used in Section \ref{sec:sv_seq}, we obtain an amount of total work $W = O(n^{3} log n)$\footnote{see \cite{yossi81} for a more detailed proof}. Applying \emph{Brent's theorem}\cite{Brent74}, we get $\lceil W/p \rceil + T$ rounds, which is $O(n^{2} log n)$ rounds for $p=n$, proving the lemma.
 \end{proof}
 
 \subsection{Bounding the number of pulses}
