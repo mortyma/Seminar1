@@ -95,11 +95,29 @@ The \emph{residual capacity} of $e \in V \times V$ w.r.t. a flow $f$ is defined 
 
 \subsection{Algorithm of Ford-Fulkerson}
 \label{sec:fordfulkerson}
-The algorithm of Ford and Fulkerson \cite{ahuja93} is an intuitive sequential algorithm that solves \lstinline|MAX-FLOW|: starting from a null flow, increase the flow along an augmenting path as long as such a path exists. This is done by finding a path from $s$ to $t$ in the residual network along which the flow can be increased further. 
+The algorithm of Ford and Fulkerson as shown in Algorithm \ref{algo:fordFulkerson} is an intuitive sequential algorithm that solves \lstinline|MAX-FLOW|: starting from a null flow (or any other valid flow), increase the flow along an augmenting path as long as such a path exists. This is done by finding a path from $s$ to $t$ in the residual network along which the flow can be increased. 
 
-Figure \ref{fig:fordfulkerson1} depicts the flow network for which \lstinline|MAX-FLOW| is to be solved and an augmenting path\footnote{The residual network is equal to the given network in the first step.}. Note that this path may be chosen arbitrarily. Figure \ref{fig:fordfulkerson2} shows the residual network resulting from the situation in Figure \ref{fig:fordfulkerson1} and the next augmenting path. 
+\begin{algorithm}
+\caption{Ford-Fulkerson}
+\label{algo:fordFulkerson}
+\begin{algorithmic}[1]
+	\Function{Ford-Fulkerson}{$N=(G=(V,E),s,t,c)$}
+	\State $f(u,v) = 0$ $\forall e=(u,v) \in E$ \Comment{Start with a valid flow}
+	\State  $G_r = G$ 
+	\While{$\exists P(s,t) \in G_r: \forall (u,v) \in P(s,t): c_r(u, v) > 0$}
+		\State $c_r(P) = min \{c_r(u,v): (u,v) \in P(s,t) \}$
+		\State $f(u,v) = f(u,v) + c_r(P)$ \Comment{Increase the flow by as much flow as can be pushed along $P(s,t)$}
+		\State $f(v,u) = f(v,u) + c_r(P)$ \Comment{Update the residual network}
+	\EndWhile
+	\EndFunction
+\end{algorithmic}
+\end{algorithm}
 
-Note that this algorithm is restricted to integer capacities:  $c:E\rightarrow \mathbb{N}_0^{+}$ $\forall a \in E$. For a more detailed explanation and theoretical analysis, refer to \cite{ahuja93}.
+
+
+Figure \ref{fig:fordfulkerson1} depicts the flow network for which \lstinline|MAX-FLOW| is to be solved and the first augmenting path\footnote{The residual network is equal to the given network in the first step.}. Note that this path may be chosen arbitrarily. Figure \ref{fig:fordfulkerson2} shows the residual network resulting from the situation in Figure \ref{fig:fordfulkerson1} and a possible next augmenting path. 
+
+Note that the algorithm of Ford and Fulkerson is restricted to integer capacities:  $c:E\rightarrow \mathbb{N}_0^{+}$ $\forall a \in E$. For a more detailed explanation and theoretical analysis, refer to \cite{ahuja93}.
 
 \begin{figure}
 \begin{center}
@@ -163,12 +181,10 @@ Note that this algorithm is restricted to integer capacities:  $c:E\rightarrow \
 \label{fig:fordfulkerson2}
 \end{figure}	
 
-
-
-
 \section{Model of Computation}
 \label{sec:model}
 We use the \textbf{PRAM} Model\footnote{Parallel Random Access Machine} as the model of computation. Specifically, a \textbf{MIMD} - Multiple Instructions Multiple Data - variant is used, where each processor $p$ executes a distinct set of instructions on distinct data. Instructions are executed in lock-step and any necessary padding of instructions is assumed to be done automatically. 
+TODO: is this enough?
 
 \section{Computitional Complexity}
 \label{sec:cc}
