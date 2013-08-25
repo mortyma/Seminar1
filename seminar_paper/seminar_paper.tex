@@ -503,8 +503,6 @@ Each \lstinline|PUSH| or \lstinline|RETURN| operation requires $O(log n)$ steps,
 
 It follows that each round is executed in $O(n*log n)$ time and thus the algorithm overall has a time complexity of $O(n^{2} * log n)$. As shown in Section \ref{sec:sv_pstrees}, a CRCW PRAM is required for the operations on PS-trees. However, Shiloach and Vishkin claim\cite{yossi81}, that a CREW PRAM is sufficient to execute the algorithm within the given bounds, since any concurrent write to a specific memory location will attempt to write the same value. Unfortunately, the paper does not substantiate this claim. 
 
-
-
 \section{Algorithm of Goldberg and Tarjan}
 \label{sec:goldberg}
 The Goldberg-Tarjan algorithm solves \lstinline|MAX-FLOW| on directed acyclic graphs. Contrary to the Shiloach-Vishkin algorithm presented in Section \ref{sec:shiloach}, it is not based on Dinitz' scheme (see Section \ref{sec:dinitz}. The algorithm constructs a blocking flow by moving flow through the network while maintaining a blocking pre-flow. Intuitively, the flow quanta do a depth-first search from $s$ to $t$ in a dynamic graph, where edges become saturated and vertices become blocked.
@@ -541,6 +539,20 @@ A \emph{phase} of the algorithm is defined as follows:
 \end{itemize}		
 
 After the initialization step, in each subsequent phase $i$ method \lstinline|PUSH| (as depicted in Algorithm \ref{algo:gt_push}) is executed in parallel for all vertices $v \in V \setminus \{s,t\}$ that are not blocked at the beginning of pulse $i$. It moves all atoms $a_i$ currently located at $v$ towards the sink node $s$, if possible, and otherwise towards the start node $s$.
+
+In line 4 of Algorithm \ref{algo:gt_push}, the cumulative sum of flow $S_j$ that atoms $a_i$ located at vertex $v$ carry is calculated. $S(k)$ is the total amount of flow that has to be pushed through outgoing arcs of $v$ that are admissible\footnote{i.e., non-saturated arcs, which can carry some more flow to another nod}. Analogously, the cumulative sum of residual capacities of arcs emanating from $v$ is computed in line 5, with $R(l)$ being the total amount of those residual capacities.
+
+In lines 6-20, each atom $a_i$ is assigned to one or more arc $e_j = (v, w_j)$, s.t.
+\begin{itemize}
+	\item The sum of flow assigned to an arc $e_j$ is less than or equal to it's residual capacity.
+	\item At most one arc is assigned an amount of flow less than the residual capacity of the arc. 
+	\item In total, an amount equal to $min\{ECXESS(v), R(l)\}$ is assigned to the set of admissible arcs.
+\end{itemize}
+
+If an atom $a_i$ is assigned to more than one arc $(v, w_j)$, it is split, which is done in lines 21-30. If an assignment of an atom $a_i$ to arc $(v, w_j)$ saturates that arc, a new atom $a_k$ is created, carrying the assigned amount of flow along arc $(v, w_j)$. Note that if an assignment of flow to an arc $(v, w_j)$ does not saturate that arc, we do not create a new atom - the original atom $a_i$ will be used to carry the assigned flow. In lines 31-37, all atoms $a_i$ assigned to an arc $(v, w_j)$ will be moved forward along that arc by increasing the flow $f(v, w_j)$ by the amount of flow $size(a_i)$ that atom carries and updating location and trace of $a_i$ accordingly.
+
+After all atoms have been pushed forward, vertex $v$ is blocked if all its outgoing arcs are saturated. Finally, in the last step (lines 42-49) all blocked vertices are checked for remaining atoms $a_i$. Each such atom $a_i$ is then returned on the arc $(v_{a_i}, w)$ that it traversed to enter vertex $v$, which is the last arc on $trace(a_i)$. To do so, the flow $f(v_{a_i}, w)$ is decreased by the amount of flow atom $a_i$ carries and location and trace of $a_i$ are updated.
+
 
 \begin{algorithm}
 \caption{Goldberg-Tarjan: PUSH}
@@ -585,21 +597,18 @@ After the initialization step, in each subsequent phase $i$ method \lstinline|PU
 		\EndFor 
 	\EndFor
 	\If{$\forall (v,w_j):$ saturated}
-		\State mark $v$ to block
+		\State block $v$
 	\EndIf	
-	\State $\forall v_i$ marked to block: $block(v_i)$
 	\ForAll{$w \in V$ and $w$ blocked}
-		\ForAll{$a$ at $w$}
-			\State Let $(v_a, w)$ be last arc on $trace(a)$
-			\State $f(v_a, w) = f(v_a, w) - size(a)$
-			\State $location(a) = v_a$
-			\State $trace(a) = trace(a) - (v_a, w)$
+		\ForAll{$a_i$ at $w$}
+			\State Let $(v_{a_i}, w)$ be last arc on $trace(a_i)$
+			\State $f(v_{a_i}, w) = f(v_{a_i}, w) - size(a_i)$
+			\State $location(a_i) = v_{a_i}$
+			\State $trace(a_i) = trace(a_i) - (v_{a_i}, w)$
 		\EndFor
 	\EndFor	
 	\EndFunction
 \end{algorithmic}
-\bigskip
-Repeat PUSH until all atoms arrive at $s$ or $t$
 \end{algorithm}
 
 \subsection{Correctness}
