@@ -470,11 +470,14 @@ The \textbf{Work-time framework} as presented in \cite{vishkin92} allows for a s
 
 \subsection{Bounding the number of pulses}
 \label{sec:sv_nr_pulses}
+We define a \emph{legal triple} as $(e =(u,v), i_p, i_r)$, where a flow quantum $Q$ was pushed to $v$ during pulse $i_p$ and some flow of $Q$ was returned on $e$ during pulse $i_r$. 
+
 \begin{lemma}
-The number of pulses in each round is at most $2n$
+The algorithm terminates after at most $2n$ pulses.\cite{yossi81}
 \end{lemma}
+\label{lemma:bounding}
 \begin{proof}
-TODO
+TODO: maybe just cite?
 \end{proof} 
 
 \subsection{Analysis}
