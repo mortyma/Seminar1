@@ -517,7 +517,7 @@ An \textbf{atom} a is defined as the maximal quantity of flow that so far moved 
 	\item \textbf{path(a)}: The simple Path $P_s(s, position(a))$ in $E$. $(v,w) \in P_s$ if $(v,w) \in P_t \and (w,v) \not\in P_t$. In other words, if an atom a traversed an edge $(v,w)$ both forwards and backwards, $(v,w) \in P_t$ but $(v,w) \not\in P_s$.  
 \end{itemize}
 
-TODO: explain algorithms
+Algorithm \ref{algo:gt_init} shows the initialization of the Goldberg-Tarjan approach: One atom $a_i$ is created for each edge $e_i=(s, v_i)$ emanating from the start node $s$. Each atom will carry as much flow as can be pushed along the edge  it traverses, thus $size(a_i) = c_(e_i)$. Position and trace of the created atoms are set accordingly.
 
 \begin{algorithm}
 \caption{Goldberg-Tarjan: INITIALIZE}
@@ -534,10 +534,18 @@ TODO: explain algorithms
 \end{algorithmic}
 \end{algorithm}
 
+A \emph{phase} of the algorithm is defined as follows:
+\begin{itemize}
+	\item \textit{phase $1$:} INITIALIZE
+	\item \textit{phase $i$:} starts at end of phase $i-1$ and ends as soon as all atoms from phase $i-1$ and all atoms created since the end of phase $i-1$ moved along at least one arc.
+\end{itemize}		
+
+After the initialization step, in each subsequent phase $i$ method \lstinline|PUSH| (as depicted in Algorithm \ref{algo:gt_push}) is executed in parallel for all vertices $v \in V \setminus \{s,t\}$ that are not blocked at the beginning of pulse $i$. It moves all atoms $a_i$ currently located at $v$ towards the sink node $s$, if possible, and otherwise towards the start node $s$.
+
 \begin{algorithm}
 \caption{Goldberg-Tarjan: PUSH}
 \label{algo:gt_push}
-$\forall v \in V \setminus \{s,t\}$ and $v$ not blocked, do in parallel:
+%$\forall v \in V \setminus \{s,t\}$ and $v$ not blocked, do in parallel:
 \begin{algorithmic}[1]
 	\Function{PUSH}{$v$}
 	\State Let $a_1 \dots a_k$ be atoms at vertex $v$
@@ -632,12 +640,8 @@ An atom $a_i$ only moves backwards on $(v,w) \in E$ once $w$ is blocked. Since $
 \end{itemize}
 \end{proof}
 
-A \emph{phase} of the algorithm is defined as follows:
-\begin{itemize}
-	\item \textit{phase $1$:} INITIALIZE
-	\item \textit{phase $i$:} starts at end of phase $i-1$ and ends as soon as all atoms from phase $i-1$ and all atoms created since the end of phase $i-1$ moved along at least one arc.
-\end{itemize}		
-This implies that every atom moves at least one step (forward or backward) during each phase and justifies the following corollary:
+
+The definition of phases in Section \ref{sec:goldberg} implies that every atom moves at least one step (forward or backward) during each phase and justifies the following corollary:
 \begin{corollary}
 The algorithm terminates after at most $2n-3$ phases.
 \end{corollary}
