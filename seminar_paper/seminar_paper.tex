@@ -49,7 +49,7 @@
 
 \section{Abstract}
 \label{sec:abstract}
-We discuss the possibilities of parallelizing the problem of finding a maximum flow in a given flow network. Although intuitive sequential algorithms have been known for a long time, only in 1990 (TODO: check date) theoretical analysis of the problem was able to ascertain the inherently sequential nature of the problem\footnote{ assuming that $P \neq NP$.}, i.e., that no parallel algorithm that solves the problem in poly-logarithmic time with polynomially bounded resource consumption exists. Before this fundamental results, significant efforts were put into finding efficient parallel algorithms for this problem based on the PRAM model. We explain two fundamental results and compare them with later and improved developments.
+We discuss the possibilities of parallelizing the problem of finding a maximum flow in a given flow network. Although intuitive sequential algorithms have been known for a long time, only the 1990s theoretical analysis of the problem was able to ascertain the inherently sequential nature of the problem\footnote{assuming that $P \neq NP$.}, i.e., that no parallel algorithm that solves the problem in poly-logarithmic time with polynomially bounded resource consumption exists. Before this fundamental results, significant efforts were put into finding efficient parallel algorithms for this problem based on the PRAM model. We explain two fundamental results and compare them with later and improved developments.
 
 
 \section{Introduction}
@@ -181,7 +181,7 @@ Note that the algorithm of Ford and Fulkerson is restricted to integer capacitie
 
 \section{Model of Computation}
 \label{sec:model}
-We use the \textbf{PRAM} Model\footnote{Parallel Random Access Machine, as defined in the lecture} as the model of computation. Specifically, a \textbf{MIMD} - Multiple Instructions Multiple Data - variant is used, where each processor $p$ executes a distinct set of instructions on distinct data. Instructions are executed in lock-step and any necessary padding of instructions is assumed to be done automatically. 
+We use the \textbf{PRAM} Model\footnote{Parallel Random Access Machine, as defined in the lecture or in \cite{papa95}} as the model of computation. Specifically, a \textbf{MIMD} - Multiple Instructions Multiple Data - variant is used, where each processor $p$ executes a distinct set of instructions on distinct data. Instructions are executed in lock-step and any necessary padding of instructions is assumed to be done automatically. 
 
 \section{Computitional Complexity}
 \label{sec:cc}
@@ -349,7 +349,6 @@ One PS-tree is attached to every arc $e \in E$:
 Let T be a PS-tree. Every node of T is represented by $T[height, i]$, where $height(root) = \lceil log_2(k) \rceil$ and $heigt(a_i) = 1$ , $\forall$ leaves $a_i$. Additionally, $T[root]$ designates the root node of T. We define the following operations on T:
 \begin{itemize}
 	\item CLEAR(i): The value of all nodes on the path $P(T[1,i],root)$ is set to 0. Note that executing this operation for less than all leaves will result in an invalid PS-tree. When executing the operation for all leaves, several processes will attempt to write to the same node. Thus a CRCW-PRAM is required.
-%TODO: more detailed explaination of required PRAM
 	\item UPDATE(i,$a_i$): The value of the $i^{th}$ leave is set to $a_i$ and the values of all nodes on the path $P(T[1,i],root)$ are updated.
 	\item SUM(i, $S_i$): Calculate the sum of leave nodes up to $a_i$. $S_i = a_1,...,a_i$.
 	\item FIND($\alpha$, k, $\rho$): Given $\alpha$, find $k$ and $\rho$ s.t. $a_1+...+a_{k-1} < \alpha \leq a_1+...+a_k$ and $\rho = \alpha - (a_1+...+a_{k-1}$.
@@ -482,18 +481,6 @@ An allocation of processors to jobs s.t. $n$ processors are sufficient is possib
 \begin{proof}
 The \textbf{Work-time framework} as presented in \cite{vishkin92} allows for a simple justification of the lemma: the number of rounds is $O(n^2 log n)$: One pulse can be executed in $O(log n)$ time steps (no loops, operations on binary trees only). Since we need at most $2n$ pulses\footnote{see Section \ref{sec:sv_nr_pulses} for the proof.} for solving \lstinline|MAX-FLOW| each of the $O(n)$ layered networks\footnote{according to Dinitz' scheme, as explained in Section \ref{sec:dinitz}.}, the total number of time steps is $T = O(n^{2} log n)$. By similar arguments as we used in Section \ref{sec:sv_seq}, we obtain an amount of total work $W = O(n^{3} log n)$\footnote{see \cite{yossi81} for a more detailed proof}. Applying \emph{Brent's theorem}\cite{Brent74}, we get $\lceil W/p \rceil + T$ rounds, which is $O(n^{2} log n)$ rounds for $p=n$, proving the lemma.
 \end{proof}
-
-\subsection{Bounding the number of pulses}
-\label{sec:sv_nr_pulses}
-We define a \emph{legal triple} as $(e =(u,v), i_p, i_r)$, where a flow quantum $Q$ was pushed to $v$ during pulse $i_p$ and some flow of $Q$ was returned on $e$ during pulse $i_r$. 
-
-\begin{lemma}
-The algorithm terminates after at most $2n$ pulses.\cite{yossi81}
-\end{lemma}
-\label{lemma:bounding}
-\begin{proof}
-TODO: maybe just cite?
-\end{proof} 
 
 \subsection{Analysis}
 \label{sec:sv_analysis}
