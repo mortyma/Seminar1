@@ -231,18 +231,17 @@ A maximum flow problem in a general network can be transformed into $O(n)$ maxim
 
 A layered network can easily be constructed from a directed acyclic network by performing breath-first search in  $O(log^{2}n)$ time. It follows that an algorithm that finds a maximal/blocking flow in a layered network can solve \lstinline|MAX-FLOW| in $O(n)$ iterations. The basic scheme is given in Algorithm \ref{algo:dinitz}
 
-%TODO: remove comments?
 \begin{algorithm}
 \caption{Dinitz' scheme}
 \label{algo:dinitz}
 \begin{algorithmic}[1]
 	\Function{MAX-FLOW}{$N=(V,E,s,t,c)$}
 	\State start with some valid flow 
-	\While{$l(t) \neq \infty$} \Comment{\textcolor{OliveGreen}{$O(n)$}}	
-		\State Construct residual network $G_r$ \Comment{\textcolor{OliveGreen}{$O(n)$, $p=O(n)$}}
-		\State Construct layered network $G_l$ from $G_r$ \Comment{\textcolor{OliveGreen}}{$O(m/p + n)$}
-		\State $f_l$ = MAX-FLOW($G_l$)  \Comment{tbd}
-		\State $f$ = $f$ + $f_l$ \Comment{\textcolor{OliveGreen}{$O(n)$}}
+	\While{$l(t) \neq \infty$} %\Comment{\textcolor{OliveGreen}{$O(n)$}}	
+		\State Construct residual network $G_r$ %\Comment{\textcolor{OliveGreen}{$O(n)$, $p=O(n)$}}
+		\State Construct layered network $G_l$ from $G_r$ %\Comment{\textcolor{OliveGreen}}{$O(m/p + n)$}
+		\State $f_l$ = MAX-FLOW($G_l$)  %\Comment{tbd}
+		\State $f$ = $f$ + $f_l$ %\Comment{\textcolor{OliveGreen}{$O(n)$}}
 	\EndWhile
 	\EndFunction
 \end{algorithmic}
@@ -482,7 +481,7 @@ TODO: maybe just cite?
 
 \subsection{Analysis}
 \label{sec:sv_analysis}
-The comments in Algorithm \ref{algo:dinitz} state the complexity of the steps: According to Dinitz' scheme, the while-loop is bounded by $O(n)$ iterations. Constructing the residual network $G_r$ can trivially be done in $O(n)$ using n processors, since $m = O(n^{2})$. Breath-first search can be used to construct a layered network $G_l$ out of $G_r$. Efficient parallel implementations of BFS run in $O(m/p +n)$ time using n processors. Adding the found \lstinline|MAX-FLOW| of a layered network to the global \lstinline|MAX-FlOW| can again be done in $O(n)$ time. It remains the calculate the complexity of finding a \lstinline|MAX-FlOW| in a layered network $G_l$, as shown in Algorithm \ref{algo:sv}.
+We can now provide asymptotic bounds for all steps of Algorithm \ref{algo:sv}: According to Dinitz' scheme, the while-loop is bounded by $O(n)$ iterations. Constructing the residual network $G_r$ can trivially be done in $O(n)$ using n processors, since $m = O(n^{2})$. Breath-first search can be used to construct a layered network $G_l$ out of $G_r$. Efficient parallel implementations of BFS run in $O(m/p +n)$ time using n processors. Adding the found \lstinline|MAX-FLOW| of a layered network to the global \lstinline|MAX-FlOW| can again be done in $O(n)$ time. It remains the calculate the complexity of finding a \lstinline|MAX-FlOW| in a layered network $G_l$, as shown in Algorithm \ref{algo:sv}.
 
 Each \lstinline|PUSH| or \lstinline|RETURN| operation requires $O(log n)$ steps, since they do not contain any loops and statements operate on paths from a leave to the root of a binary tree of height $\lceil log_2(k) \rceil$.
 
