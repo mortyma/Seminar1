@@ -49,7 +49,7 @@
 
 \section{Abstract}
 \label{sec:abstract}
-We discuss the possibilities of parallelizing the problem of finding a maximum flow in a given flow network. Although intuitive sequential algorithms have been known for a long time, only the 1990s theoretical analysis of the problem was able to ascertain the inherently sequential nature of the problem\footnote{assuming that $P \neq NP$.}, i.e., that no parallel algorithm that solves the problem in poly-logarithmic time with polynomially bounded resource consumption exists. Before this fundamental results, significant efforts were put into finding efficient parallel algorithms for this problem based on the PRAM model. We explain two fundamental results and compare them with later and improved developments.
+We discuss the possibilities of parallelizing the problem of finding a maximum flow in a given flow network. Although intuitive sequential algorithms have been known for a long time, only the 1990s theoretical analysis of the problem was able to ascertain the inherently sequential nature of the problem, i.e., that no parallel algorithm that solves the problem in poly-logarithmic time with polynomially bounded resource consumption exists. Before this fundamental results, significant efforts were put into finding efficient parallel algorithms for this problem based on the PRAM model. We explain two fundamental results and compare them with later and improved developments.
 
 
 \section{Introduction}
@@ -193,7 +193,7 @@ Clearly, $NC \subseteq P$, but whether $NC \subset P$ or $NC = P$ is still unkno
 
 As an example, the Ford-Fulkerson algorithm can not be parallelized trivially. Although constructing the residual network can be done in constant time $O(1)$ by assigning a processor to each edge $a \in E$ and augmenting paths can be found in $O(log^{2}n)$ time and $O(n^{2})$ work by a basic BFS search, the number of stages can not be reduced to less than $O(\sqrt(n))$ \cite{ahuja93}. Thus the total complexity, which is dominated by the number of stages, places the algorithm in $P \setminus NC$.
 	
-As shown in \cite{papa95}, \lstinline|MAX-FLOW| is P-complete and no parallel algorithm $\in NC$ is currently known for solving this problem. It is assumed that the problem is inherently sequential.
+As shown in \cite{papa95}, \lstinline|MAX-FLOW| is P-complete and no parallel algorithm $\in NC$ is currently known for solving this problem. It is assumed that the problem is inherently sequential\footnote{assuming that $P \neq NP$.}.
 
 \section{Dinitz' scheme}
 \label{sec:dinitz}
@@ -644,7 +644,7 @@ By assigning a processor to each atom, each phase requires $O(log n)$ steps and 
 \label{sec:further}
 Table \ref{tbl:results} gives an overview of the algorithms presented in this paper as well as some further results. Entries 1-4 depict classical early results, which are the foundation of the Algorithms of Shiloach-Vishkin (5) and Goldberg-Tarjan (6) presented in this paper.  Vishkin (7) combined the two results to an algorithm for an EREW PRAM with time complexity $O(n*logn)$ using $O(n)$ processors and $O(n^{2})$ space. For specialized problems, more efficient algorithms may exist, as shown by Johnson's algorithms solving \lstinline|MAX-FLOW| on planar networks, undirected graphs or for  given maximum flow value in poly-logarithmic time (albeit an unrealistic requirement in number of processors for larger networks). King, Rao and Tarjan (9) showed that the problem can be solved in $O(nm)$ time for larger $m$ on a single processor. A recent result of Orlin (10) proves the conjecture that the \lstinline|MAX-FLOW| problem can be solved in $O(nm)$ time for any $m$ without parallelism. However, this is still slower by a factor of $log n / m$ compared to Vishkin's\cite{vishkin92} 20 year old algorithm for a PRAM, indicating the usefulness of parallel solutions even for problems that are assumed to be inherently sequential, as we showed in Section \ref{sec:cc}.
 
-Although the PRAM model, on which we based our analysis, does not seem to be a "practical" model\footnote{only some prototypes were built so far} of parallel computation, it's high level of abstraction provides the means to develop and analyse parallel algorithms in a clear fashion without the tediousness often involved when working with a more realistic model (such as shared memory or message passing).
+Although the PRAM model, on which we based our analysis, does not seem to be a "practical" model\footnote{only some prototypes were built so far} of parallel computation, it's high level of abstraction provides the means to develop and analyse parallel algorithms in a clear fashion without the tediousness often involved when working with a more realistic model (such as shared memory or message passing).  Nevertheless, once it was proved that a parallel poly-logarithmic time algorithm does not exist for \lstinline|MAX-FLOW|\footnote{assuming that $P \neq NP$.}, efforts to improve the complexity bounds of PRAM algorithms have somewhat declined.
 
 
 \begin{table*}
