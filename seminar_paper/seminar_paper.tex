@@ -91,7 +91,7 @@ A flow $f$
 	\item is a \emph{maximal (or blocking) flow} if every directed path P(s,t) contains at least one saturated arc
 \end{itemize}
 \medskip
-The \emph{residual capacity} of $e \in V \times V$ w.r.t. a flow $f$ is defined as $c_r(e) = c(e) - f(e)$. $G_r = (V, E_r)$ is the \emph{residual network}, where $E_r = \left\{e \in V \times V \lvert c_r(e) > 0\right\}$. A path $P$ from $s$ to $t$ in $G_r$ is called an \emph{augmenting path} and can be used to increase the flow $f$.
+The \emph{residual capacity} of $e \in V \times V$ w.r.t. a flow $f$ is defined as $c_r(e) = c(e) - f(e)$. $G_r = (V, E_r)$ is the \emph{residual network}, where $E_r = \left\{e \in V \times V \lvert c_r(e) > 0\right\}$. The set of \emph{admissible arcs} of a vertex $v$ is the set of all edges $e$ emanating from $v$ s.t. $c_r(e) > 0$.  A path $P$ from $s$ to $t$ in $G_r$ is called an \emph{augmenting path} if it consists of admissible arcs only and can be used to increase the flow $f$.
 
 \subsection{Algorithm of Ford-Fulkerson}
 \label{sec:fordfulkerson}
