@@ -273,7 +273,7 @@ The following notation will be used:
 
 The algorithm operates in \emph{pulses}: In the first pulse, all outgoing edges of $s$ or saturated: $\forall e_i = (s, v_i):$ $f(e_i) = c(e_i)$. The set of unbalanced vertices at the end of pulse 1 is thus the set of all neighbours of $s$: \lstinline|UNBALANCED| = $\{v_i\lvert \exists (s, v_i) \in E \}$. In each subsequent pulse, the unbalanced vertices try to push forward\footnote{i.e., to the next layer of the network} as much of their excessive flow as possible. Any remaining excessive flow will be returned backward. All balanced vertices remain idle during the pulses. The algorithm terminates as soon as no unbalanced vertices are available, implying that all flow reach the source $s$ or sink $t$.
 
-Algorithm \ref{algo:sv} shows an abstract routine for solving \lstinline|MAX-FLOW| in a given layered network. Parallel implementations of functions \lstinline|PUSH| and \lstinline|RETURN| are depicted in Algorithm \ref{algo:sv_push} and Algorithm \ref{algo:sv_return}, respectively and will be explained in detail in the remainder of this section. The algorithm maintains the number of the current pulse in $i$.
+Algorithm \ref{algo:sv} shows an abstract routine for solving \lstinline|MAX-FLOW| in a given layered network. In each pulse $i>1$, the \lstinline|while| loop in lines 4-13 is executed in parallel for each node $v \in UNBALANCED$. Parallel implementations of functions \lstinline|PUSH| and \lstinline|RETURN| are depicted in Algorithm \ref{algo:sv_push} and Algorithm \ref{algo:sv_return}, respectively and will be explained in detail in the remainder of this section. The algorithm maintains the number of the current pulse in $i$.
 
 \begin{algorithm}
 \caption{Shiloach-Vishkin}
@@ -390,12 +390,13 @@ At beginning of each pulse:
 \end{algorithmic}
 \end{algorithm}
 
-TODO: explain algorithms
+The \lstinline|PUSH| function is given in Algorithm \ref{algo:sv_push}. In lines 3-4, the amount of flow to be pushed in this pulse from node $v$ is calculated and the amount of excess flow remaining at node $v$ is updated. In line 5, the algorithm computes the number $k-1$ of outgoing edges that will be saturated in this pulse, starting with the edge pointed to by $k'$, as well as the amount of flow $\rho$ that will be pushed on the $k^{th}$ outgoing edge, without saturating that edge.
+
+In the next step, all processors assigned to an edge $e_j$ s.t. $k'\leq j \leq$ will update their edge: In line 10, the flow of the $k^{th}$ edge is updated by an amount $\rho$; in line 12, $k-1$ edges are updated with as much flow as can be pushed through them. Lines 8-9 are used to count and order the processes that require access to node $w$, in order to store the flow quanta pushed to $w$ (line 16). In line 18, the \lstinline|head| pointer of node $w$ is advanced to the last recorded flow quantum. Lines 15 and 20 calculate the amount of excess flow at node $w$ (which is the amount of flow that was pushed to $w$ in this pulse). Finally, in lines 23-26 all vertices $v$ that have some remaining excess flow are blocked. Since no more flow can be pushed along their outgoing edges, the remaining excess flow will have to be returned.
 
 \begin{algorithm}
 \caption{Shiloach-Vishkin: PUSH}
 \label{algo:sv_push}
-$\forall v \in UNBALANCED$ do in parallel:
 \begin{algorithmic}[1]
 	\Function{PUSH}{v,EXCESS(v)}
 		\State \textcolor{blue}{P(v):}
@@ -403,7 +404,7 @@ $\forall v \in UNBALANCED$ do in parallel:
 		\State EXCESS(v) = EXCESS(v) - $\alpha$
 		\State FIND($\alpha$, k, $\rho$) in T-OUT(v)
 		\State \textcolor{blue}{P($e_j = v \rightarrow w$):}
-		\If{k' $\leq$ j $\leq$ k}
+		\If{k' $\leq$ j $\leq$ k' + k}
  		\State UPDATE(j,1) in T-ACCESS(w)
 		\State SUM(j,$S_j$) in T-ACCESS(w)
 		\If{$j == k$}
@@ -420,13 +421,15 @@ $\forall v \in UNBALANCED$ do in parallel:
 		\State EXCESS(w) = T-IN(w)[root] - TOTAL(w)
 		\EndIf
 		\State \textcolor{blue}{P(v):} k' = k
-		\State \textcolor{blue}{P($e_d = v \rightarrow w$):}
+		\State \textcolor{blue}{P($e_j = v \rightarrow w$):}
 		\If{EXCESS(v) $>$ 0}
 			\State block v
 		\EndIf
  	\EndFunction
 \end{algorithmic}
 \end{algorithm}
+
+The \lstinline|RETURN| function given in Algorithm \ref{algo:sv_return} works as follows: In line 3, we find the number $k$ of edges into node $v$ that carry the flow that was pushed to outgoing edges of $v$. In lines 5-9 the excess flow that will be returned on edges $e_j$ s.t. $k<=j<=head(v)$, which brought the excess flow to $v$, is calculated. All those edges $e_j$ will return as much flow as was pushed along them, except for edge $e_k$, which will only return an amount $\rho$. Note that the rest $q_k - \rho$ of the flow pushed along $e_k$ was already forwarded to another node during \lstinline|PUSH|. Lines 10-11 calculate the total amount of flow returned on $e_j$ in this pulse and update the total flow pushed along $e_j$ accordingly. Lines 12-13 calculate the amount of flow returned to node $u$, which is added to the amount of excess flow located at $u$. Finally, in line 17 the $head$ pointer is set to the latest flow quantum that was pushed into $v$ but not returned.
 
 \begin{algorithm}
 \caption{Shiloach-Vishkin: RETURN}
@@ -437,16 +440,16 @@ $\forall v \in UNBALANCED$ do in parallel:
 		\State FIND (T-IN(v)[root] - EXCESS(v), k, $\rho$) in T-IN(v)
 		\State EXCESS(v) = 0
 		\State \textcolor{blue}{$P(Q_j = (e_j = u \rightarrow v, q_j))$:}
-		\State $d_j \rightarrow q_j$ for $k < j \leq head(v)$
-		\State $d_j \rightarrow q_j - \rho$ if $j = k$
+		\State $d_j = q_j$ for $k < j \leq head(v)$
+		\State $d_j = q_j - \rho$ if $j == k$
 		\State UPDATE(j, 0) in T-IN(v) for $k < j \leq head(v)$
-		\State UPDATE(j, $\rho$) in T-IN(v) if $j = k$
-		\State UPDATE($r_j$,$d_j$) in T-EDGE($e_j$)
+		\State UPDATE(j, $\rho$) in T-IN(v) if $j == k$
+		\State UPDATE($p_j$,$d_j$) in T-EDGE($e_j$)
 		\State $f(e_j)$ = $f(e_j)$ - T-EDGE($e_j$)[root]
-		\State UPDATE($l_j$, T-EDGE($e_j$)[root] in T-SUM(u)
+		\State UPDATE($e_j$, T-EDGE($e_j$)[root] in T-SUM(u)
 		\State EXCESS(u) = EXCESS(u) + T-SUM(u)[root]
 		\State CLEAR($r_j$) in T-EDGE($e_j$)
-		\State CLEAR($l_j$) in T-SUM(u)
+		\State CLEAR($e_j$) in T-SUM(u)
 		\State \textcolor{blue}{P(v):}
 		\State head(v) = k
 	\EndFunction
