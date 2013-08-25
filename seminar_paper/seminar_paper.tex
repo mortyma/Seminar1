@@ -611,8 +611,8 @@ After all atoms have been pushed forward, vertex $v$ is blocked if all its outgo
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Correctness}
-\label{sec:gt_correctness}
+\subsection{Analysis}
+\label{sec:gt_analysis}
 The following observations are important for the analysis of the algorithm:
 \begin{itemize}
 	\item Atoms can move forward on an edge $e=(v,w) \in E$, increasing the flow $f(v,w)$.
@@ -621,11 +621,6 @@ The following observations are important for the analysis of the algorithm:
 	\item $f(v,w)$ increases until $w$ is blocked, after which $f(v,w)$ decreases.
 \end{itemize}
 
-TODO: proof correctness
-
-
-\subsection{Analysis}
-\label{sec:gt_analysis}
 \begin{lemma}
 The number of created atoms is $\leq m$.
 \end{lemma}
@@ -670,12 +665,12 @@ Ford-Fulkerson\cite{ahuja93} & $O((n+m) * f_{max})$ & Sequential algorithm \\
 Edmonds-Karp\cite{ahuja93} & $O(n*m^2)$ & Sequential algorithm  \\
 Dinitz\cite{dinitz70}& $O(n^2*m)$ & Sequential algorithm on layered networks\\
 Preflow-Push\cite{ahuja93} & $O(n^2*m)$, $O(n*m*log(n^2/m))$ & Various improvements\\
-Shiloach-Vishkin\cite{yossi81} & $O(n^2*log m)$, $p=O(n)$ & on CREW PRAM\\
-Goldberg-Tarjan\cite{goldberg89} & $O(n*log n)$, $p=O(m)$, $O(nm)$ space & on EREW PRAM \\
+Shiloach-Vishkin\cite{yossi81} & $O(n^2*log m)$, $p=O(n)$ & On CREW PRAM\\
+Goldberg-Tarjan\cite{goldberg89} & $O(n*log n)$, $p=O(m)$, $O(nm)$ space & On EREW PRAM \\
 Vishkin\cite{vishkin92} & $O(n*log n)$, $p=O(n)$, $O(n^2)$ space & Combines previous two\\
 Johnson\cite{johnson87} & $O(log^{3} n)$, $p=O(n^{4})$ or $O(log^{2} n)$, $p=O(n^{6})$ &
-for planar networks\\
- & $	O(log^{2} n)$, $p=O(n^{4})$ & on undirected graphs or if  $\lvert f_{max} \rvert$ is given\\
+For planar networks\\
+ & $	O(log^{2} n)$, $p=O(n^{4})$ & On undirected graphs or if  $\lvert f_{max} \rvert$ is given\\
 \hline
 \end{tabular}
 \caption{Comparison of different algorithms for \lstinline|MAX-FLOW|}
