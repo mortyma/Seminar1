@@ -113,8 +113,6 @@ The algorithm of Ford and Fulkerson as shown in Algorithm \ref{algo:fordFulkerso
 \end{algorithmic}
 \end{algorithm}
 
-
-
 Figure \ref{fig:fordfulkerson1} depicts the flow network for which \lstinline|MAX-FLOW| is to be solved and the first augmenting path\footnote{The residual network is equal to the given network in the first step.}. Note that this path may be chosen arbitrarily. Figure \ref{fig:fordfulkerson2} shows the residual network resulting from the situation in Figure \ref{fig:fordfulkerson1} and a possible next augmenting path. 
 
 Note that the algorithm of Ford and Fulkerson is restricted to integer capacities:  $c:E\rightarrow \mathbb{N}_0^{+}$ $\forall a \in E$. For a more detailed explanation and theoretical analysis, refer to \cite{ahuja93}.
@@ -183,8 +181,7 @@ Note that the algorithm of Ford and Fulkerson is restricted to integer capacitie
 
 \section{Model of Computation}
 \label{sec:model}
-We use the \textbf{PRAM} Model\footnote{Parallel Random Access Machine} as the model of computation. Specifically, a \textbf{MIMD} - Multiple Instructions Multiple Data - variant is used, where each processor $p$ executes a distinct set of instructions on distinct data. Instructions are executed in lock-step and any necessary padding of instructions is assumed to be done automatically. 
-TODO: is this enough?
+We use the \textbf{PRAM} Model\footnote{Parallel Random Access Machine, as defined in the lecture} as the model of computation. Specifically, a \textbf{MIMD} - Multiple Instructions Multiple Data - variant is used, where each processor $p$ executes a distinct set of instructions on distinct data. Instructions are executed in lock-step and any necessary padding of instructions is assumed to be done automatically. 
 
 \section{Computitional Complexity}
 \label{sec:cc}
