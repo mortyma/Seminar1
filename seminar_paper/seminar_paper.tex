@@ -41,7 +41,7 @@
 %\newtheorem{proof}[lemma]{Proof}
 
 \title{Parallel Network Flow Algorithms \\ 
-\large A follow up seminar to the Parallel Algorithms lecture\footnote{Jesper Larsson Träff, lecture "Parallel Algorithms", 2012 winter term at TU Wien}}
+\large A follow up seminar to the Parallel Algorithms lecture\footnote{Jesper Larsson Träff, lecture "Parallel Algorithms", 2012 winter term at TU Wien.}}
 \author{Martin Kalany, 0825673}
 
 \begin{document}
@@ -49,16 +49,16 @@
 
 \section{Abstract}
 \label{sec:abstract}
-\textit{We discuss the possibilities of parallelizing the problem of finding a maximum flow in a given flow network. Although intuitive sequential algorithms have been known for a long time, efficient, poly-logarithmic parallel algorithms could not be found despite large efforts. Only in the 1990s theoretical analysis of the problem was able to ascertain the inherently sequential nature of the problem, i.e., that no parallel algorithm that solves the problem in poly-logarithmic time with polynomially bounded resource consumption exists. After a detailed introduction to the problem and reviewing the intuitive algorithm of Ford and Fulkerson, we will prove the inherently sequential nature of the problem. Two fundamental parallel algorithms that nicely convey approaches of parallelization are presented and their asymptotic bounds are studied based on the PRAM model to compare those two algorithms with later and improved developments.}
+\textit{We discuss the possibilities of parallelizing the problem of finding a maximum flow in a given flow network. Although intuitive sequential algorithms have been known for a long time, efficient, poly-logarithmic parallel algorithms could not be found despite large efforts. Only in the 1990s theoretical analysis of the problem was able to ascertain the inherently sequential nature of the problem, i.e., that no parallel algorithm that solves the problem in poly-logarithmic time with polynomially bounded resource consumption exists. After a detailed introduction to the problem and reviewing the intuitive algorithm of Ford and Fulkerson, we will prove the inherently sequential nature of the problem. Two fundamental parallel algorithms that nicely convey approaches of parallelization are presented and their asymptotic bounds are studied based on the PRAM model. We compare those two algorithms with later and improved algorithms, both sequential and parallel variants.}
 
 
 \section{Introduction}
 \label{sec:intro}
-The \emph{maximum flow problem}\footnote{Henceforth called \lstinline|MAX-FLOW| for brevity} is an important problem in algorithms and graph theory with numerous applications\cite{ahuja93}. A detailed description of the problem is given in Section \ref{sec:intro} along with definitions for all graph theoretical concepts used in this paper. Section \ref{sec:fordfulkerson}, to illustrate the problems and definitions, gives a quick explanation of the algorithm of Ford and Fulkerson, which is an intuitive sequential algorithm solving the problem. The PRAM model, which we will use as our model of computation in this paper, will briefly be described in Section \ref{sec:model}. In Section \ref{sec:cc} the inherently sequential nature of the problem will be shown. The informal term "inherently sequential" describes computational problems for which it is unlikely that efficient parallel algorithms with an asymptotic poly-logarithmic run time in $0(log^{k}n)$ (for input size $n$ and some constant $k$) exist, although sequential algorithms $\in P$, i.e., with an asymptotic run time in $O(n^{k})$ are known.
+The \emph{maximum flow problem}\footnote{Henceforth called \lstinline|MAX-FLOW| for brevity.} is an important problem in algorithms and graph theory with numerous applications\cite{ahuja93}. A detailed description of the problem is given in Section \ref{sec:networkFlows} along with definitions for all graph theoretical concepts used in this paper. Section \ref{sec:fordfulkerson}, to illustrate the problems and definitions, gives a quick explanation of the algorithm of Ford and Fulkerson, an intuitive sequential algorithm solving the problem. The PRAM model, which we will use as our model of computation in this paper, will briefly be described in Section \ref{sec:model}. In Section \ref{sec:cc} the inherently sequential nature of the problem will be shown. The informal term "inherently sequential" describes computational problems for which it is unlikely that efficient parallel algorithms with a poly-logarithmic asymptotic run time in $0(log^{k}n)$ (for input size $n$ and some constant $k$) exist, although sequential algorithms $\in P$, i.e., with an asymptotic run time in $O(n^{k})$, are known.
 
-Section \ref{sec:dinitz} discusses Dinitz' scheme, a fundamental result in graph theory that allows to  decompose the problem if finding a maximum flow in an arbitrary directed acyclic graph to $O(n)$ problems of finding a maximum flow in a layered network, which is a significantly simpler problem. Several improvements of previous algorithms are based on Dinitz' scheme, as is an early parallel algorithm of Shiloach and Vishkin, which will be presented in detail in  Section \ref{sec:shiloach}. Section \ref{sec:sv_parImpl} gives the necessary technical details for a parallel implementation of the algorithm, while Sections \ref{sec:sv_seq}, \ref{sec:sv_nr_procs} and \ref{sec:sv_analysis} deal with the theoretical analysis of the sequential variant\footnote{Simulating the parallel algorithm with one processor trivially yields a sequential algorithm.}, the number of required processors and the asymptotic complexity, respectively.
+Section \ref{sec:dinitz} discusses Dinitz' scheme, a fundamental result in graph theory that allows to  decompose the problem of finding a maximum flow in an arbitrary directed acyclic graph into $O(n)$ problems of finding a maximal flow in a layered network, which is a significantly simpler problem. Several improvements of previous algorithms are based on Dinitz' scheme, as is an early parallel algorithm of Shiloach and Vishkin, which will be presented in detail in  Section \ref{sec:shiloach}. This algorithm solves \lstinline|MAX-FLOW| in a layered network using the pre-flow push principle. Section \ref{sec:sv_parImpl} gives the necessary technical details for a parallel implementation of the algorithm, while Sections \ref{sec:sv_seq}, \ref{sec:sv_nr_procs} and \ref{sec:sv_analysis} deal with the theoretical analysis of the sequential variant\footnote{Simulating the parallel algorithm with one processor trivially yields a sequential algorithm.}, the number of required processors and the asymptotic complexity, respectively.
 
-Another approach to solve the problem in parallel was developed by Goldberg and Tarjan. We will explain their solution in Section \ref{sec:goldberg} and provide theoretical analysis in Section \ref{sec:gt_analysis}. We finish our discussion with a comparison of the algorithms presented in this paper and further important results as well as some concluding remarks in Section \ref{sec:further}. 
+Another approach to solve the problem in parallel was developed by Goldberg and Tarjan. Their approach works on directed acyclic graphs without the detour via layered networks. It keeps track of the movement of each unit of flow by tracking it's path through the network. We will explain their solution in Section \ref{sec:goldberg} and provide theoretical analysis in Section \ref{sec:gt_analysis}. We finish our discussion with a comparison of the algorithms presented in this paper and further important results as well as some concluding remarks in Section \ref{sec:further}. 
 
 \section{Network flows}
 \label{sec:networkFlows}
@@ -66,7 +66,7 @@ A \textbf{flow network} \cite{ahuja93} is given by $N = (G,s,t,c)$, where
 \begin{itemize}
 	\item $G =(V,E)$ is a directed graph
     \item $s$ and $t$, $s \neq t$ are the source and terminal node
-   	\item $c:E\rightarrow \mathbb{R}_0^{+}$ assigns a capacity $\forall a \in E$
+   	\item $c:E\rightarrow \mathbb{R}_0^{+}$ assigns a capacity $\forall e \in E$
    	\item $n=\lvert V\rvert$, $m=\lvert E\rvert$
 \end{itemize}
 
@@ -94,7 +94,7 @@ A flow $f$
 	\item is a \emph{maximal (or blocking) flow} if every directed path P(s,t) contains at least one saturated arc
 \end{itemize}
 \medskip
-The \emph{residual capacity} of $e \in V \times V$ w.r.t. a flow $f$ is defined as $c_r(e) = c(e) - f(e)$. $G_r = (V, E_r)$ is the \emph{residual network}, where $E_r = \left\{e \in V \times V \lvert c_r(e) > 0\right\}$. The set of \emph{admissible arcs} of a vertex $v$ is the set of all edges $e$ emanating from $v$ s.t. $c_r(e) > 0$.  A path $P$ from $s$ to $t$ in $G_r$ is called an \emph{augmenting path} if it consists of admissible arcs only and can be used to increase the flow $f$.
+The \emph{residual capacity} of $e \in V \times V$ w.r.t. a flow $f$ is defined as $c_r(e) = c(e) - f(e)$. $G_r = (V, E_r)$ is the \emph{residual network}, where $E_r = \left\{e \in V \times V \lvert c_r(e) > 0\right\}$. The set of \emph{admissible arcs} of a vertex $v$ is the set of all arcs $e$ emanating from $v$ s.t. $c_r(e) > 0$.  A path $P$ from $s$ to $t$ in $G_r$ is called an \emph{augmenting path} if it consists of admissible arcs only and can be used to increase the flow $f$.
 
 \subsection{Algorithm of Ford-Fulkerson}
 \label{sec:fordfulkerson}
@@ -110,15 +110,16 @@ The algorithm of Ford and Fulkerson as shown in Algorithm \ref{algo:fordFulkerso
 	\While{$\exists P(s,t) \in G_r: \forall (u,v) \in P(s,t): c_r(u, v) > 0$}
 		\State $c_r(P) = min \{c_r(u,v): (u,v) \in P(s,t) \}$
 		\State $f(u,v) = f(u,v) + c_r(P)$ \Comment{Increase the flow by as much flow as can be pushed along $P(s,t)$}
-		\State $f(v,u) = f(v,u) + c_r(P)$ \Comment{Update the residual network}
+		\State $c_r(u,v) = c_r(u,v) - c_r(P)$
+		\State $f(v,u) = f(v,u) + c_r(P)$ 
 	\EndWhile
 	\EndFunction
 \end{algorithmic}
 \end{algorithm}
 
-Figure \ref{fig:fordfulkerson1} depicts the flow network for which \lstinline|MAX-FLOW| is to be solved and the first augmenting path\footnote{The residual network is equal to the given network in the first step.}. Note that this path may be chosen arbitrarily. Figure \ref{fig:fordfulkerson2} shows the residual network resulting from the situation in Figure \ref{fig:fordfulkerson1} and a possible next augmenting path. 
+As an illustration of the algorithm, figure \ref{fig:fordfulkerson1} depicts the flow network for which \lstinline|MAX-FLOW| is to be solved and the first augmenting path\footnote{The residual network is equal to the given network in the first step.}. Note that this path may be chosen arbitrarily. Figure \ref{fig:fordfulkerson2} shows the residual network resulting from the situation in Figure \ref{fig:fordfulkerson1} and a possible next augmenting path. 
 
-Note that the algorithm of Ford and Fulkerson is restricted to integer capacities:  $c:E\rightarrow \mathbb{N}_0^{+}$ $\forall a \in E$. For a more detailed explanation and theoretical analysis, refer to \cite{ahuja93}.
+Note that the algorithm of Ford and Fulkerson is restricted to integer capacities:  $c:E\rightarrow \mathbb{N}_0^{+}$ $\forall e \in E$. For a more detailed explanation and theoretical analysis, refer to \cite{ahuja93}.
 
 \begin{figure}
 \begin{center}
@@ -134,8 +135,8 @@ Note that the algorithm of Ford and Fulkerson is restricted to integer capacitie
        	\path[edge] (\source) -- node[weight] {$\weight$} (\dest);
         	
        	%v_1/v_4/9
-       	\path[edge] ([xshift= -2pt, yshift= 5pt] v_4.center) -- node[weight] {6}  ([xshift= 5pt, yshift= -2pt] v_1.center);
-       	\path[edge] ([xshift = 2pt, yshift= -5pt] v_1.center) -- node[weight] {9}  ([xshift= -5pt, yshift= 2pt] v_4.center);
+       	\path[edge] ([xshift= -4pt, yshift= 8pt] v_4.center) -- node[weight] {6}  ([xshift= 8pt, yshift= -4pt] v_1.center);
+       	\path[edge] ([xshift = 4pt, yshift= -8pt] v_1.center) -- node[weight] {9}  ([xshift= -8pt, yshift= 4pt] v_4.center);
   
 	% For convenience we use a background layer to highlight edges
    	% This way we don't have to worry about the highlighting covering
@@ -143,12 +144,12 @@ Note that the algorithm of Ford and Fulkerson is restricted to integer capacitie
 	\begin{pgfonlayer}{background}
    	    \foreach \source /\dest  /\weight in {s/v_3/5,v_4/t/5}
 	        \path[selected edge] (\source) -- node[weight,above] {$\weight$}(\dest);		
-            \path[selected edge] ([xshift = 2pt, yshift= -5pt] v_1.center) -- node[weight,left] {5}  ([xshift= -5pt, yshift= 2pt] v_4.center);
+            \path[selected edge] ([xshift = 4pt, yshift= -8pt] v_1.center) -- node[weight,left] {5}  ([xshift= -8pt, yshift= 4pt] v_4.center);
             \path[selected edge] (v_3) -- node[weight,left] {$5$}(v_1);
    	\end{pgfonlayer}
 \end{tikzpicture}
 \end{center}
-\caption{Algorithm of Ford-Fulkerson: Initial network (black) and first augmenting path (red)}
+\caption{Algorithm of Ford-Fulkerson: Initial network (thin, black) and first augmenting path (thick, red)}
 \label{fig:fordfulkerson1}
 \end{figure}
 
@@ -166,11 +167,11 @@ Note that the algorithm of Ford and Fulkerson is restricted to integer capacitie
        	\path[residual edge] (\source) -- node[weight] {$\weight$} (\dest);
 
         	%s/v_3/8,
-       	\path[residual edge] ([xshift= -2pt, yshift= 5pt] v_3.center) -- node[weight] {5}  ([xshift= 5pt, yshift= -2pt] s.center);
-       	\path[residual edge] ([xshift = 2pt, yshift= -5pt] s.center) -- node[weight] {3}  ([xshift= -5pt, yshift= 2pt] v_3.center);
+       	\path[residual edge] ([xshift= -4pt, yshift= 8pt] v_3.center) -- node[weight] {5}  ([xshift= 8pt, yshift= -4pt] s.center);
+       	\path[residual edge] ([xshift = 4pt, yshift= -8pt] s.center) -- node[weight] {3}  ([xshift= -8pt, yshift= 4pt] v_3.center);
         	%v_1/v_4/9
-       	\path[residual edge] ([xshift= -2pt, yshift= 5pt] v_4.center) -- node[weight] {11}  ([xshift= 5pt, yshift= -2pt] v_1.center);
-       	\path[residual edge] ([xshift = 2pt, yshift= -5pt] v_1.center) -- node[weight] {4}  ([xshift= -5pt, yshift= 2pt] v_4.center);       	
+       	\path[residual edge] ([xshift= -4pt, yshift= 8pt] v_4.center) -- node[weight] {11}  ([xshift= 8pt, yshift= -4pt] v_1.center);
+       	\path[residual edge] ([xshift = 4pt, yshift= -8pt] v_1.center) -- node[weight] {4}  ([xshift= -8pt, yshift= 4pt] v_4.center);       	
         	
        	\begin{pgfonlayer}{background}
    	    \foreach \source /\dest  /\weight in {s/v_1/2,v_1/v_2/2,v_2/t/2}
@@ -178,25 +179,25 @@ Note that the algorithm of Ford and Fulkerson is restricted to integer capacitie
    	\end{pgfonlayer}
 \end{tikzpicture}
 \end{center}
-\caption{Algorithm of Ford-Fulkerson: Residual network (blue) and augmenting path (red)}
+\caption{Algorithm of Ford-Fulkerson: Residual network (thin, blue) and augmenting path (thick, red)}
 \label{fig:fordfulkerson2}
 \end{figure}	
 
 \section{Model of Computation}
 \label{sec:model}
-We use the \textbf{PRAM} Model\footnote{Parallel Random Access Machine, as defined in the lecture or in \cite{papa95}} as the model of computation. Specifically, a \textbf{MIMD} - Multiple Instructions Multiple Data - variant is used, where each processor $p$ executes a distinct set of instructions on distinct data. Instructions are executed in lock-step and any necessary padding of instructions is assumed to be done automatically. 
+We use the \textbf{PRAM} Model\footnote{Parallel Random Access Machine, as defined in the lecture or in \cite{papa95}.} as the model of computation. Specifically, a \textbf{MIMD} (Multiple Instructions Multiple Data) variant is used, where each processor $p$ executes a distinct set of instructions on distinct data. Instructions are executed in lock-step and any necessary padding of instructions is assumed to be done automatically. 
 
 \section{Computational Complexity}
 \label{sec:cc}
-The algorithmic complexity of the \emph{Ford-Fulkerson} algorithm is given as $O((n+m)*f_{max})$\footnote{$f_{max}$ is from here on used to denote the maximum flow} \cite{ahuja93,papa95}. This was improved by the \emph{Edmonds-Karp} algorithm to $O(n*m^2)$, by using shortest augmenting paths instead of arbitrarily chosen ones. Clearly, the \emph{maximum flow problem} can be solved in polynomial time with a sequential algorithm and is thus $\in P$.
+The algorithmic complexity of the \emph{Ford-Fulkerson} algorithm is given as $O((n+m)*f_{max})$\footnote{$f_{max}$ is from here on used to denote the maximum flow.} \cite{ahuja93,papa95}. This was improved by the \emph{Edmonds-Karp} algorithm to $O(n*m^2)$, by using shortest augmenting paths instead of arbitrarily chosen ones. Clearly, the \emph{maximum flow problem} can be solved in polynomial time with a sequential algorithm and is thus $\in P$.
 
-Informally, algorithms may be \emph{efficiently parallelizable} or \emph{inherently sequential}. The complexity class \textbf{NC} \cite{papa95} ("Nick's Class") contains all problems solvable in $O(log^{k_1}(n))$ time and $O(n^{k_2})$ total work. We give a useful alternate definition:  A language that is decided by PRAM in $O(log^{k_1}(n))$ time steps with $O(n^{k_2})$ processors available at each step is in $NC$. Problems $\in NC$ thus are solvable  in poly-logarithmic time requiring polynomial work (or resources). Problems $P \setminus NC$ are dubbed "inherently sequential", i.e., not parallelizable efficiently. 
+Informally, algorithms may be \emph{efficiently parallelizable} or \emph{inherently sequential}. The complexity class \textbf{NC} \cite{papa95} ("Nick's Class") contains all problems solvable in $O(log^{k_1}(n))$ time and $O(n^{k_2})$ total work. We give a useful alternate definition:  A language that is decided by PRAM in $O(log^{k_1}(n))$ time steps with $O(n^{k_2})$ processors available at each step is in $NC$. Problems $\in NC$ thus are solvable  in poly-logarithmic time requiring polynomial work (or resources, such as processors and memory). Problems in $P \setminus NC$ are dubbed "inherently sequential", i.e., not parallelizable efficiently. 
 
 Clearly, $NC \subseteq P$, but whether $NC \subset P$ or $NC = P$ is still unknown. It follows that we do not know whether or not inherently sequential problems actually exist. The most likely problems to be hard to parallelize are P-complete problems. Since any problem $A \in P$ can be reduced to a P-complete problem $B$, a parallel algorithm that solves $B$ within poly-logarithmic time bounds would immediately imply that for all problems $\in P$ a parallel algorithm $\in NC$ exists \cite{papa95}.
 
-As an example, the Ford-Fulkerson algorithm can not be parallelized trivially. Although constructing the residual network can be done in constant time $O(1)$ by assigning a processor to each edge $a \in E$ and augmenting paths can be found in $O(log^{2}n)$ time and $O(n^{2})$ work by a basic BFS search, the number of stages can not be reduced to less than $O(\sqrt(n))$ \cite{ahuja93}. Thus the total complexity, which is dominated by the number of stages, places the algorithm in $P \setminus NC$.
+As an example, the Ford-Fulkerson algorithm can not be parallelized trivially. Although constructing the residual network can be done in constant time $O(1)$ (by assigning a processor to each arc $e \in E$) and augmenting paths can be found in $O(log^{2}n)$ time and $O(n^{2})$ work by a basic breath first search, the number of stages can not be reduced to less than $O(\sqrt(n))$ \cite{ahuja93}. Thus the total complexity, which is dominated by the number of stages, places the algorithm in $P \setminus NC$.
 	
-As shown in \cite{papa95}, \lstinline|MAX-FLOW| is P-complete and no parallel algorithm $\in NC$ is currently known for solving this problem. It is assumed that the problem is inherently sequential\footnote{assuming that $P \neq NP$.}.
+As shown in \cite{papa95}, \lstinline|MAX-FLOW| is P-complete and no parallel algorithm $\in NC$ is currently known for solving this problem. It is assumed that the problem is inherently sequential\footnote{provided that $P \neq NP$.}.
 
 \section{Dinitz' scheme}
 \label{sec:dinitz}
@@ -223,8 +224,8 @@ Figure \ref{fig:dinitz} shows a layered network and it's underlying directed acy
      \path[edge] (\source) -- (\dest);
         	
      %v_1/v_4/9
-     \path[edge] ([xshift= -2pt, yshift= 5pt] v_4.center) -- ([xshift= 5pt, yshift= -2pt] v_1.center);
-     \path[edge] ([xshift = 2pt, yshift= -5pt] v_1.center) -- ([xshift= -5pt, yshift= 2pt] v_4.center);
+     \path[edge] ([xshift= -4pt, yshift= 8pt] v_4.center) -- ([xshift= 8pt, yshift= -4pt] v_1.center);
+     \path[edge] ([xshift = 4pt, yshift= -8pt] v_1.center) -- ([xshift= -8pt, yshift= 4pt] v_4.center);
   
 	% For convenience we use a background layer to highlight edges
     % This way we don't have to worry about the highlighting covering
@@ -232,7 +233,7 @@ Figure \ref{fig:dinitz} shows a layered network and it's underlying directed acy
 	\begin{pgfonlayer}{background}
     	\foreach \source /\dest in {s/v_3,v_2/t,s/v_1,v_1/v_2,v_3/v_4,v_4/t}
 	      	\path[selected edge, color=blue] (\source) -- (\dest);		
-	    \path[selected edge, color=blue] ([xshift = 2pt, yshift= -5pt] v_1.center) -- ([xshift= -5pt, yshift= 2pt] v_4.center);
+	    \path[selected edge, color=blue] ([xshift = 4pt, yshift= -8pt] v_1.center) -- ([xshift= -8pt, yshift= 4pt] v_4.center);
 	\end{pgfonlayer}
 \end{tikzpicture}
 \end{center}
@@ -245,7 +246,7 @@ Figure \ref{fig:dinitz} shows a layered network and it's underlying directed acy
 A maximum flow problem in a general network can be transformed into $O(n)$ maximal flow problems in layered networks.
 \end{corollary}
 
-A layered network can easily be constructed from a directed acyclic network by performing breath-first search in  $O(log^{2}n)$ time. It follows that an algorithm that finds a maximal/blocking flow in a layered network can solve \lstinline|MAX-FLOW| in $O(n)$ iterations. The basic scheme is given in Algorithm \ref{algo:dinitz}
+A layered network can easily be constructed from a directed acyclic network by performing breath-first search in, which can be done in parallel in $O(log^{2}n)$ time. It follows that an algorithm that finds a maximal/blocking flow in a layered network can solve \lstinline|MAX-FLOW| in $O(n)$ iterations. The basic scheme is given in Algorithm \ref{algo:dinitz}
 
 \begin{algorithm}
 \caption{Dinitz' scheme}
@@ -270,13 +271,13 @@ The Shiloach-Vishkin algorithm is based on Dinitz' scheme as shown in Section \r
 The following notation will be used:
 \begin{itemize}
 	\item \lstinline|EXCESS(v)|: The amount of excessive flow at node $v$. \lstinline|EXCESS(v)| = $IN(f,v) - OUT(f,v) \geq 0$.
-	\item \lstinline|UNBALANCED|: The set of vertices that hold some excess flow. \lstinline|UNBALANCED| = $\{v \in V \lvert EXCESS(v) > 0 \}$. The implementation uses a queue to maintain FIFO order on the set of unbalanced vertices.
-	\item \lstinline|blocked|: A vertex v is blocked if for all it's outgoing edges $e_i = (v, u_i)$, $e_i$ is either saturated or $u_i$ is blocked\footnote{The sink vertex $t$ is never blocked}. 
+	\item \lstinline|UNBALANCED|: The set of vertices that hold some excess flow. \lstinline|UNBALANCED| = $\{v \in V \lvert EXCESS(v) > 0 \}$. The sequential implementation (Section \ref{sec:sv_seq} uses a queue to maintain FIFO order on the set of unbalanced vertices.
+	\item \lstinline|blocked|: A vertex v is blocked if for all it's outgoing arcs $e_i = (v, u_i)$, $e_i$ is either saturated or $u_i$ is blocked\footnote{The sink vertex $t$ is never blocked.}. 
 \end{itemize}
 
-The algorithm operates in \emph{pulses}: In the first pulse, all outgoing edges of $s$ or saturated: $\forall e_i = (s, v_i):$ $f(e_i) = c(e_i)$. The set of unbalanced vertices at the end of pulse 1 is thus the set of all neighbors of $s$: \lstinline|UNBALANCED| = $\{v_i\lvert \exists (s, v_i) \in E \}$. In each subsequent pulse, the unbalanced vertices try to push forward\footnote{i.e., to the next layer of the network} as much of their excessive flow as possible. Any remaining excessive flow will be returned backward. All balanced vertices remain idle during the pulses. The algorithm terminates as soon as no unbalanced vertices are available, implying that all flow reach the source $s$ or sink $t$.
+The algorithm operates in \emph{pulses}: In the first pulse, all outgoing arcs of $s$ or saturated: $\forall e_i = (s, v_i):$ $f(e_i) = c(e_i)$. The set of unbalanced vertices at the end of pulse 1 is thus the set of all neighbors of $s$: \lstinline|UNBALANCED| = $\{v_i\lvert \exists (s, v_i) \in E \}$. In each subsequent pulse, the unbalanced vertices try to push forward\footnote{i.e., to the next layer of the network.} as much of their excessive flow as possible. Any remaining excessive flow will be returned backwards. All balanced vertices remain idle during the pulses. The algorithm terminates as soon as no unbalanced vertices are available, implying that all flow reached the source $s$ or sink $t$.
 
-Algorithm \ref{algo:sv} shows an abstract routine for solving \lstinline|MAX-FLOW| in a given layered network. In each pulse $i>1$, the \lstinline|while| loop in lines 4-13 is executed in parallel for each node $v \in UNBALANCED$. Parallel implementations of functions \lstinline|PUSH| and \lstinline|RETURN| are depicted in Algorithm \ref{algo:sv_push} and Algorithm \ref{algo:sv_return}, respectively and will be explained in detail in the remainder of this section. The algorithm maintains the number of the current pulse in $i$.
+Algorithm \ref{algo:sv} shows an abstract routine for solving \lstinline|MAX-FLOW| in a given layered network. In each pulse $i>1$, the \lstinline|while| loop in lines 4-12 is executed in parallel for each node $v \in UNBALANCED$. Parallel implementations of functions \lstinline|PUSH| and \lstinline|RETURN| are depicted in Algorithm \ref{algo:sv_push} and Algorithm \ref{algo:sv_return}, respectively and will be explained in detail in the remainder of this section. The algorithm maintains the number of the current pulse in $i$.
 
 \begin{algorithm}
 \caption{Shiloach-Vishkin}
@@ -335,12 +336,12 @@ A \emph{partial sums tree}\footnote{Abbreviated PS-tree from here on.} is a comp
 \label{fig:pstree}
 \end{figure}
 
-A \emph{flow quantum} is a 3-tuple $(p, e, f)$, where $p$ is the number of the pulse during which some flow of value $f$ reached a vertex $v$ via edge $e$.
+A \emph{flow quantum} is a 3-tuple $(p, e, f)$, where $p$ is the number of the pulse during which some flow of value $f$ reached a vertex $v$ via arc $e$.
 
 For the parallel implementation of \lstinline|PUSH| and \lstinline|RETURN|, several PS-trees will be used. Four PS-trees are attached to every vertex $v \in V$:
 \begin{itemize}
-	\item T-OUT(v): Each active leave $a_i$ is associated with an outgoing edge $e_i = (v, w_i)$. $a_i = c(e_i) - f(e_i)$ ,i.e., $a_i$ stores the residual capacity of $e_i$. T-OUT(v) has $d_{out}(v)$\footnote{As usual, $d_{in}(v)$ and $d_{out}(v)$ designate the in- and out-degree of a vertex} active leaves.
-	\item T-IN(v): Records flow quanta reaching $v$. T-IN(v) has $2n*d_{in}(v)$ active leaves to be able to record the pulse\footnote{As shown in Section \ref{sec:sv_analysis}, the number of pulses is bounded by $O(2n)$} and edge for each flow quantum that reaches $v$. 
+	\item T-OUT(v): Each active leave $a_i$ is associated with an outgoing arc $e_i = (v, w_i)$. $a_i = c(e_i) - f(e_i)$, i.e., $a_i$ stores the residual capacity of $e_i$. T-OUT(v) has $d_{out}(v)$\footnote{As usual, $d_{in}(v)$ and $d_{out}(v)$ designate the in- and out-degree of a vertex.} active leaves.
+	\item T-IN(v): Records flow quanta reaching $v$. T-IN(v) has $2n*d_{in}(v)$ active leaves to be able to record the pulse\footnote{the number of pulses is bounded by $O(2n)$ \cite{yossi81}.} and arc for each flow quantum that reaches $v$. 
 	\item T-ACCESS(v): Each of the $d_{in}(v)$ active leaves is associated with one edge entering $v$. Used to coordinate access to $v$.
 	\item T-SUM(v): Sums up the flow returned to $v$ in a given pulse. $d_{out}(v)$ active leaves. 
 \end{itemize}
@@ -351,10 +352,10 @@ One PS-tree is attached to every arc $e \in E$:
 
 Let T be a PS-tree. Every node of T is represented by $T[height, i]$, where $height(root) = \lceil log_2(k) \rceil$ and $height(a_i) = 1$ , $\forall$ leaves $a_i$. Additionally, $T[root]$ designates the root node of T. We define the following operations on T:
 \begin{itemize}
-	\item CLEAR(i): The value of all nodes on the path $P(T[1,i],root)$ is set to 0. Note that executing this operation for less than all leaves will result in an invalid PS-tree. When executing the operation for all leaves, several processes will attempt to write to the same node. Thus a CRCW-PRAM is required.
+	\item CLEAR(i): The value of all nodes on the path $P(T[1,i],root)$ is set to 0. Note that executing this operation for less than all leaves will result in an invalid PS-tree. When executing the operation for all leaves, several processes will attempt to write to the same node. Thus a CRCW-PRAM is required. However, all processes will attempt to write the same value - 0 - to each node of the PS-tree.
 	\item UPDATE(i,$a_i$): The value of the $i^{th}$ leave is set to $a_i$ and the values of all nodes on the path $P(T[1,i],root)$ are updated.
-	\item SUM(i, $S_i$): Calculate the sum of leave nodes up to $a_i$. $S_i = a_1,...,a_i$.
-	\item FIND($\alpha$, k, $\rho$): Given $\alpha$, find $k$ and $\rho$ s.t. $a_1+...+a_{k-1} < \alpha \leq a_1+...+a_k$ and $\rho = \alpha - (a_1+...+a_{k-1}$.
+	\item SUM(i, $S_i$): Calculate the sum of values stored in leave nodes $a_1...a_i$. $S_i = a_1,...,a_i$.
+	\item FIND($\alpha$, k, $\rho$): Given $\alpha$, find $k$ and $\rho$ s.t. $a_1+...+a_{k-1} < \alpha \leq a_1+...+a_k$ and $\rho = \alpha - (a_1+...+a_{k-1})$. Given an amount of flow $\alpha$, this operation will be used to find the number $k$ of edges required to push flow from a node $v$. Along the first $k-1$ edges an amount of flow equal to the residual capacity of each each will be pushed. The remaining amount of flow $\rho$ will be pushed along edge $k$. 
 \end{itemize}  
 
 \subsection{Parallel Implementation}
@@ -362,19 +363,19 @@ Let T be a PS-tree. Every node of T is represented by $T[height, i]$, where $hei
 We use the following processor assignment:
 \begin{itemize}
 	\item Each vertex $v \in V$ has a processor $P(v)$ assigned
-	\item Each edge $e \in E$ has a processor $P(e)$ assigned
+	\item Each arc $e \in E$ has a processor $P(e)$ assigned
 	\item Each flow quantum $Q$ has a processor $P(Q)$ assigned. In other words, each leaf in each of the $2n * d_{in}(v)$ T-IN(v) PS-trees has a processor $P(Q)$ assigned.
 \end{itemize}
 
-The total number of required processors is $O(nm)$, which is dominated by the assignment of one processor for each flow quantum. This large number of required processors can be reduced to $n$, which we will prove in Section \ref{sec:sv_nr_procs}. We will however use the above assignment of processors to present the essentials of the algorithm in cleaner way.   
+The total number of required processors is $O(nm)$, which is dominated by the assignment of one processor for each flow quantum. This apparently large number of required processors can be reduced to $n$, which we will prove in Section \ref{sec:sv_nr_procs}. We will however use the above assignment of processors to present the essentials of the algorithm in cleaner way.   
 
 In addition to the four PS-trees attached to each vertex $v$, $v$ keeps two pointers:
 \begin{itemize}
-	\item head(v): Points to the rightmost significant leave in T-in($v$). The rightmost significant (i.e., the rightmost leave with a value $\neq 0$) is associated with the flow quanta that was the last to reach $v$. head(v) will be used to return excess flow. 
-	\item $k'$: The outgoing edges of $v$ are assumed to be ordered arbitrarily. $k'$ points to the first outgoing edge\footnote{the edge with the smallest index w.r.t. the given ordering} that is not yet saturated. In other words, $k'$ points to the next edge that can be utilized to push excess flow from $v$.  
+	\item head(v): Points to the rightmost significant leave in T-in($v$). The rightmost significant (i.e., the rightmost leave with a value $\neq 0$) is associated with the flow quantum that was the last to reach $v$. head(v) will be used to keep track of the order of flow quanta reaching a node $v$, in order to be able to return excess flow. 
+	\item $k'$: The outgoing arcs of $v$ are assumed to be ordered arbitrarily. $k'$ points to the first outgoing arc\footnote{the arc with the smallest index w.r.t. the given ordering.} that is not yet saturated. In other words, $k'$ points to the next arc that can be utilized to push excess flow from $v$.  
 \end{itemize}
 
-In Algorithms \ref{algo:sv_init}, \ref{algo:sv_push} and \ref{algo:sv_return}, the notation \textcolor{blue}{P():} is used to indicate that the following instructions are carried out only by the specified processors. Algorithm \ref{algo:sv_init} shows the initialization routine executed at the beginning of each pulse. Each processor assigned to an edge $e_j = (v, w)$ updates the PS-tree T-OUT attached to $v$ s.t. it's leave $a_j$ is assigned the residual capacity of $e_j$. $f(e_j$) is set to 0. In the next step, each processor assigned to a vertex $v$ initializes it's pointers $head(v)$ and $k'(v)$.
+In Algorithms \ref{algo:sv_init}, \ref{algo:sv_push} and \ref{algo:sv_return}, the notation \textcolor{blue}{P():} is used to indicate that the following instructions are carried out only by the specified processors. Algorithm \ref{algo:sv_init} shows the initialization routine executed at the beginning of each pulse. Each processor assigned to an arc $e_j = (v, w)$ updates the PS-tree T-OUT attached to $v$ s.t. it's leave $a_j$ is assigned the residual capacity of $e_j$. $f(e_j$) is set to 0. In the next step, each processor assigned to a vertex $v$ initializes it's pointers $head(v)$ and $k'(v)$.
 
 \begin{algorithm}
 \caption{Shiloach-Vishkin: INITIALIZE}
@@ -392,9 +393,9 @@ At beginning of each pulse:
 \end{algorithmic}
 \end{algorithm}
 
-The \lstinline|PUSH| function is given in Algorithm \ref{algo:sv_push}. In lines 3-4, the amount of flow to be pushed in this pulse from node $v$ is calculated and the amount of excess flow remaining at node $v$ is updated. In line 5, the algorithm computes the number $k-1$ of outgoing edges that will be saturated in this pulse, starting with the edge pointed to by $k'$, as well as the amount of flow $\rho$ that will be pushed on the $k^{th}$ outgoing edge, without saturating that edge.
+The \lstinline|PUSH| function is given in Algorithm \ref{algo:sv_push}. In lines 3-4, the amount of flow to be pushed in this pulse from node $v$ is calculated and the amount of excess flow remaining at node $v$ is updated. In line 5, the algorithm computes the number $k-1$ of outgoing arcs that will be saturated in this pulse, starting with the arc pointed to by $k'$, as well as the amount of flow $\rho$ that will be pushed on the $k^{th}$ outgoing arc, without saturating that arc.
 
-In the next step, all processors assigned to an edge $e_j$ s.t. $k'\leq j \leq$ will update their edge: In line 10, the flow of the $k^{th}$ edge is updated by an amount $\rho$; in line 12, $k-1$ edges are updated with as much flow as can be pushed through them. Lines 8-9 are used to count and order the processes that require access to node $w$, in order to store the flow quanta pushed to $w$ (line 16). In line 18, the \lstinline|head| pointer of node $w$ is advanced to the last recorded flow quantum. Lines 15 and 20 calculate the amount of excess flow at node $w$ (which is the amount of flow that was pushed to $w$ in this pulse). Finally, in lines 23-26 all vertices $v$ that have some remaining excess flow are blocked. Since no more flow can be pushed along their outgoing edges, the remaining excess flow will have to be returned.
+In the next step, all processors assigned to an arc $e_j$ s.t. $k'\leq j \leq k'+k$ will update their arc: In line 10, the flow of the $k^{th}$ arc is updated by an amount $\rho$; in line 12, $k-1$ arcs are updated with as much flow as can be pushed through them. Lines 8-9 are used to count and order the processes that require access to node $w$, in order to store the flow quanta pushed to $w$ (line 16). In line 18, the \lstinline|head| pointer of node $w$ is advanced to the last recorded flow quantum. Lines 15 and 20 calculate the amount of excess flow at node $w$ (which is the amount of flow that was pushed to $w$ in this pulse). Finally, in lines 23-26 all vertices $v$ that have some remaining excess flow are blocked. Since no more flow can be pushed along their outgoing arcs, the remaining excess flow will have to be returned.
 
 \begin{algorithm}
 \caption{Shiloach-Vishkin: PUSH}
@@ -431,7 +432,7 @@ In the next step, all processors assigned to an edge $e_j$ s.t. $k'\leq j \leq$ 
 \end{algorithmic}
 \end{algorithm}
 
-The \lstinline|RETURN| function given in Algorithm \ref{algo:sv_return} works as follows: In line 3, we find the number $k$ of edges into node $v$ that carry the flow that was pushed to outgoing edges of $v$. In lines 5-9 the excess flow that will be returned on edges $e_j$ s.t. $k<=j<=head(v)$, which brought the excess flow to $v$, is calculated. All those edges $e_j$ will return as much flow as was pushed along them, except for edge $e_k$, which will only return an amount $\rho$. Note that the rest $q_k - \rho$ of the flow pushed along $e_k$ was already forwarded to another node during \lstinline|PUSH|. Lines 10-11 calculate the total amount of flow returned on $e_j$ in this pulse and update the total flow pushed along $e_j$ accordingly. Lines 12-13 calculate the amount of flow returned to node $u$, which is added to the amount of excess flow located at $u$. Finally, in line 17 the $head$ pointer is set to the latest flow quantum that was pushed into $v$ but not returned.
+The \lstinline|RETURN| function given in Algorithm \ref{algo:sv_return} works as follows: In line 3, we find the number $k$ of arcs into node $v$ that carry the flow that was pushed to outgoing arcs of $v$. In lines 5-9 the excess flow that will be returned on arcs $e_j$ s.t. $k<=j<=head(v)$, which brought the excess flow to $v$, is calculated. All those arcs $e_j$ will return as much flow as was pushed along them, except for arc $e_k$, which will only return an amount $\rho$. Note that the rest $q_k - \rho$ of the flow pushed along $e_k$ was already forwarded to another node during \lstinline|PUSH|. Lines 10-11 calculate the total amount of flow returned on $e_j$ in this pulse and update the total flow pushed along $e_j$ accordingly. Lines 12-13 calculate the amount of flow returned to node $u$, which is added to the amount of excess flow located at $u$. Finally, in line 17 the $head$ pointer is set to the latest flow quantum that was pushed into $v$ but not returned.
 
 \begin{algorithm}
 \caption{Shiloach-Vishkin: RETURN}
@@ -466,14 +467,14 @@ The parallel algorithm presented above can easily be turned into a sequential al
 The complexity of the sequential algorithm is $O(n^{3})$\cite{yossi81}.
 \end{lemma}
 \begin{proof}
-All the elementary operations of the algorithm will be associated to either edges or (vertex, pulse) pairs s.t. each edge or pair is assigned only a constant number of elementary operations. As shown in great detail by Shiloach and Vishkin in \cite{yossi81}, the number of pulses is bounded by $2n$, which implies an $O(n^{2})$\footnote{Note that since $m < n^2$, the $m$ term is dominated by the $n$ term.} bound for the number of (vertex, pulse) pairs for one layered network, yielding a complexity of $O(n^{3})$ for the whole algorithm.
+All the elementary operations of the algorithm will be associated to either arcs or (vertex, pulse) pairs s.t. each arc or pair is assigned only a constant number of elementary operations. As shown in great detail by Shiloach and Vishkin in \cite{yossi81}, the number of pulses is bounded by $2n$, which implies an $O(n^{2})$  bound\footnote{Note that since $m < n^2$, the $m$ term is dominated by the $n$ term.} for the number of (vertex, pulse) pairs for one layered network, yielding a complexity of $O(n^{3})$ for the whole algorithm.
 
 \begin{itemize}
-	\item If an edge $e$ becomes saturated during a \emph{PUSH(v, EXCESS(v))}, the resulting operations (which are a constant number) are charged to $e$. In each pulse $p_i$ only one edge $e$ emanating from a vertex $v$ will be used to push along flow without $e$ becoming saturated and thus the elementary operations are charged to the corresponding pair $(v, p_i)$. This implies a bound of $O(n^2)$ elementary operations involved all PUSH operations required to solve the \lstinline|MAX-FLOW| problem in a layered network.
-	\item The elementary operations of \emph{RETURN(v, EXCESS(v)} will be charged either to related PUSH operations or again to a (vertex, pulse) pair. When some flow is returned from vertex $v$ at pulse $p_i$, the flow cancels out flow quanta that were pushed to $v$ at some pulse $p_j$ with $j<=i$ and the corresponding push-operation is charged. The returned flow may furthermore cause a change in at most one flow quantum, in which case the elementary operations are assigned to the pair $(v, p_j)$. By the same argument as before, we get a $O(n^{2})$ bound on the number of elementary operations involved in all RETURN operations.
+	\item If an arc $e$ becomes saturated during a \emph{PUSH(v, EXCESS(v))}, the resulting operations (which are a constant number) are charged to $e$. In each pulse $p_i$ only one arc $e$ emanating from a vertex $v$ will be used to push along flow without $e$ becoming saturated and thus the elementary operations are charged to the corresponding pair $(v, p_i)$. This implies a bound of $O(n^2)$ elementary operations involved in all PUSH operations required to solve the \lstinline|MAX-FLOW| problem in a layered network.
+	\item The elementary operations of \emph{RETURN(v, EXCESS(v)} will be charged either to related PUSH operations or again to a (vertex, pulse) pair. When some flow is returned from vertex $v$ at pulse $p_i$, the flow cancels out flow quanta that were pushed to $v$ at some pulse $p_j$ with $j<=i$ and the corresponding push-operation is charged. The returned flow may furthermore cause a change in at most one flow quantum, in which case the elementary operations are assigned to the pair $(v, p_i)$. By the same argument as before, we get a $O(n^{2})$ bound on the number of elementary operations involved in all RETURN operations.
 \end{itemize}
 
-These charging rules yield an $O(n^{2})$ bound on the number of elementary operations involved in pushing and returning flow while solving \lstinline|MAX-FLOW| for a layered network, which implies an overall complexity of $O(n^{3}$ for the whole algorithm. 
+These charging rules yield an $O(n^{2})$ bound on the number of elementary operations involved in pushing and returning flow while solving \lstinline|MAX-FLOW| for a layered network, which implies an overall complexity of $O(n^{3})$ for the whole algorithm. 
 \end{proof}
 
 \subsection{Processor efficient parallel implementation}
@@ -482,30 +483,30 @@ These charging rules yield an $O(n^{2})$ bound on the number of elementary opera
 An allocation of processors to jobs s.t. $n$ processors are sufficient is possible without effecting the complexity of the algorithm. 
 \end{lemma}
 \begin{proof}
-The \textbf{Work-time framework} as presented in \cite{vishkin92} allows for a simple justification of the lemma: the number of rounds is $O(n^2 log n)$: One pulse can be executed in $O(log n)$ time steps (no loops, operations on binary trees only). Since we need at most $2n$ pulses\footnote{see \cite{yossi81} for a detailed proof.} for solving \lstinline|MAX-FLOW| each of the $O(n)$ layered networks\footnote{according to Dinitz' scheme, as explained in Section \ref{sec:dinitz}.}, the total number of time steps is $T = O(n^{2} log n)$. By similar arguments as we used in Section \ref{sec:sv_seq}, we obtain an amount of total work $W = O(n^{3} log n)$\footnote{see \cite{yossi81} for a more detailed proof}. Applying \emph{Brent's theorem}\cite{Brent74}, we get $\lceil W/p \rceil + T$ rounds, which is $O(n^{2} log n)$ rounds for $p=n$, proving the lemma.
+The \textbf{Work-time framework} as presented in \cite{vishkin92} allows for a simple justification of the lemma: the number of rounds is $O(n^2 log n)$: One pulse can be executed in $O(log n)$ time steps (no loops, operations on binary trees of height $\lceil 2*log 2n \rceil$ only). Since we need at most $2n$ pulses\footnote{see \cite{yossi81} for a detailed proof.} for solving \lstinline|MAX-FLOW| each of the $O(n)$ layered networks\footnote{according to Dinitz' scheme, as explained in Section \ref{sec:dinitz}.}, the total number of time steps is $T = O(n^{2} log n)$. By similar arguments as we used in Section \ref{sec:sv_seq}, we obtain an amount of total work $W = O(n^{3} log n)$\footnote{see \cite{yossi81} for a more detailed proof.}. Applying \emph{Brent's theorem}\cite{Brent74}, we get $\lceil W/p \rceil + T$ rounds, which is $O(n^{2} log n)$ rounds for $p=n$, proving the lemma.
 \end{proof}
 
 \subsection{Analysis}
 \label{sec:sv_analysis}
 We can now provide asymptotic bounds for all steps of Algorithm \ref{algo:sv}: According to Dinitz' scheme, the while-loop is bounded by $O(n)$ iterations. Constructing the residual network $G_r$ can trivially be done in $O(n)$ using n processors, since $m = O(n^{2})$. Breath-first search can be used to construct a layered network $G_l$ out of $G_r$. Efficient parallel implementations of BFS run in $O(m/p +n)$ time using n processors. Adding the found \lstinline|MAX-FLOW| of a layered network to the global \lstinline|MAX-FlOW| can again be done in $O(n)$ time. It remains the calculate the complexity of finding a \lstinline|MAX-FlOW| in a layered network $G_l$, as shown in Algorithm \ref{algo:sv}.
 
-Each \lstinline|PUSH| or \lstinline|RETURN| operation requires $O(log n)$ steps, since they do not contain any loops and statements operate on paths from a leave to the root of a binary tree of height $\lceil log_2(k) \rceil$.
+Each \lstinline|PUSH| or \lstinline|RETURN| operation requires $O(log n)$ steps, since they do not contain any loops and statements operate on paths from a leave to the root of a binary tree of height $O(\lceil log_2(n) \rceil)$.
 
 It follows that each round is executed in $O(n*log n)$ time and thus the algorithm overall has a time complexity of $O(n^{2} * log n)$. As shown in Section \ref{sec:sv_pstrees}, a CRCW PRAM is required for the operations on PS-trees. However, Shiloach and Vishkin claim\cite{yossi81}, that a CREW PRAM is sufficient to execute the algorithm within the given bounds, since any concurrent write to a specific memory location will attempt to write the same value. Unfortunately, the paper does not substantiate this claim. 
 
 \section{Algorithm of Goldberg and Tarjan}
 \label{sec:goldberg}
-The Goldberg-Tarjan algorithm solves \lstinline|MAX-FLOW| on directed acyclic graphs. Contrary to the Shiloach-Vishkin algorithm presented in Section \ref{sec:shiloach}, it is not based on Dinitz' scheme (see Section \ref{sec:dinitz}. The algorithm constructs a blocking flow by moving flow through the network while maintaining a blocking pre-flow. Intuitively, the flow quanta do a depth-first search from $s$ to $t$ in a dynamic graph, where edges become saturated and vertices become blocked.
+The Goldberg-Tarjan algorithm solves \lstinline|MAX-FLOW| on directed acyclic graphs. Contrary to the Shiloach-Vishkin algorithm presented in Section \ref{sec:shiloach}, it is not based on Dinitz' scheme (see Section \ref{sec:dinitz}). The algorithm constructs a blocking flow by moving flow through the network while maintaining a blocking pre-flow. Intuitively, the flow quanta do a depth-first search from $s$ to $t$ in a dynamic graph, where arcs become saturated and vertices become blocked.
 
-An \textbf{atom} a is defined as the maximal quantity of flow that so far moved along the same path $P(s,v)$. An atom a can move along forwards on an edge $e \in E$, or backwards along the same edge. Formally, the backward edges are defined as $E^{-1} = \{(w,v)\vert (v,w) \in E \}$. Furthermore, an atom a has the following properties:
+An \textbf{atom} $a$ is defined as the maximal quantity of flow that so far moved along the same path $P(s,v)$. An atom a can move along forwards on an arc $e \in E$, or backwards along the same arc. Formally, the backward arcs are defined as $E^{-1} = \{(w,v)\vert (v,w) \in E \}$. Furthermore, an atom $a$ has the following properties:
 \begin{itemize}
-	\item \textbf{size(a)}: the amount of excess flow that a carries.
-	\item \textbf{position(a)}: the vertex $v \in V$ the atom is currently located at.
-	\item \textbf{trace(a)}: The trace, i.e., the sequence of edges the atom a moved so far. $P_t(s, position(a))$ in $E \cup  E^{-1}$. 
-	\item \textbf{path(a)}: The simple Path $P_s(s, position(a))$ in $E$. $(v,w) \in P_s$ if $(v,w) \in P_t \and (w,v) \not\in P_t$. In other words, if an atom a traversed an edge $(v,w)$ both forwards and backwards, $(v,w) \in P_t$ but $(v,w) \not\in P_s$.  
+	\item \textbf{size(a)}: the amount of excess flow that $a$ carries.
+	\item \textbf{position(a)}: the vertex $v \in V$ the atom $a$ is currently located at.
+	\item \textbf{trace(a)}: The trace, i.e., the sequence of arcs the atom $a$ moved so far. $P_t(s, position(a))$ in $E \cup  E^{-1}$. 
+	\item \textbf{path(a)}: The simple Path $P_s(s, position(a))$ in $E$. $(v,w) \in P_s$ if $(v,w) \in P_t \and (w,v) \not\in P_t$. In other words, if an atom $a$ traversed an arc $(v,w)$ both forwards and backwards, $(v,w) \in P_t$ but $(v,w) \not\in P_s$.  
 \end{itemize}
 
-Algorithm \ref{algo:gt_init} shows the initialization of the Goldberg-Tarjan approach: One atom $a_i$ is created for each edge $e_i=(s, v_i)$ emanating from the start node $s$. Each atom will carry as much flow as can be pushed along the edge  it traverses, thus $size(a_i) = c_(e_i)$. Position and trace of the created atoms are set accordingly.
+Algorithm \ref{algo:gt_init} shows the initialization of the Goldberg-Tarjan approach: One atom $a_i$ is created for each arc $e_i=(s, v_i)$ emanating from the start node $s$. Each atom will carry as much flow as can be pushed along the arc  it traverses, thus $size(a_i) = c(e_i)$. Position and trace of the created atoms are set accordingly.
 
 \begin{algorithm}
 \caption{Goldberg-Tarjan: INITIALIZE}
@@ -528,11 +529,11 @@ A \emph{phase} of the algorithm is defined as follows:
 	\item \textit{phase $i$:} starts at end of phase $i-1$ and ends as soon as all atoms from phase $i-1$ and all atoms created since the end of phase $i-1$ moved along at least one arc.
 \end{itemize}		
 
-After the initialization step, in each subsequent phase $i$ method \lstinline|PUSH| (as depicted in Algorithm \ref{algo:gt_push}) is executed in parallel for all vertices $v \in V \setminus \{s,t\}$ that are not blocked at the beginning of pulse $i$. It moves all atoms $a_i$ currently located at $v$ towards the sink node $s$, if possible, and otherwise towards the start node $s$.
+After the initialization step, in each subsequent phase $i$ method \lstinline|PUSH| (as depicted in Algorithm \ref{algo:gt_push}) is executed in parallel for all vertices $v \in V \setminus \{s,t\}$ that are not blocked at the beginning of pulse $i$. It moves all atoms $a_i$ currently located at $v$ towards the sink node $t$, if possible, and otherwise towards the start node $s$.
 
-In line 4 of Algorithm \ref{algo:gt_push}, the cumulative sum of flow $S_j$ that atoms $a_i$ located at vertex $v$ carry is calculated. $S(k)$ is the total amount of flow that has to be pushed through outgoing arcs of $v$ that are admissible\footnote{i.e., non-saturated arcs, which can carry some more flow to another nod}. Analogously, the cumulative sum of residual capacities of arcs emanating from $v$ is computed in line 5, with $R(l)$ being the total amount of those residual capacities.
+In line 4 of Algorithm \ref{algo:gt_push}, the cumulative sum of flow $S_j$ that atoms $a_i$ located at vertex $v$ carry is calculated. $S(k)$ is the total amount of flow that has to be pushed through outgoing arcs of $v$ that are admissible\footnote{i.e., non-saturated arcs, which can carry some more flow to another node.}. Analogously, the cumulative sum of residual capacities of arcs emanating from $v$ is computed in line 5, with $R(l)$ being the total amount of those residual capacities.
 
-In lines 6-20, each atom $a_i$ is assigned to one or more arc $e_j = (v, w_j)$, s.t.
+In lines 6-20, each atom $a_i$ is assigned to one or more arcs $e_j = (v, w_j)$, s.t.
 \begin{itemize}
 	\item The sum of flow assigned to an arc $e_j$ is less than or equal to it's residual capacity.
 	\item At most one arc is assigned an amount of flow less than the residual capacity of the arc. 
@@ -605,9 +606,9 @@ After all atoms have been pushed forward, vertex $v$ is blocked if all its outgo
 \label{sec:gt_analysis}
 The following observations are important for the analysis of the algorithm:
 \begin{itemize}
-	\item Atoms can move forward on an edge $e=(v,w) \in E$, increasing the flow $f(v,w)$.
+	\item Atoms can move forward on an arc $e=(v,w) \in E$, increasing the flow $f(v,w)$.
 	\item or backward on $e^{-1}=(w,v)$, decreasing $f(v,w)$ and blocking $w$. 
-	\item The flow along an edge $f(v,w)$ never becomes negative: an atom can only move backward on $e^{-1}=(w,v)$ if it moved along $e=(v,w)$ first.
+	\item The flow along an arc $f(v,w)$ never becomes negative: an atom can only move backward on $e^{-1}=(w,v)$ if it moved along $e=(v,w)$ first.
 	\item $f(v,w)$ increases until $w$ is blocked, after which $f(v,w)$ decreases.
 \end{itemize}
 
@@ -618,7 +619,7 @@ The number of created atoms is $\leq m$.
 Atoms created in algorithm
 \begin{itemize}
 	\item INITIALIZE: $\lvert (s,v_i) \in E \rvert$. $size(a_i) = c(s,v_i)$
-	\item PUSH: Splitting an atom: The newly created atom $a'$: $size(a') = c_r(v,w)$ is assigned the residual capacity of an edge $(v,w)$.
+	\item PUSH: Splitting an atom: The newly created atom $a'$: $size(a') = c_r(v,w)$ is assigned the residual capacity of an arc $(v,w)$.
 \end{itemize}
 Clearly, each newly created atom in \lstinline|INITIALIZE| and \lstinline|PUSH| saturates an arc. Each arc may be saturated only once, which implies the claim.
 \end{proof}
