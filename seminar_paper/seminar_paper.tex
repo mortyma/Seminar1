@@ -347,16 +347,38 @@ For the parallel implementation of \lstinline|PUSH| and \lstinline|RETURN|, seve
 \end{itemize}
 One PS-tree is attached to every arc $e \in E$:
 \begin{itemize}
-	\item T-EDGE(v): $2n$ active leaves, each of which is associated with one pulse to record the amount of flow returned on $e$ in a given pulse.
+	\item T-EDGE(e): $2n$ active leaves, each of which is associated with one pulse to record the amount of flow returned on $e$ in a given pulse.
 \end{itemize}
 
 Let T be a PS-tree. Every node of T is represented by $T[height, i]$, where $height(root) = \lceil \log_2(k) \rceil$ and $height(a_i) = 1$ , $\forall$ leaves $a_i$. Additionally, $T[root]$ designates the root node of T. We define the following operations on T:
 \begin{itemize}
-	\item CLEAR(i): The value of all nodes on the path $P(T[1,i],root)$ is set to 0. Note that executing this operation for less than all leaves will result in an invalid PS-tree. When executing the operation for all leaves, several processes will attempt to write to the same node. Thus a CRCW-PRAM is required. However, all processes will attempt to write the same value - 0 - to each node of the PS-tree.
+	\item CLEAR(i): The value of all nodes on the path $P(T[1,i],root)$ is set to 0. 
 	\item UPDATE(i,$a_i$): The value of the $i^{th}$ leave is set to $a_i$ and the values of all nodes on the path $P(T[1,i],root)$ are updated.
 	\item SUM(i, $S_i$): Calculate the sum of values stored in leave nodes $a_1...a_i$. $S_i = a_1,...,a_i$.
 	\item FIND($\alpha$, k, $\rho$): Given $\alpha$, find $k$ and $\rho$ s.t. $a_1+...+a_{k-1} < \alpha \leq a_1+...+a_k$ and $\rho = \alpha - (a_1+...+a_{k-1})$. Given an amount of flow $\alpha$, this operation will be used to find the number $k$ of edges required to push flow from a node $v$. Along the first $k-1$ edges an amount of flow equal to the residual capacity of each each will be pushed. The remaining amount of flow $\rho$ will be pushed along edge $k$. 
-\end{itemize}  
+\end{itemize}
+
+\begin{lemma}
+CLEAR, UPDATE, SUM and FIND each require $O(\log n)$ time steps on a CRCW PRAM with common write ability\cite{yossi81}.
+\end{lemma}
+\begin{proof}
+Of the 5 PS-trees defined above (T-OUT(v), T-IN(v), T-ACCESS(v), T-SUM(v) and T-EDGE(e)), T-IN(v) has the most active leaves: $2n*d_{in}(v) \leq 2n^2$. This implies height of $2 * \lceil \log n \rceil$ for the complete binary tree, which is bounded by $O(\log n)$. All operations work on paths from some leaf $a_i$ to the root of the tree. Implementing them as follows ensures a time complexity of $O(\log n)$ for all operations on a CRCW PRAM. In particular, a \emph{common write} variant is required, where all processors attempting to write to the same memory location have to write the same value.
+\begin{itemize}
+	\item FIND does a binary search from $root$ to leaf $i$, s.t. $a_{i-1} < \alpha \leq a_i$. 
+	\item SUM: On the path $P(root, i)$, sum up the values of left child nodes when traversing to the right child node and add the value $a_i$.
+	\item CLEAR: Sets the values of nodes on the path $P(i, root)$ to 0. Note that this would potentially invalidate the PS-tree. However, this operation will be executed for all leaves of the tree simultaneously, thus clearing the whole tree. Resulting PRAM requirements will be discussed below.
+	\item UPDATE: Updates the value of leaf $i$ followed by the values of all nodes on the path $P(i, root)$. To do so, for all nodes along $P(i, root)$ the values of both children need to be accessed.
+\end{itemize}
+\end{proof}
+
+The original paper\cite{yossi81} claims that:
+\begin{corollary}
+The same performance can be achieved using a CREW PRAM.
+\end{corollary}
+
+Unfortunately, this far from trivial claim is not further elaborated on in the paper. It is easy to achieve for the CLEAR operation: starting at the leaves of the tree, at each level every second processor can stop. The processor doing the update on the sibling node will take care of the remaining nodes, since they share the same path to the root. 
+
+A similar scheme may be devised for operations on T-OUT(v): All $p$ processors will operate on $p$ consecutive leaf nodes of the tree (this is implied by the PUSH function). However, this is not true for UPDATE operations on T-IN(v): During one pulse, the incoming flow may be pushed to $v$ along any subset of $d_in(v)$, requiring UPDATE for some leaves within a range of 2n. We were not able to reproduce the claim for this situation. 
 
 \subsection{Parallel Implementation}
 \label{sec:sv_parImpl}
@@ -371,7 +393,7 @@ The total number of required processors is $O(nm)$, which is dominated by the as
 
 In addition to the four PS-trees attached to each vertex $v$, $v$ keeps two pointers:
 \begin{itemize}
-	\item head(v): Points to the rightmost significant leaf in T-in($v$). The rightmost significant (i.e., the rightmost leave with a value $\neq 0$) is associated with the flow quantum that was the last to reach $v$. head(v) will be used to keep track of the order of flow quanta reaching a node $v$, in order to be able to return excess flow. 
+	\item head(v): Points to the rightmost significant leaf in T-in($v$). The rightmost significant leaf (i.e., the rightmost leaf with a value $\neq 0$) is associated with the flow quantum that was the last to reach $v$. head(v) will be used to keep track of the order of flow quanta reaching a node $v$, in order to be able to return excess flow. 
 	\item $k'$: The outgoing arcs of $v$ are assumed to be ordered arbitrarily. $k'$ points to the first outgoing arc\footnote{the arc with the smallest index w.r.t. the given ordering.} that is not yet saturated. In other words, $k'$ points to the next arc that can be utilized to push excess flow from $v$.  
 \end{itemize}
 
@@ -432,7 +454,19 @@ In the next step, all processors assigned to an arc $e_j$ s.t. $k'\leq j \leq k'
 \end{algorithmic}
 \end{algorithm}
 
-The \lstinline|RETURN| function given in Algorithm \ref{algo:sv_return} works as follows: In line 3, we find the number $k$ of arcs into node $v$ that carry the flow that was pushed to outgoing arcs of $v$. In lines 5-9 the excess flow that will be returned on arcs $e_j$ s.t. $k<=j<=head(v)$, which brought the excess flow to $v$, is calculated. All those arcs $e_j$ will return as much flow as was pushed along them, except for arc $e_k$, which will only return an amount $\rho$. Note that the rest $q_k - \rho$ of the flow pushed along $e_k$ was already forwarded to another node during \lstinline|PUSH|. Lines 10-11 calculate the total amount of flow returned on $e_j$ in this pulse and update the total flow pushed along $e_j$ accordingly. Lines 12-13 calculate the amount of flow returned to node $u$, which is added to the amount of excess flow located at $u$. Finally, in line 17 the $head$ pointer is set to the latest flow quantum that was pushed into $v$ but not returned.
+The \lstinline|RETURN| function given in Algorithm \ref{algo:sv_return} returns any excessive flow remaining at a node $v$. Excessive flow is the amount of flow that was pushed to $v$ but could not be pushed further along any of the outgoing arcs $e_j$ of $v$. This is the case when for all outgoing arcs $e_j = (v ,w_j)$ of $v$ at least one of two conditions hold: either the arc $e_j$ is saturated or the node $w_j$ is blocked. 
+
+The algorithm works as follows: In line 3, we find the number $k$ of arcs into node $v$ that carry the flow that was pushed to $v$ and than further along outgoing arcs of $v$. Note that this amount of flow constitutes a valid flow through node $v$, satisfying all requirements of flow as given in Section \ref{sec:networkFlows}. Line 4 sets the amount of excessive flow at node $v$ to 0 (any excessive flow will be taken care of in subsequent steps).
+
+In lines 5-9 the excess flow that will be returned on arcs $e_j$ s.t. $k<=j<=head(v)$, which brought the excess flow to $v$, is calculated. All arcs $e_j$ s.t. $k<j<=head(v)$ will return as much flow as was pushed along them in any of the previous step, resulting in 0 units of flow being pushed along them in the final flow. Arc $e_k$ will return an amount of flow of $d_k = "q_k - \rho$, where $0 <= d_k <= c(e_k)$. Note that $\rho$ is the amount of flow pushed into node $v$ along arc $e_k$ and than pushed further along an outgoing arc of $v$. Thus, on $e_k$ only flow exceeding $\rho$, if any, has to be returned. In lines 8-9, the flow assigned to arcs $a_j$, which is the flow pushed into $v$ along arcs $e_j$, is updated accordingly.
+
+Line 10 records the amount of flow that is returned on arc $e_j$ in this pulse. In line 11 the amount of flow assigned to arc $e_j$ is then reduced by the amount that was returned in this pulse. Note that \lstinline|T-EDGE(e_j)[root]| contains the amount of flow returned on the current pulse only and not the sum of flow returned in all pulses so far since it is cleared at the end of each pulse (line 14).
+
+In line 12, the amount of flow returned to node $u$ in the current pulse is calculated. This is done by storing the amount of flow that is returned to node $u$ via arc $e_j$ in the corresponding leave of \lstinline|T-SUM| by applying the \lstinline|UPDATE| function. The root node of \lstinline|T-SUM| then contains the sum of flow returned to node $u$ via all of it's outgoing arcs. The returned flow will be excessive flow at node $u$ (since \lstinline|PUSH| pushed as much flow as possbile along $u$'s outgoing in previous pulses) and will have to be taken care of in the next pulse. Thus, the amount of excessive flow at node $u$ is increased by the amount of flow returned to $u$.
+
+Lines 14 and 15 simply clear \lstinline|T-EDGE| and \lstinline|T-SUM|, since their leaves are associated with flow moved in the current pulse, as their definition in Section \ref{sec:sv_parImpl} states.
+
+Finally, in line 17 the $head$ pointer is set to the latest flow quantum that was pushed into $v$ but not returned.
 
 \begin{algorithm}
 \caption{Shiloach-Vishkin: RETURN}
@@ -449,7 +483,7 @@ The \lstinline|RETURN| function given in Algorithm \ref{algo:sv_return} works as
 		\State UPDATE(j, $\rho$) in T-IN(v) if $j == k$
 		\State UPDATE($p_j$,$d_j$) in T-EDGE($e_j$)
 		\State $f(e_j)$ = $f(e_j)$ - T-EDGE($e_j$)[root]
-		\State UPDATE($e_j$, T-EDGE($e_j$)[root] in T-SUM(u)
+		\State UPDATE($e_j$, T-EDGE($e_j$)[root]) in T-SUM(u)
 		\State EXCESS(u) = EXCESS(u) + T-SUM(u)[root]
 		\State CLEAR($r_j$) in T-EDGE($e_j$)
 		\State CLEAR($e_j$) in T-SUM(u)
@@ -492,16 +526,18 @@ The \textbf{Work-time framework} as presented in \cite{vishkin92} allows for a s
 The algorithm of Shiloach and Vishkin solves \lstinline|MAX-FLOW| in  $O(n^{2} \log n)$, using $O(n)$ processors on a CREW PRAM.
 \end{theorem}
 
-Using the results from the previous sections, we can now provide asymptotic bounds for all steps of Algorithm \ref{algo:sv}: According to Dinitz' scheme, the while-loop is bounded by $O(n)$ iterations. Constructing the residual network $G_r$ can trivially be done in $O(n)$ using n processors, since $m = O(n^{2})$. Breath-first search can be used to construct a layered network $G_l$ out of $G_r$. Efficient parallel implementations of BFS run in $O(m/p +n)$ time using n processors on a CREW PRAM. \cite{Varman87}. Adding the found \lstinline|MAX-FLOW| of a layered network to the global \lstinline|MAX-FlOW| can again be done in $O(n)$ time. 
+Using the results from the previous sections, we can now provide asymptotic bounds for all steps of Algorithm \ref{algo:sv}: According to Dinitz' scheme, the while-loop is bounded by $O(n)$ iterations. Constructing the residual network $G_r$ can trivially be done in $O(n)$ using n processors, since $m = O(n^{2})$. Breath-first search can be used to construct a layered network $G_l$ out of $G_r$. Efficient parallel implementations of BFS run in $O(m/p +n)$ time using n processors on a CREW PRAM\cite{Varman87}. Adding the found \lstinline|MAX-FLOW| of a layered network to the global \lstinline|MAX-FlOW| can again be done in $O(n)$ time. 
 
 It remains the calculate the complexity of finding a \lstinline|MAX-FlOW| in a layered network $G_l$, as shown in Algorithm \ref{algo:sv}. Each \lstinline|PUSH| or \lstinline|RETURN| operation requires $O(\log n)$ steps, since they do not contain any loops and statements operate on paths from a leave to the root of a binary tree of height $O(\lceil \log_2(n) \rceil)$.
 
-It follows that each round is executed in $O(n \log n)$ time, solving \lstinline|MAX-FLOW| for a layered network. Thus the algorithm overall has a time complexity of $O(n^{2} \log n)$. As shown in Section \ref{sec:sv_pstrees}, a CRCW PRAM is required for the operations on PS-trees. However, Shiloach and Vishkin claim\cite{yossi81}, that a CREW PRAM is sufficient to execute the algorithm within the given bounds, since any concurrent write to a specific memory location will attempt to write the same value. Unfortunately, the paper does not substantiate this claim. TODO
+It follows that each round is executed in $O(n \log n)$ time, solving \lstinline|MAX-FLOW| for a layered network. Thus the algorithm overall has a time complexity of $O(n^{2} \log n)$. As shown in Section \ref{sec:sv_pstrees}, a CRCW PRAM is required for the operations on PS-trees. The claim of Shiloach and Vishkin\cite{yossi81}, that a CREW PRAM is sufficient to execute the algorithm within the given bounds could not be reproduced, as explained in Section \ref{sec:sv_pstrees}.
 
 \section{Algorithm of Goldberg and Tarjan}
 \label{sec:goldberg}
 The Goldberg-Tarjan algorithm solves \lstinline|MAX-FLOW| on directed acyclic graphs. Contrary to the Shiloach-Vishkin algorithm presented in Section \ref{sec:shiloach}, it is not based on Dinitz' scheme (see Section \ref{sec:dinitz}). The algorithm constructs a blocking flow by moving flow through the network while maintaining a blocking pre-flow. Intuitively, the flow quanta do a depth-first search from $s$ to $t$ in a dynamic graph, where arcs become saturated and vertices become blocked.
 
+\subsection{Atoms}
+\label{sec:gt_atoms}
 An \textbf{atom} $a$ is defined as the maximal quantity of flow that so far moved along the same path $P(s,v)$. An atom a can move along forwards on an arc $e \in E$, or backwards along the same arc. Formally, the backward arcs are defined as $E^{-1} = \{(w,v)\vert (v,w) \in E \}$. Furthermore, an atom $a$ has the following properties:
 \begin{itemize}
 	\item \textbf{size(a)}: the amount of excess flow that $a$ carries.
@@ -510,6 +546,8 @@ An \textbf{atom} $a$ is defined as the maximal quantity of flow that so far move
 	\item \textbf{path(a)}: The simple Path $P_s(s, position(a))$ in $E$. $(v,w) \in P_s$ if $(v,w) \in P_t \and (w,v) \not\in P_t$. In other words, if an atom $a$ traversed an arc $(v,w)$ both forwards and backwards, $(v,w) \in P_t$ but $(v,w) \not\in P_s$.  
 \end{itemize}
 
+\subsection{Algorithm}
+\label{sec:gt_algo}
 Algorithm \ref{algo:gt_init} shows the initialization of the Goldberg-Tarjan approach: One atom $a_i$ is created for each arc $e_i=(s, v_i)$ emanating from the start node $s$. Each atom will carry as much flow as can be pushed along the arc  it traverses, thus $size(a_i) = c(e_i)$. Position and trace of the created atoms are set accordingly.
 
 \begin{algorithm}
@@ -606,6 +644,15 @@ After all atoms have been pushed forward, vertex $v$ is blocked if all its outgo
 \end{algorithmic}
 \end{algorithm}
 
+\subsection{Parallel implementation}
+\label{sec:gt_parImpl}
+A high degree of parallelism is achieved by assigning one processor to each atom $a_i$. As we will show in Section \ref{sec:gt_analysis}, the number of atoms is bounded by $O(m)$, implying the same bound on the number of processors for this assignment.
+
+However, the \lstinline|PUSH| function as given in Algorithm \ref{algo:gt_push} does not work on individual atoms but on nodes. If a number of atoms $a_1...a_k$ are located at the same node $v$, they can not simply be processed in parallel since any assigment of an atom $a_i$ to an outgoing arc $e_i$ will change the set of admissible arcs for all other atoms located at node $v$.
+
+Goldberg and Tarjan claim\cite{goldberg89} that the \lstinline|PUSH| function can be implemented to run in $O(\log n)$. They claim that this can be achieved by using various standard techniques of parallel computation, such as prefix-sum computations, operations on complete binary trees and fast sorting, but no further details are given in the paper. Some of the approaches and techniques used in the implementation of the algorithm of Shiloach and Vishkin discussed in Section \ref{sec:shiloach} might be of use though.
+
+
 \subsection{Analysis}
 \label{sec:gt_analysis}
 The following observations are important for the analysis of the algorithm:
@@ -648,7 +695,7 @@ The algorithm terminates after at most $2n-3$ phases.
 The algorithm of Goldberg and Tarjan solves \lstinline|MAX-FLOW| on directed acyclic networks in $O(n \log n)$ time using $m$ processors and $O(nm)$ space on an EREW PRAM\cite{goldberg89}.
 \end{theorem}
 
-By assigning a processor to each atom, each phase requires $O(\log n)$ steps and $O(n)$ phases are required. The space complexity of the algorithm is $O(nm)$, which is dominated by storing the traces of $O(m)$ atoms, each of length $O(n)$.  
+As discussed in Section \ref{sec:gt_parImpl}, the algorithm can be implemented such that each phase requires $O(\log n)$ steps by using $O(m)$ processors. The above corollary implies that $O(n)$ phases are required. Thus, the total runtime is $O(n*\log n)$. The space complexity of the algorithm is $O(nm)$, which is dominated by storing the traces of $O(m)$ atoms, each of length $O(n)$.  
 
 
 \begin{table*}
