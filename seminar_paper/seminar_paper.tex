@@ -43,7 +43,7 @@
 \newtheorem{theorem}[lemma]{Theorem}
 
 \title{Parallel Network Flow Algorithms \\ 
-\large A follow up seminar to the Parallel Algorithms lecture\footnote{Jesper Larsson Träff, lecture "Parallel Algorithms", 2012 winter term at TU Wien.}}
+\large A follow up seminar to the Parallel Algorithms lecture\footnote{Jesper Larsson Träff, lecture ``Parallel Algorithms'', 2012 winter term at TU Wien.}}
 \author{Martin Kalany, 0825673}
 
 \begin{document}
@@ -51,12 +51,12 @@
 
 \section{Abstract}
 \label{sec:abstract}
-\textit{We discuss possibilities of parallelizing algorithms for the problem of finding a maximum flow in a given flow network. Although sequential algorithms have been known for a long time, efficient, poly-logarithmic time parallel algorithms could not be found despite large efforts. In 1982 theoretical analysis~\cite{Goldschlager82} of the problem was able to ascertain the inherently sequential nature of the problem, i.e., that no parallel algorithm that solves the problem in poly-logarithmic time with polynomially bounded resource consumption exists, assuming that $NC \neq P$. After a detailed introduction to the problem and reviewing the algorithm of Ford and Fulkerson, we will prove the inherently sequential nature of the problem. Two fundamental parallel algorithms that nicely convey approaches of parallelization are presented and their asymptotic bounds are studied based on the PRAM model. We compare those two algorithms with later and improved algorithms, both sequential and parallel variants.}
+\textit{We discuss possibilities of parallelizing algorithms for the problem of finding a maximum flow in a given flow network. Although sequential algorithms have been known for a long time, efficient, poly-logarithmic time parallel algorithms could not be found despite large efforts. In 1982 theoretical analysis~\cite{Goldschlager82} of the problem was able to ascertain the inherently sequential nature of the problem, i.e., that no parallel algorithm that solves the problem in poly-logarithmic time with polynomially bounded resource consumption exists, assuming that $NC \neq P$. After a detailed introduction to the problem and reviewing the algorithm of Ford and Fulkerson, we will explain the inherently sequential nature of the problem. Two fundamental parallel algorithms that nicely convey approaches of parallelization are presented and their asymptotic bounds are studied based on the PRAM model. We compare those two algorithms with later and improved algorithms, both sequential and parallel variants.}
 
 
 \section{Introduction}
 \label{sec:intro}
-The \emph{maximum flow problem} (\lstinline|MAX-FLOW|), is an important problem in algorithms and graph theory with numerous applications~\cite{ahuja93}. A detailed description of the problem is given in Section \ref{sec:networkFlows} along with definitions of all graph theoretical concepts used in this paper. Section \ref{sec:fordfulkerson}, to illustrate the problems and definitions, gives a quick explanation of the algorithm of Ford and Fulkerson, an intuitive sequential algorithm solving the problem. The PRAM model, which we will use as our model of computation in this paper, will briefly be described in Section \ref{sec:model}. In Section \ref{sec:cc} the inherently sequential nature of the problem will be shown. The informal term ``inherently sequential'' describes computational problems for which it is unlikely that efficient parallel algorithms with run time in $O(\log^{k}n)$ (for input size $n$ and some constant $k$) exist, although sequential algorithms $\in P$, i.e., with an asymptotic run time in $O(n^{k})$, are known.
+The \emph{maximum flow problem} (\lstinline|MAX-FLOW|), is an important problem in algorithms and graph theory with numerous applications~\cite{ahuja93}. A detailed description of the problem is given in Section \ref{sec:networkFlows} along with definitions of all graph theoretical concepts used in this paper. Section \ref{sec:fordfulkerson}, to illustrate the problems and definitions, gives a quick explanation of the algorithm of Ford and Fulkerson, an intuitive sequential algorithm solving the problem. The PRAM model, which we will use as our model of computation in this paper, will briefly be described in Section \ref{sec:model}. In Section \ref{sec:cc} the inherently sequential nature of the problem will be shown. The informal term ``inherently sequential'' describes computational problems for which it is unlikely that efficient parallel algorithms with run time in $O(\log^{k_1}n)$ and number of required processors in $O(n^{k_2})$ (for input size $n$ and some constants $k_1$, $k_2$) exist, although sequential algorithms $\in P$, i.e., with an asymptotic run time in $O(n^{k})$ (for some constant $k$), are known.
 
 Section \ref{sec:dinitz} discusses Dinitz' scheme, a fundamental result in graph theory that allows to  decompose the problem of finding a maximum flow in an arbitrary directed acyclic graph with $n$ vertices into $O(n)$ problems of finding a maximal flow in a layered network, which is a significantly simpler problem. Several improvements of previous algorithms are based on Dinitz' scheme, as is an early parallel algorithm of Shiloach and Vishkin, which will be presented in detail in  Section \ref{sec:shiloach}. This algorithm solves \lstinline|MAX-FLOW| in a layered network using the pre-flow push principle. Section \ref{sec:sv_parImpl} gives the necessary technical details for a parallel implementation of the algorithm, while Sections \ref{sec:sv_seq}, \ref{sec:sv_nr_procs} and \ref{sec:sv_analysis} deal with the theoretical analysis of the sequential variant\footnote{Simulating the parallel algorithm with one processor trivially yields a sequential algorithm.}, the number of required processors and the asymptotic complexity, respectively.
 
@@ -76,7 +76,6 @@ Furthermore, the following assumptions are made:
 \begin{itemize}
 	\item $G$ is connected
 	\item $G$ is simple, i.e., does not contain loops or parallel arcs
-	\item There is no path $P(s,t)$ from source node $s$ to sink node $t$ with infinite capacity
 \end{itemize}
 
 \medskip
@@ -92,11 +91,11 @@ $f:E \rightarrow \mathbb{R}_0^{+}$ is a \textit{flow} if it satisfies:
 A flow $f$
 \begin{itemize}
 	\item is a \emph{maximum flow} if $\lvert f\rvert \geq \lvert f'\rvert$, for any other flow $f'$
-	\item \emph{saturates} an arc e if $f(e) = c(e)$
+	\item \emph{saturates} an arc $e$ if $f(e) = c(e)$
 	\item is a \emph{maximal (or blocking) flow} if every directed path P(s,t) contains at least one saturated arc
 \end{itemize}
 \medskip
-The \emph{residual capacity} of $e \in V \times V$ w.r.t.\ a flow $f$ is defined as $c_r(e) := c(e) - f(e)$. $G_r := (V, E_r)$ is the \emph{residual network}, where $E_r := \left\{e \in V \times V \lvert c_r(e) > 0\right\}$. The set of \emph{admissible arcs} of a vertex $v$ is the set of all arcs $e$ emanating from $v$ s.t. $c_r(e) > 0$.  A path $P$ from $s$ to $t$ in $G_r$ is called an \emph{augmenting path} if it consists of admissible arcs only. An augmenting path $P(s,t)$ can be used to increase the flow $f$. Let $f_P(e)$ be the flow assigned to arc $e$ in augmenting path $P$. The flow $f$ can now be increased by $\forall e \in P: f'(e) := f(e) + f_P(e)$.
+The \emph{residual capacity} of $e \in E$ w.r.t.\ a flow $f$ is defined as $c_r(e) := c(e) - f(e)$. $G_r := (V, E_r)$ is the \emph{residual network}, where $E_r := \left\{e \in E \lvert c_r(e) > 0\right\}$. The set of \emph{admissible arcs} of a vertex $v$ is the set of all arcs $e$ emanating from $v$ s.t. $c_r(e) > 0$.  A path $P$ from $s$ to $t$ in $G_r$ is called an \emph{augmenting path} if it consists of admissible arcs only. An augmenting path $P(s,t)$ can be used to increase the flow $f$: let $f_P(e)$ be the flow assigned to arc $e$ in augmenting path $P$. The flow $f$ can now be increased by setting $\forall e \in P: f'(e) := f(e) + f_P(e)$.
 
 \subsection{Algorithm of Ford-Fulkerson}
 \label{sec:fordfulkerson}
@@ -187,19 +186,19 @@ Note that the algorithm of Ford and Fulkerson is restricted to integer capacitie
 
 \section{Model of Computation}
 \label{sec:model}
-We use the \textit{PRAM} Model\footnote{Parallel Random Access Machine, as defined in the lecture or in~\cite{papa95}.} as the model of computation. The PRAM model is a high level abstraction of a shared memory machine, in which memory access by any processor to any memory location is assumed to require constant time. Specifically, a \textit{MIMD} (Multiple Instructions Multiple Data) variant is used, where each processor $p$ executes a distinct set of instructions on distinct data. Instructions are executed in lock-step and any necessary padding of instructions is assumed to be done automatically. 
+We use the \textit{PRAM} Model\footnote{Parallel Random Access Machine, as defined in the lecture or in~\cite{papa95}.} as the model of computation. The PRAM model is a high level abstraction of a shared memory machine, in which memory access by any processor to any memory location is assumed to require constant time. Specifically, a \textit{MIMD} (Multiple Instructions Multiple Data) variant is used, where each processor $p$ can execute a distinct instruction in each time step on different data. Instructions are executed in lock-step and any necessary padding of instructions is assumed to be done automatically. 
 
 \section{Computational Complexity}
 \label{sec:cc}
 Let $f_{\mathrm{max}}$ denote the maximum flow. The algorithmic complexity of the \emph{Ford-Fulkerson} algorithm is given as $O((n+m)f_{\mathrm{max}})$~\cite{ahuja93,papa95}. This was improved by the \emph{Edmonds-Karp} algorithm to $O(nm^2)$, by using shortest augmenting paths instead of arbitrarily chosen ones. Clearly, the \emph{maximum flow problem} can be solved in polynomial time with a sequential algorithm and thus \lstinline|MAX-FLOW| $\in P$.
 
-Informally, algorithms may be \emph{efficiently parallelizable} or \emph{inherently sequential}. The complexity class \textit{NC}~\cite{papa95} ("Nick's Class") contains all problems solvable in $O(\log^{k_1}(n))$ time and $O(n^{k_2})$ total work. We give a useful alternate definition:  A language that is decided by PRAM in $O(\log^{k_1}(n))$ time steps with $O(n^{k_2})$ processors available at each step is in $NC$. Problems in $NC$ thus are solvable  in poly-logarithmic time requiring polynomial work (or resources, such as processors and memory). Problems in $P \setminus NC$ are dubbed "inherently sequential", i.e., not parallelizable efficiently. 
+Informally, algorithms may be \emph{efficiently parallelizable} or \emph{inherently sequential}. The complexity class \textit{NC}~\cite{papa95} (``Nick's Class'') contains all problems solvable in $O(\log^{k_1}(n))$ time and $O(n^{k_2})$ total work, where $k_1$, $k_2$ are some constants. We give a useful alternate definition:  A language that is decided by PRAM in $O(\log^{k_1}(n))$ time steps with $O(n^{k_2})$ processors available at each step is in $NC$. Problems in $NC$ thus are solvable  in poly-logarithmic time requiring polynomial work (or resources such as processors). Problems in $P \setminus NC$ are dubbed ``inherently sequential'', i.e., not parallelizable efficiently. 
 
 Clearly, $NC \subseteq P$, but whether $NC \subset P$ or $NC = P$ is still unknown. It follows that we do not know whether or not inherently sequential problems actually exist. The most likely problems to be hard to parallelize are problems that are P-complete w.r.t.\ NC reduction. Since any problem $A \in P$ can be reduced to a P-complete problem $B$, a parallel algorithm that solves $B$ within poly-logarithmic time bounds would immediately imply that for all problems $\in P$ a parallel algorithm $\in NC$ exists~\cite{papa95}.
 
-As an example, the Ford-Fulkerson algorithm can not be parallelized trivially. Although constructing the residual network can be done in constant time $O(1)$ (by assigning a processor to each arc $e \in E$) and augmenting paths can be found in $O(\log^{2}n)$ time and $O(n^{2})$ work by a basic breath first search, the number of stages can not be reduced to less than $O(\sqrt{n})$ ~\cite{ahuja93}. Thus the total complexity, which is dominated by the number of stages, places the algorithm in $P \setminus NC$.
+As an example, the Ford-Fulkerson algorithm can not be parallelized trivially. Although constructing the residual network can be done in constant time $O(1)$ (by assigning a processor to each arc $e \in E$) and augmenting paths can be found in $O(\log^{2}n)$ time and $O(n^{2})$ work by a basic breadth first search, the number of stages can not be reduced to less than $O(\sqrt{n})$ ~\cite{ahuja93}. Thus the total complexity, which is dominated by the number of stages, places this algorithm in $P \setminus NC$.
 	
-As shown in~\cite{papa95}, \lstinline|MAX-FLOW| is P-complete and no parallel algorithm $\in NC$ is currently known for solving this problem. It is assumed that the problem is inherently sequential\footnote{provided that $P \neq NC$.}.
+As shown in~\cite{Goldschlager82}, \lstinline|MAX-FLOW| is P-complete and no parallel algorithm in $NC$ is currently known for solving this problem. It is assumed that the problem is inherently sequential\footnote{provided that $P \neq NC$.}.
 
 \section{Dinitz' scheme}
 \label{sec:dinitz}
@@ -248,7 +247,7 @@ Figure \ref{fig:dinitz} shows a layered network and its underlying directed acyc
 A maximum flow problem in a general network can be transformed into $O(n)$ maximal flow problems in layered networks.
 \end{theorem}
 
-A layered network can easily be constructed from a directed acyclic network by performing breath-first search, which can be done in parallel in $O(\log^{2}n)$ time~\cite{yossi81}. It follows that an algorithm that finds a maximal/blocking flow in a layered network can solve \lstinline|MAX-FLOW| in $O(n)$ iterations. The basic scheme is given in Algorithm \ref{algo:dinitz}.
+A layered network can easily be constructed from a directed acyclic network by performing breadth-first search, which can be done in parallel in $O(\log^{2}n)$ time~\cite{yossi81}. It follows that an algorithm that finds a maximal/blocking flow in a layered network can solve \lstinline|MAX-FLOW| in $O(n)$ iterations. The basic scheme is given in Algorithm \ref{algo:dinitz}.
 
 \begin{algorithm}
 \caption{Dinitz' scheme}
@@ -286,23 +285,25 @@ Algorithm \ref{algo:sv} shows an abstract routine for solving \lstinline|MAX-FLO
 \label{algo:sv}
 \begin{algorithmic}[1]
 	\Function{MAX-FLOW}{$G_l$}
-		\State EXCESS(s) $ \gets \Sigma_{v \in L_1}$ c(s$\rightarrow$v)
-		\State PUSH(s, EXCESS(s))
+		\State EXCESS($s$) $ \gets \Sigma_{v \in L_1} c(e = (s,v))$
+		\State PUSH($s$, EXCESS($s$))
 		$i \gets 1$;
-		\While{$\exists$ v $\in UNBALANCED$}
+		\While{$\exists v \in$ UNBALANCED}
 			\State i++
-			\ForAll {$v \in UNBALANCED$}			
+			\ForAll {$v \in$ UNBALANCED}			
 				\If{$v$ is not blocked}
-					\State PUSH(v, EXCESS(v))
+					\State PUSH($v$, EXCESS($v$))
 				\EndIf
 			\EndFor
-			\State RETURN(v, EXCESS(v))
+			\State RETURN($v$, EXCESS($v$))
 		\EndWhile
 	\EndFunction
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Partial Sums trees}
+Section \ref{sec:sv_pstrees} defines \emph{Partial Sums Trees}. Furthermore, operations on partial sums trees, which will be required for a parallel implementation of functions \lstinline|PUSH| and \lstinline|RETURN|, are defined and their complexity is analyzed. 
+
+\subsection{Partial Sums Trees}
 \label{sec:sv_pstrees}
 A \emph{partial sums tree} (PS-tree) is a complete binary tree with the leftmost $k$ leaves associated with $k$ numbers $a_1,...,a_k$. A PS-tree is of height $height := \lceil \log_2(k) \rceil$ and has $width := 2^{\lceil \log_2(k) \rceil}$ leaves. The remaining $w - k$ rightmost leaves are associated with 0. Each internal node of a PS-tree stores the sum of its child nodes. Thus, the root node stores the sum of all the leaves of the tree. Figure \ref{fig:pstree} provides an example.
 
@@ -366,7 +367,7 @@ CLEAR, UPDATE, SUM and FIND each require $O(\log n)$ time steps on a CRCW PRAM w
 \begin{proof}
 Of the 5 PS-trees defined above (T-OUT(v), T-IN(v), T-ACCESS(v), T-SUM(v) and T-EDGE(e)), T-IN(v) has the most active leaves: $2nd_{\mathrm{in}}(v) \leq 2n^2$. This implies height of $2 \lceil \log n \rceil$ for the complete binary tree, which is bounded by $O(\log n)$. All operations work on paths from some leaf $a_i$ to the root of the tree. Implementing them as follows ensures a time complexity of $O(\log n)$ for all operations on a CRCW PRAM. In particular, a \emph{common write} variant is required, where all processors attempting to write to the same memory location have to write the same value.
 \begin{description}
-	\item [FIND] does a binary search from the root node of the tree $T[root]$ to leaf $i$, s.t. $a_{i-1} < \alpha \leq a_i$. 
+	\item [FIND] Does a binary search from the root node of the tree $T[root]$ to leaf $i$, s.t. $a_{i-1} < \alpha \leq a_i$. 
 	\item [SUM] On the path $P(T[root], i)$, sum up the values of left child nodes when traversing to the right child node and add the value $a_i$.
 	\item [CLEAR] Sets the values of nodes on the path $P(i, T[root])$ to 0. Note that this would potentially invalidate the PS-tree. However, this operation will be executed for all leaves of the tree simultaneously, thus clearing the whole tree. Resulting PRAM requirements will be discussed below.
 	\item [UPDATE] Updates the value of leaf $i$ followed by the values of all nodes on the path $P(i, T[root])$. To do so, for all nodes along $P(i, T[root])$ the values of both children need to be accessed.
@@ -399,18 +400,18 @@ In addition to the four PS-trees attached to each vertex $v$, $v$ keeps two poin
 	\item [$k'$] The outgoing arcs of $v$ are assumed to be ordered arbitrarily. $k'$ points to the first outgoing arc\footnote{the arc with the smallest index w.r.t. the given ordering.} that is not yet saturated. In other words, $k'$ points to the next arc that can be utilized to push excess flow from $v$.  
 \end{description}
 
-In Algorithms \ref{algo:sv_init}, \ref{algo:sv_push} and \ref{algo:sv_return}, the notation \textcolor{blue}{P():} is used to indicate that the following instructions are carried out only by the specified processors. Algorithm \ref{algo:sv_init} shows the initialization routine executed at the beginning of each pulse. Each processor assigned to an arc $e_j = (v, w)$ updates the PS-tree T-OUT attached to $v$ s.t.\ its leaf $a_j$ is assigned the residual capacity of $e_j$. $f(e_j$) is set to 0. In the next step, each processor assigned to a vertex $v$ initializes its pointers head($v$) and $k'(v)$.
+In Algorithms \ref{algo:sv_init}, \ref{algo:sv_push} and \ref{algo:sv_return}, the notation \textcolor{blue}{$P()$:} is used to indicate that the following instructions are carried out only by the specified processors. Algorithm \ref{algo:sv_init} shows the initialization routine executed at the beginning of each pulse. Each processor assigned to an arc $e_j = (v, w)$ updates the PS-tree T-OUT attached to $v$ s.t.\ its leaf $a_j$ is assigned the residual capacity of $e_j$. $f(e_j$) is set to 0. In the next step, each processor assigned to a vertex $v$ initializes its pointers head($v$) and $k'(v)$.
 
 \begin{algorithm}
 \caption{Shiloach-Vishkin: INITIALIZE}
 \label{algo:sv_init}
 At beginning of each pulse:	
 \begin{algorithmic}[1]
-	\Function{INITIALIZE}{v}
-		\State \textcolor{blue}{P($e_j = v \rightarrow w$):}
+	\Function{INITIALIZE}{$v$}
+		\State \textcolor{blue}{$P(e_j = v \rightarrow w)$:}
 		\State UPDATE($j$, $c_r(e_j)$) T-OUT(v)
 		\State $f(e_j) \gets 0$
-		\State \textcolor{blue}{P(v):}
+		\State \textcolor{blue}{$P(v)$:}
 		\State $\mathrm{head}(v) \gets 0	$
 		\State $k'(v) \gets 1$	
  	\EndFunction
@@ -425,32 +426,32 @@ In the next step, all processors assigned to an arc $e_j$ s.t. $k'\leq j \leq k'
 \caption{Shiloach-Vishkin: PUSH}
 \label{algo:sv_push}
 \begin{algorithmic}[1]
-	\Function{PUSH}{v,EXCESS(v)}
-		\State \textcolor{blue}{P(v):}
-		\State $\alpha \gets$ min\{EXCESS(v), T-OUT(v)[root]\} 
-		\State EXCESS(v) $\gets$ EXCESS(v) - $\alpha$
-		\State FIND($\alpha$, k, $\rho$) in T-OUT(v)
-		\State \textcolor{blue}{P($e_j = v \rightarrow w$):}
-		\If{k' $\leq$ j $\leq$ k' + k}
- 		\State UPDATE(j,1) in T-ACCESS(w)
-		\State SUM(j,$S_j$) in T-ACCESS(w)
-		\If{$j == k$}
+	\Function{PUSH}{$v$,EXCESS($v$)}
+		\State \textcolor{blue}{$P(v)$:}
+		\State $\alpha \gets$ min\{EXCESS($v$), T-OUT($v$)[root]\} 
+		\State EXCESS($v$) $\gets$ EXCESS($v$) - $\alpha$
+		\State FIND($\alpha$, $k$, $\rho$) in T-OUT($v$)
+		\State \textcolor{blue}{$P(e_j = v \rightarrow w)$:}
+		\If{$k' \leq j \leq k' + k$}
+ 		\State UPDATE($j$,1) in T-ACCESS($w$)
+		\State SUM($j$,$S_j$) in T-ACCESS($w$)
+		\If{$j = k$}
 			$q_j \gets \rho$
 		\Else
-			\State $q_j\gets$ T-OUT(v)[1,j]
+			\State $q_j\gets$ T-OUT($v$)[1,$j$]
 		\EndIf
 		\State $f(e_j) \gets f(e_j)$ + $q_j$
-		\State TOTAL(w) $\gets$ T-IN(w)[root]
-		\State UPDATE(head(w) + $S_j$, $q_j$) in T-IN(w)
-		\State UPDATE(j, T-OUT(v)[1,j] - $q_j$) in T-OUT(v)
-		\State head(w) $\gets$ head(w) + T-ACCESS(w)[root] 
-		\State CLEAR(j) in T-ACCESS(w)
-		\State EXCESS(w) $\gets$ T-IN(w)[root] - TOTAL(w)
+		\State TOTAL($w$) $\gets$ T-IN($w$)[root]
+		\State UPDATE(head($w$) + $S_j$, $q_j$) in T-IN($w$)
+		\State UPDATE($j$, T-OUT($v$)[1,$j$] - $q_j$) in T-OUT($v$)
+		\State head($w$) $\gets$ head($w$) + T-ACCESS($w$)[root] 
+		\State CLEAR($j$) in T-ACCESS($w$)
+		\State EXCESS($w$) $\gets$ T-IN($w$)[root] - TOTAL($w$)
 		\EndIf
-		\State \textcolor{blue}{P(v):} $k' \gets k$
-		\State \textcolor{blue}{P($e_j = v \rightarrow w$):}
-		\If{EXCESS(v) $>$ 0}
-			\State block v
+		\State \textcolor{blue}{$P(v)$:} $k' \gets k$
+		\State \textcolor{blue}{$P(e_j = v \rightarrow w)$:}
+		\If{EXCESS($v$) $>$ 0}
+			\State block $v$
 		\EndIf
  	\EndFunction
 \end{algorithmic}
@@ -474,23 +475,23 @@ Finally, in line 17 the pointer $head$ is set to the latest flow quantum that wa
 \caption{Shiloach-Vishkin: RETURN}
 \label{algo:sv_return}
 \begin{algorithmic}[1]
-	\Function{RETURN}{v, EXCESS(v)}
-		\State \textcolor{blue}{P(v):}
-		\State FIND (T-IN(v)[root] - EXCESS(v), k, $\rho$) in T-IN(v)
+	\Function{RETURN}{$v$, EXCESS($v$)}
+		\State \textcolor{blue}{$P(v)$:}
+		\State FIND (T-IN($v$)[root] - EXCESS($v$), $k$, $\rho$) in T-IN($v$)
 		\State EXCESS(v) $\gets$ 0
 		\State \textcolor{blue}{$P(Q_j = (e_j = u \rightarrow v, q_j))$:}
 		\State $d_j \gets q_j$ for $k < j \leq head(v)$
 		\State $d_j \gets q_j - \rho$ if $j == k$
-		\State UPDATE(j, 0) in T-IN(v) for $k < j \leq head(v)$
-		\State UPDATE(j, $\rho$) in T-IN(v) if $j == k$
+		\State UPDATE($j$, 0) in T-IN($v$) for $k < j \leq head(v)$
+		\State UPDATE($j$, $\rho$) in T-IN($v$) if $j == k$
 		\State UPDATE($p_j$,$d_j$) in T-EDGE($e_j$)
 		\State $f(e_j) \gets f(e_j)$ - T-EDGE($e_j$)[root]
-		\State UPDATE($e_j$, T-EDGE($e_j$)[root]) in T-SUM(u)
-		\State EXCESS(u) $\gets$ EXCESS(u) + T-SUM(u)[root]
+		\State UPDATE($e_j$, T-EDGE($e_j$)[root]) in T-SUM($u$)
+		\State EXCESS(u) $\gets$ EXCESS($u$) + T-SUM($u$)[root]
 		\State CLEAR($r_j$) in T-EDGE($e_j$)
-		\State CLEAR($e_j$) in T-SUM(u)
-		\State \textcolor{blue}{P(v):}
-		\State head(v) $\gets k$
+		\State CLEAR($e_j$) in T-SUM($u$)
+		\State \textcolor{blue}{$P(v)$:}
+		\State head($v$) $\gets k$
 	\EndFunction
 \end{algorithmic}
 \end{algorithm}
@@ -525,10 +526,10 @@ The \emph{Work-time framework} as presented in~\cite{vishkin92} allows for a sim
 \subsection{Analysis}
 \label{sec:sv_analysis}
 \begin{theorem}
-The algorithm of Shiloach and Vishkin solves \lstinline|MAX-FLOW| in  $O(n^{2} \log n)$, using $O(n)$ processors on a CREW PRAM.
+The algorithm of Shiloach and Vishkin solves \lstinline|MAX-FLOW| in  $O(n^{2} \log n)$ time steps, using $O(n)$ processors on a CREW PRAM.
 \end{theorem}
 
-Using the results from the previous sections, we can now provide asymptotic bounds for all steps of Algorithm \ref{algo:sv}. According to Dinitz' scheme, the while-loop is bounded by $O(n)$ iterations. Constructing the residual network $G_r$ can trivially be done in $O(n)$ using $n$ processors, since $m \in O(n^{2})$. Breath-first search can be used to construct a layered network $G_l$ out of $G_r$. Efficient parallel implementations of BFS run in $O(m/p +n)$ time using n processors on a CREW PRAM~\cite{Varman87}. Adding the found \lstinline|MAX-FLOW| of a layered network to the global \lstinline|MAX-FlOW| can again be done in $O(n)$ time. 
+Using the results from the previous sections, we can now provide asymptotic bounds for all steps of Algorithm \ref{algo:sv}. According to Dinitz' scheme, the while-loop is bounded by $O(n)$ iterations. Constructing the residual network $G_r$ can trivially be done in $O(n)$ using $n$ processors, since $m \in O(n^{2})$. Breadth-first search can be used to construct a layered network $G_l$ out of $G_r$. Efficient parallel implementations of BFS run in $O(m/p +n)$ time using n processors on a CREW PRAM~\cite{Varman87}. Adding the found \lstinline|MAX-FLOW| of a layered network to the global \lstinline|MAX-FlOW| can again be done in $O(n)$ time. 
 
 It remains to compute the complexity of finding a \lstinline|MAX-FlOW| in a layered network $G_l$, as shown in Algorithm \ref{algo:sv}. Each \lstinline|PUSH| or \lstinline|RETURN| operation requires $O(\log n)$ steps, since they do not contain any loops and statements operate on paths from a leaf to the root of a binary tree of height $O(\lceil \log_2(n) \rceil)$.
 
@@ -699,6 +700,7 @@ The algorithm of Goldberg and Tarjan solves \lstinline|MAX-FLOW| on directed acy
 
 As discussed in Section \ref{sec:gt_parImpl}, the algorithm can be implemented such that each phase requires $O(\log n)$ steps by using $O(m)$ processors. The above corollary implies that $O(n)$ phases are required. Thus, the total runtime is $O(n\log n)$. The space complexity of the algorithm is $O(nm)$, which is dominated by storing the traces of $O(m)$ atoms, each of length $O(n)$.  
 
+Note that the algorithm of Goldberg-Tarjan works on acyclic networks only, whereas the algrothim of Shiloach-Vishkin as presented in Section \ref{sec:shiloach} does not have this restriction. One possiblity to overcome this restriction of the Goldberg-Tarjan algorithm is to apply Dinitz' scheme (Section \ref{sec:dinitz}), resulting in a total complexity of $O(n^{2}\log n)$ time steps.
 
 \begin{table*}
 \begin{center}
@@ -712,8 +714,10 @@ As discussed in Section \ref{sec:gt_parImpl}, the algorithm can be implemented s
   & & & on layered networks\\
 4 & Preflow-Push~\cite{ahuja93} & $O(n^2*m)$, $O(nm \log(n^2/m))$ & Various improvements\\
 5 & Shiloach-Vishkin~\cite{yossi81} & $O(n^2 \log m)$, $p=O(n)$ & On CREW PRAM\\
-6 & Goldberg-Tarjan~\cite{goldberg89} & $O(n \log n)$, $p=O(m)$, $O(nm)$ space & On EREW PRAM \\
-7 & Vishkin~\cite{vishkin92} & $O(n \log n)$, $p=O(n)$, $O(n^2)$ space & Combines previous two\\
+6 & Goldberg-Tarjan~\cite{goldberg89} & $O(n \log n)$, $p=O(m)$, $O(nm)$ space & On EREW PRAM; \\ 
+  & & & for acyclic networks \\
+7 & Vishkin~\cite{vishkin92} & $O(n \log n)$, $p=O(n)$, $O(n^2)$ space & Combines previous two;\\ 
+  & & & for acyclic networks\\
 8 & Johnson~\cite{johnson87} & $O(\log^{3} n)$, $p=O(n^{4})$ or $O(\log^{2} n)$, $p=O(n^{6})$ &
 For planar networks\\
   & & $	O(\log^{2} n)$, $p=O(n^{4})$ & On undirected graphs \\
@@ -729,9 +733,9 @@ For planar networks\\
 
 \section{Further results and conclusion}
 \label{sec:further}
-Table \ref{tbl:results} gives an overview of the algorithms presented in this paper as well as some further results. Entries 1-4 depict classical early results, which are the foundation of the Algorithms of Shiloach-Vishkin (5) and Goldberg-Tarjan (6) presented in this paper.  Vishkin (7) combined the two results to an algorithm for an EREW PRAM with time complexity $O(n \log n)$ using $O(n)$ processors and $O(n^{2})$ space. For specialized problems, more efficient algorithms may exist, as shown by Johnson's algorithms solving \lstinline|MAX-FLOW| on planar networks, undirected graphs or for  given maximum flow value in poly-logarithmic time (albeit an unrealistic requirement in number of processors for larger networks). King, Rao and Tarjan (9) showed that the problem can be solved in $O(nm)$ time for larger $m$ on a single processor. A recent result of Orlin (10) proves the conjecture that the \lstinline|MAX-FLOW| problem can be solved in $O(nm)$ time for any $m$ without parallelism. However, this is still slower by a factor of $m/ \log m$ compared to Vishkin's~\cite{vishkin92} 20 year old algorithm for a PRAM, indicating the usefulness of parallel solutions even for problems that are assumed to be inherently sequential, as we showed in Section \ref{sec:cc}.
+Table \ref{tbl:results} gives an overview of the algorithms presented in this paper as well as some further results. Entries 1-4 depict classical early results, which are the foundation of the Algorithms of Shiloach-Vishkin (\ref{tbl:results}, line 5) and Goldberg-Tarjan (line 6) presented in this paper.  Vishkin combined the two results to an algorithm for an EREW PRAM with time complexity $O(n \log n)$ using $O(n)$ processors and $O(n^{2})$ space (line 7). For specialized problems, more efficient algorithms may exist, as shown by Johnson's algorithms (line 8) solving \lstinline|MAX-FLOW| on planar networks, undirected graphs or for  given maximum flow value in poly-logarithmic time (albeit an unrealistic requirement in number of processors for larger networks). King, Rao and Tarjan showed that the problem can be solved in $O(nm)$ time for larger $m$ on a single processor (line 9). A recent result of Orlin proves the conjecture that the \lstinline|MAX-FLOW| problem can be solved in $O(nm)$ time for any $m$ without parallelism (line 10). However, this is still slower by a factor of $m/ \log m$ compared to Vishkin's~\cite{vishkin92} 20 year old algorithm for a PRAM, indicating the usefulness of parallel solutions even for problems that are assumed to be inherently sequential, as we showed in Section \ref{sec:cc}.
 
-Although the PRAM model, on which we based our analysis, does not seem to be a ``practical'' model\footnote{only some prototypes were built so far} of parallel computation, its high level of abstraction provides the means to develop and analyze parallel algorithms in a clear fashion without the tediousness often involved when working with a more realistic model (such as shared memory or message passing).  Nevertheless, once it was proved that a parallel poly-logarithmic time algorithm does not exist for \lstinline|MAX-FLOW|\footnote{assuming that $P \neq NP$.}, efforts to improve the complexity bounds of PRAM algorithms have somewhat declined.
+Although the PRAM model, on which we based our analysis, does not seem to be a ``practical'' model\footnote{only some prototypes were built so far} of parallel computation, its high level of abstraction provides the means to develop and analyze parallel algorithms in a clear fashion without the tediousness often involved when working with a more realistic model (such as shared memory or message passing). Nevertheless, once it was proved that a parallel poly-logarithmic time algorithm does not exist for \lstinline|MAX-FLOW|\footnote{assuming that $P \neq NC$.}, efforts to improve the complexity bounds of PRAM algorithms have somewhat declined.
 
 
 %\pagebreak
