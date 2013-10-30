@@ -64,7 +64,7 @@ Another approach to solve the problem in parallel was developed by Goldberg and 
 
 \section{Network flows}
 \label{sec:networkFlows}
-A \textbf{flow network}~\cite{ahuja93} is a 4-tuple $N := (G,s,t,c)$, where
+A \textit{flow network}~\cite{ahuja93} is a 4-tuple $N := (G,s,t,c)$, where
 \begin{itemize}
 	\item $G =(V,E)$ is a directed graph
     \item $s, t \in V$, $s \neq t$ are the source and terminal node
@@ -80,7 +80,7 @@ Furthermore, the following assumptions are made:
 \end{itemize}
 
 \medskip
-$f:E \rightarrow \mathbb{R}_0^{+}$ is a \textbf{flow} if it satisfies:
+$f:E \rightarrow \mathbb{R}_0^{+}$ is a \textit{flow} if it satisfies:
 \begin{itemize}
 	\item \emph{Capacity constraints:} $f(e) \leq c(e)$ $\forall e \in E$
 	\item \emph{Flow conservation:} 
@@ -187,13 +187,13 @@ Note that the algorithm of Ford and Fulkerson is restricted to integer capacitie
 
 \section{Model of Computation}
 \label{sec:model}
-We use the \textbf{PRAM} Model\footnote{Parallel Random Access Machine, as defined in the lecture or in~\cite{papa95}.} as the model of computation. The PRAM model is a high level abstraction of a shared memory machine, in which memory access by any processor to any memory location is assumed to require constant time. Specifically, a \textbf{MIMD} (Multiple Instructions Multiple Data) variant is used, where each processor $p$ executes a distinct set of instructions on distinct data. Instructions are executed in lock-step and any necessary padding of instructions is assumed to be done automatically. 
+We use the \textit{PRAM} Model\footnote{Parallel Random Access Machine, as defined in the lecture or in~\cite{papa95}.} as the model of computation. The PRAM model is a high level abstraction of a shared memory machine, in which memory access by any processor to any memory location is assumed to require constant time. Specifically, a \textit{MIMD} (Multiple Instructions Multiple Data) variant is used, where each processor $p$ executes a distinct set of instructions on distinct data. Instructions are executed in lock-step and any necessary padding of instructions is assumed to be done automatically. 
 
 \section{Computational Complexity}
 \label{sec:cc}
 The algorithmic complexity of the \emph{Ford-Fulkerson} algorithm is given as $O((n+m)f_{\mathrm{max}})$\footnote{$f_{\mathrm{max}}$ is from here on used to denote the maximum flow.}~\cite{ahuja93,papa95}. This was improved by the \emph{Edmonds-Karp} algorithm to $O(nm^2)$, by using shortest augmenting paths instead of arbitrarily chosen ones. Clearly, the \emph{maximum flow problem} can be solved in polynomial time with a sequential algorithm and thus \lstinline|MAX-FLOW| $\in P$.
 
-Informally, algorithms may be \emph{efficiently parallelizable} or \emph{inherently sequential}. The complexity class \textbf{NC}~\cite{papa95} ("Nick's Class") contains all problems solvable in $O(\log^{k_1}(n))$ time and $O(n^{k_2})$ total work. We give a useful alternate definition:  A language that is decided by PRAM in $O(\log^{k_1}(n))$ time steps with $O(n^{k_2})$ processors available at each step is in $NC$. Problems in $NC$ thus are solvable  in poly-logarithmic time requiring polynomial work (or resources, such as processors and memory). Problems in $P \setminus NC$ are dubbed "inherently sequential", i.e., not parallelizable efficiently. 
+Informally, algorithms may be \emph{efficiently parallelizable} or \emph{inherently sequential}. The complexity class \textit{NC}~\cite{papa95} ("Nick's Class") contains all problems solvable in $O(\log^{k_1}(n))$ time and $O(n^{k_2})$ total work. We give a useful alternate definition:  A language that is decided by PRAM in $O(\log^{k_1}(n))$ time steps with $O(n^{k_2})$ processors available at each step is in $NC$. Problems in $NC$ thus are solvable  in poly-logarithmic time requiring polynomial work (or resources, such as processors and memory). Problems in $P \setminus NC$ are dubbed "inherently sequential", i.e., not parallelizable efficiently. 
 
 Clearly, $NC \subseteq P$, but whether $NC \subset P$ or $NC = P$ is still unknown. It follows that we do not know whether or not inherently sequential problems actually exist. The most likely problems to be hard to parallelize are problems that are P-complete w.r.t.\ NC reduction. Since any problem $A \in P$ can be reduced to a P-complete problem $B$, a parallel algorithm that solves $B$ within poly-logarithmic time bounds would immediately imply that for all problems $\in P$ a parallel algorithm $\in NC$ exists~\cite{papa95}.
 
@@ -203,7 +203,7 @@ As shown in~\cite{papa95}, \lstinline|MAX-FLOW| is P-complete and no parallel al
 
 \section{Dinitz' scheme}
 \label{sec:dinitz}
-$N = (V,E,s,t,c)$ is a \textbf{layered network}~\cite{yossi81} if each vertex $v \in V$ has a layer number $l(v)$ s.t.
+$N = (V,E,s,t,c)$ is a \textit{layered network}~\cite{yossi81} if each vertex $v \in V$ has a layer number $l(v)$ s.t.
 \begin{itemize}
 	\item $l(s) := 0$ and $0 \leq l(v) \leq l(t)$ $\forall v \in V$
 	\item $e = (u,v) \in E  \Rightarrow l(v) - l(u) = 1$
@@ -244,7 +244,7 @@ Figure \ref{fig:dinitz} shows a layered network and its underlying directed acyc
 \end{figure}
 
 \begin{theorem}
-\textbf{Dinitz' scheme}~\cite{dinitz70} \\
+\textit{Dinitz' scheme}~\cite{dinitz70} \\
 A maximum flow problem in a general network can be transformed into $O(n)$ maximal flow problems in layered networks.
 \end{theorem}
 
