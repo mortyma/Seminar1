@@ -389,7 +389,7 @@ We use the following processor assignment:
 \begin{itemize}
 	\item Each vertex $v \in V$ has a processor $P(v)$ assigned
 	\item Each arc $e \in E$ has a processor $P(e)$ assigned
-	\item Each flow quantum $Q$ has a processor $P(Q)$ assigned. In other words, each leaf in each of the $2n * d_{\mathrm{in}}(v)$ T-IN(v) PS-trees has a processor $P(Q)$ assigned.
+	\item Each flow quantum $Q$ has a processor $P(Q)$ assigned. In other words, each leaf in each of the $2n \cdot d_{\mathrm{in}}(v)$ T-IN(v) PS-trees has a processor $P(Q)$ assigned.
 \end{itemize}
 
 The total number of required processors is $O(nm)$, which is dominated by the assignment of one processor for each flow quantum. This apparently large number of required processors can be reduced to $n$, which we will prove in Section \ref{sec:sv_nr_procs}. We will however use the above assignment of processors to present the essentials of the algorithm in cleaner way.   
@@ -708,11 +708,11 @@ Note that the algorithm of Goldberg-Tarjan works on acyclic networks only, where
 \hline
 &\textbf{Algorithm} & \textbf{Bounds} & \textbf{Remarks} \\
 \hline
-1 & Ford-Fulkerson~\cite{ahuja93} & $O((n+m) * f_{max})$ & Sequential algorithm \\
-2 & Edmonds-Karp~\cite{ahuja93} & $O(n*m^2)$ & Sequential algorithm  \\
-3 & Dinitz~\cite{dinitz70}& $O(n^2*m)$ & Sequential algorithm \\
+1 & Ford-Fulkerson~\cite{ahuja93} & $O((n+m) \cdot f_{max})$ & Sequential algorithm \\
+2 & Edmonds-Karp~\cite{ahuja93} & $O(n\cdot m^2)$ & Sequential algorithm  \\
+3 & Dinitz~\cite{dinitz70}& $O(n^2 \cdot m)$ & Sequential algorithm \\
   & & & on layered networks\\
-4 & Preflow-Push~\cite{ahuja93} & $O(n^2*m)$, $O(nm \log(n^2/m))$ & Various improvements\\
+4 & Preflow-Push~\cite{ahuja93} & $O(n^2\cdot m)$, $O(nm \log(n^2/m))$ & Various improvements\\
 5 & Shiloach-Vishkin~\cite{yossi81} & $O(n^2 \log m)$, $p=O(n)$ & On CREW PRAM\\
 6 & Goldberg-Tarjan~\cite{goldberg89} & $O(n \log n)$, $p=O(m)$, $O(nm)$ space & On EREW PRAM; \\ 
   & & & for acyclic networks \\
