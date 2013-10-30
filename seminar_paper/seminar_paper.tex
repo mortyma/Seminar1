@@ -61,7 +61,7 @@ The \emph{maximum flow problem} (\lstinline|MAX-FLOW|), is an important problem 
 
 Section \ref{sec:dinitz} discusses Dinitz' scheme, a fundamental result in graph theory that allows to  decompose the problem of finding a maximum flow in an arbitrary directed acyclic graph with $n$ vertices into $O(n)$ problems of finding a maximal flow in a layered network, which is a significantly simpler problem. Several improvements of previous algorithms are based on Dinitz' scheme, as is an early parallel algorithm of Shiloach and Vishkin, which will be presented in detail in  Section \ref{sec:shiloach}. This algorithm solves \lstinline|MAX-FLOW| in a layered network using the pre-flow push principle. Section \ref{sec:sv_parImpl} gives the necessary technical details for a parallel implementation of the algorithm, while Sections \ref{sec:sv_seq}, \ref{sec:sv_nr_procs} and \ref{sec:sv_analysis} deal with the theoretical analysis of the sequential variant\footnote{Simulating the parallel algorithm with one processor trivially yields a sequential algorithm.}, the number of required processors and the asymptotic complexity, respectively.
 
-Another approach to solve the problem in parallel was developed by Goldberg and Tarjan. Their approach works on directed acyclic graphs without the detour via layered networks. It keeps track of the movement of each unit of flow by tracking it's path through the network. We will explain their solution in Section \ref{sec:goldberg} and provide theoretical analysis in Section \ref{sec:gt_analysis}. We finish our discussion with a comparison of the algorithms presented in this paper and further important results as well as some concluding remarks in Section \ref{sec:further}. 
+Another approach to solve the problem in parallel was developed by Goldberg and Tarjan. Their approach works on directed acyclic graphs without the detour via layered networks. It keeps track of the movement of each unit of flow by tracking its path through the network. We will explain their solution in Section \ref{sec:goldberg} and provide theoretical analysis in Section \ref{sec:gt_analysis}. We finish our discussion with a comparison of the algorithms presented in this paper and further important results as well as some concluding remarks in Section \ref{sec:further}. 
 
 \section{Network flows}
 \label{sec:networkFlows}
@@ -209,7 +209,7 @@ $N = (V,E,s,t,c)$ is a \textbf{layered network}~\cite{yossi81} if each vertex $v
 	\item $l(s) = 0$ and $0 \leq l(v) \leq l(t)$ $\forall v \in V$
 	\item $e = (u,v) \in E  \Rightarrow l(v) - l(u) = 1$
 \end{itemize}
-Figure \ref{fig:dinitz} shows a layered network and it's underlying directed acyclic network.
+Figure \ref{fig:dinitz} shows a layered network and its underlying directed acyclic network.
 
 \begin{figure}
 \begin{center}
@@ -240,7 +240,7 @@ Figure \ref{fig:dinitz} shows a layered network and it's underlying directed acy
 	\end{pgfonlayer}
 \end{tikzpicture}
 \end{center}
-\caption{A layered network (in blue) with layer numbers and it's underlying network}
+\caption{A layered network (in blue) with layer numbers and its underlying network}
 \label{fig:dinitz}
 \end{figure}
 
@@ -275,7 +275,7 @@ The following notation will be used:
 \begin{description}
 	\item [EXCESS(v)] The amount of excessive pre-flow at node $v$. \lstinline|EXCESS(v)| = $\mathrm{IN}(f,v) - \mathrm{OUT}(f,v) \geq 0$.
 	\item[UNBALANCED] The set of vertices that hold some excess flow. \lstinline|UNBALANCED| = $\{v \in V \lvert \mathrm{EXCESS}(v) > 0 \}$. The sequential implementation (Section \ref{sec:sv_seq}) uses a queue to maintain FIFO order on the set of unbalanced vertices.
-	\item[blocked] A vertex v is blocked if for all it's outgoing arcs $e_i = (v, u_i)$, $e_i$ is either saturated or $u_i$ is blocked\footnote{The sink vertex $t$ is never blocked.}. 
+	\item[blocked] A vertex v is blocked if for all its outgoing arcs $e_i = (v, u_i)$, $e_i$ is either saturated or $u_i$ is blocked\footnote{The sink vertex $t$ is never blocked.}. 
 \end{description}
 	
 The algorithm operates in \emph{pulses}: In the first pulse, all outgoing arcs of $s$ or saturated: $\forall e_i = (s, v_i):$ $f(e_i) = c(e_i)$. The set of unbalanced vertices at the end of pulse 1 is thus the set of all neighbors of $s$: \lstinline|UNBALANCED| = $\{v_i\lvert \exists (s, v_i) \in E \}$. In each subsequent pulse, the unbalanced vertices try to push forward\footnote{i.e., to the next layer of the network.} as much of their excessive flow as possible. Any remaining excessive flow will be returned backwards. All balanced vertices remain idle during the pulses. The algorithm terminates as soon as no unbalanced vertices are available, implying that all flow reached the source $s$ or sink $t$.
@@ -305,7 +305,7 @@ Algorithm \ref{algo:sv} shows an abstract routine for solving \lstinline|MAX-FLO
 
 \subsection{Partial Sums trees}
 \label{sec:sv_pstrees}
-A \emph{partial sums tree} (PS-tree) is a complete binary tree with the leftmost $k$ leaves associated with $k$ numbers $a_1,...,a_k$. A PS-tree is of height $height := \lceil \log_2(k) \rceil$ and has $width := 2^{\lceil \log_2(k) \rceil}$ leaves. The remaining $w - k$ rightmost leaves are associated with 0. Each internal node of a PS-tree stores the sum of it's child nodes. Thus, the root node stores the sum of all the leaves of the tree. Figure \ref{fig:pstree} provides an example.
+A \emph{partial sums tree} (PS-tree) is a complete binary tree with the leftmost $k$ leaves associated with $k$ numbers $a_1,...,a_k$. A PS-tree is of height $height := \lceil \log_2(k) \rceil$ and has $width := 2^{\lceil \log_2(k) \rceil}$ leaves. The remaining $w - k$ rightmost leaves are associated with 0. Each internal node of a PS-tree stores the sum of its child nodes. Thus, the root node stores the sum of all the leaves of the tree. Figure \ref{fig:pstree} provides an example.
 
 \begin{figure}[H]
 \begin{center}
@@ -400,7 +400,7 @@ In addition to the four PS-trees attached to each vertex $v$, $v$ keeps two poin
 	\item [$k'$] The outgoing arcs of $v$ are assumed to be ordered arbitrarily. $k'$ points to the first outgoing arc\footnote{the arc with the smallest index w.r.t. the given ordering.} that is not yet saturated. In other words, $k'$ points to the next arc that can be utilized to push excess flow from $v$.  
 \end{description}
 
-In Algorithms \ref{algo:sv_init}, \ref{algo:sv_push} and \ref{algo:sv_return}, the notation \textcolor{blue}{P():} is used to indicate that the following instructions are carried out only by the specified processors. Algorithm \ref{algo:sv_init} shows the initialization routine executed at the beginning of each pulse. Each processor assigned to an arc $e_j = (v, w)$ updates the PS-tree T-OUT attached to $v$ s.t.\ it's leave $a_j$ is assigned the residual capacity of $e_j$. $f(e_j$) is set to 0. In the next step, each processor assigned to a vertex $v$ initializes its pointers head($v$) and $k'(v)$.
+In Algorithms \ref{algo:sv_init}, \ref{algo:sv_push} and \ref{algo:sv_return}, the notation \textcolor{blue}{P():} is used to indicate that the following instructions are carried out only by the specified processors. Algorithm \ref{algo:sv_init} shows the initialization routine executed at the beginning of each pulse. Each processor assigned to an arc $e_j = (v, w)$ updates the PS-tree T-OUT attached to $v$ s.t.\ its leaf $a_j$ is assigned the residual capacity of $e_j$. $f(e_j$) is set to 0. In the next step, each processor assigned to a vertex $v$ initializes its pointers head($v$) and $k'(v)$.
 
 \begin{algorithm}
 \caption{Shiloach-Vishkin: INITIALIZE}
