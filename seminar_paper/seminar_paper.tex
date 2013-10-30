@@ -84,7 +84,7 @@ $f:E \rightarrow \mathbb{R}_0^{+}$ is a \textit{flow} if it satisfies:
 \begin{itemize}
 	\item \emph{Capacity constraints:} $f(e) \leq c(e)$ $\forall e \in E$
 	\item \emph{Flow conservation:} 
-	$ \sum\limits_{u \in V} f(u,v) =  0 \Leftrightarrow \mathrm{IN}$\footnote{$\mathrm{IN}(f,v)$ and $\mathrm{OUT}(f,v)$ designate the amount of flow entering and exiting a node $v$}$(f,v) = \mathrm{OUT}(f,v)$ $\forall v \in V \setminus \{s,t\}$
+	$ \sum\limits_{u \in V} f(u,v) =  0 \Leftrightarrow \mathrm{IN}(f,v) = \mathrm{OUT}(f,v)$ $\forall v \in V \setminus \{s,t\}$, where $\mathrm{IN}(f,v)$ and $\mathrm{OUT}(f,v)$ designate the amount of flow entering and exiting a node $v$
 	\item \emph{Skew symmetry:} $f(v,w) = -f(w,v)$
 	\item \emph{Value of a flow:} $\lvert f\rvert := f(V,t)$ 
 \end{itemize}
@@ -191,7 +191,7 @@ We use the \textit{PRAM} Model\footnote{Parallel Random Access Machine, as defin
 
 \section{Computational Complexity}
 \label{sec:cc}
-The algorithmic complexity of the \emph{Ford-Fulkerson} algorithm is given as $O((n+m)f_{\mathrm{max}})$\footnote{$f_{\mathrm{max}}$ is from here on used to denote the maximum flow.}~\cite{ahuja93,papa95}. This was improved by the \emph{Edmonds-Karp} algorithm to $O(nm^2)$, by using shortest augmenting paths instead of arbitrarily chosen ones. Clearly, the \emph{maximum flow problem} can be solved in polynomial time with a sequential algorithm and thus \lstinline|MAX-FLOW| $\in P$.
+Let $f_{\mathrm{max}}$ denote the maximum flow. The algorithmic complexity of the \emph{Ford-Fulkerson} algorithm is given as $O((n+m)f_{\mathrm{max}})$~\cite{ahuja93,papa95}. This was improved by the \emph{Edmonds-Karp} algorithm to $O(nm^2)$, by using shortest augmenting paths instead of arbitrarily chosen ones. Clearly, the \emph{maximum flow problem} can be solved in polynomial time with a sequential algorithm and thus \lstinline|MAX-FLOW| $\in P$.
 
 Informally, algorithms may be \emph{efficiently parallelizable} or \emph{inherently sequential}. The complexity class \textit{NC}~\cite{papa95} ("Nick's Class") contains all problems solvable in $O(\log^{k_1}(n))$ time and $O(n^{k_2})$ total work. We give a useful alternate definition:  A language that is decided by PRAM in $O(\log^{k_1}(n))$ time steps with $O(n^{k_2})$ processors available at each step is in $NC$. Problems in $NC$ thus are solvable  in poly-logarithmic time requiring polynomial work (or resources, such as processors and memory). Problems in $P \setminus NC$ are dubbed "inherently sequential", i.e., not parallelizable efficiently. 
 
@@ -342,7 +342,7 @@ A \emph{flow quantum} is a 3-tuple $(p, e, f)$, where $p$ is the number of the p
 
 For the parallel implementation of \lstinline|PUSH| and \lstinline|RETURN|, several PS-trees will be used. Four PS-trees are attached to every vertex $v \in V$:
 \begin{description}
-	\item [T-OUT($v$)] Each active leaf $a_i$ is associated with an outgoing arc $e_i = (v, w_i)$. The value of leaf $i$ is $a_i = c(e_i) - f(e_i)$, i.e., $a_i$ stores the residual capacity of $e_i$. T-OUT($v$) has $d_{\mathrm{out}}(v)$\footnote{As usual, $d_{\mathrm{in}}(v)$ and $d_{\mathrm{out}}(v)$ designate the in- and out-degree of a vertex.} active leaves.
+	\item [T-OUT($v$)] Each active leaf $a_i$ is associated with an outgoing arc $e_i = (v, w_i)$. The value of leaf $i$ is $a_i = c(e_i) - f(e_i)$, i.e., $a_i$ stores the residual capacity of $e_i$. T-OUT($v$) has $d_{\mathrm{out}}(v)$ active leaves\footnote{As usual, $d_{\mathrm{in}}(v)$ and $d_{\mathrm{out}}(v)$ designate the in- and out-degree of a vertex.}.
 	\item [T-IN($v$)] Records flow quanta reaching $v$. T-IN($v$) has $2nd_{\mathrm{in}}(v)$ active leaves to be able to record the pulse\footnote{the number of pulses is bounded by $O(2n)$~\cite{yossi81}.} and arc for each flow quantum that reaches $v$. 
 	\item [T-ACCESS($v$)] Each of the $d_{\mathrm{in}}(v)$ active leaves is associated with one edge entering $v$. Used to coordinate access to $v$.
 	\item [T-SUM($v$)] Sums up the flow returned to $v$ in a given pulse. $d_{\mathrm{out}}(v)$ active leaves. 
@@ -519,7 +519,7 @@ These charging rules yield an $O(n^{2})$ bound on the number of elementary opera
 An allocation of processors to jobs s.t. $n$ processors are sufficient is possible without affecting the complexity of the algorithm. 
 \end{theorem}
 \begin{proof}
-The \emph{Work-time framework} as presented in~\cite{vishkin92} allows for a simple justification of the theorem. The number of rounds is $O(n^2 \log n)$: One pulse can be executed in $O(\log n)$ time steps (no loops, operations on binary trees of height $\lceil 2 \log 2n \rceil$ only). Since we need at most $2n$ pulses\footnote{see~\cite{yossi81} for a detailed proof.} for solving \lstinline|MAX-FLOW| each of the $O(n)$ layered networks\footnote{according to Dinitz' scheme, as explained in Section \ref{sec:dinitz}.}, the total number of time steps is $T \in O(n^{2} \log n)$. By similar arguments as we used in Section \ref{sec:sv_seq}, we obtain an amount of total work $W \in O(n^{3} \log n)$\footnote{see~\cite{yossi81} for a more detailed proof.}. Applying \emph{Brent's theorem}~\cite{Brent74}, we get $\lceil W/p \rceil + T$ rounds, which is $O(n^{2} \log n)$ rounds for $p=n$, proving the lemma.
+The \emph{Work-time framework} as presented in~\cite{vishkin92} allows for a simple justification of the theorem. The number of rounds is $O(n^2 \log n)$: One pulse can be executed in $O(\log n)$ time steps (no loops, operations on binary trees of height $\lceil 2 \log 2n \rceil$ only). Since we need at most $2n$ pulses\footnote{see~\cite{yossi81} for a detailed proof.} for solving \lstinline|MAX-FLOW| each of the $O(n)$ layered networks\footnote{according to Dinitz' scheme, as explained in Section \ref{sec:dinitz}.}, the total number of time steps is $T \in O(n^{2} \log n)$. By similar arguments as we used in Section \ref{sec:sv_seq}, we obtain an amount of total work\footnote{see~\cite{yossi81} $W \in O(n^{3} \log n)$ for a more detailed proof.}. Applying \emph{Brent's theorem}~\cite{Brent74}, we get $\lceil W/p \rceil + T$ rounds, which is $O(n^{2} \log n)$ rounds for $p=n$, proving the lemma.
 \end{proof}
 
 \subsection{Analysis}
