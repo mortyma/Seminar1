@@ -64,12 +64,12 @@ Another approach to solve the problem in parallel was developed by Goldberg and 
 
 \section{Network flows}
 \label{sec:networkFlows}
-A \textbf{flow network}~\cite{ahuja93} is a 4-tuple $N = (G,s,t,c)$, where
+A \textbf{flow network}~\cite{ahuja93} is a 4-tuple $N := (G,s,t,c)$, where
 \begin{itemize}
 	\item $G =(V,E)$ is a directed graph
     \item $s, t \in V$, $s \neq t$ are the source and terminal node
    	\item $c:E\rightarrow \mathbb{R}_0^{+}$ assigns a capacity $\forall e \in E$
-   	\item $n=\lvert V\rvert$, $m=\lvert E\rvert$
+   	\item $n:=\lvert V\rvert$, $m:=\lvert E\rvert$
 \end{itemize}
 
 Furthermore, the following assumptions are made:
@@ -96,7 +96,7 @@ A flow $f$
 	\item is a \emph{maximal (or blocking) flow} if every directed path P(s,t) contains at least one saturated arc
 \end{itemize}
 \medskip
-The \emph{residual capacity} of $e \in V \times V$ w.r.t.\ a flow $f$ is defined as $c_r(e) = c(e) - f(e)$. $G_r = (V, E_r)$ is the \emph{residual network}, where $E_r = \left\{e \in V \times V \lvert c_r(e) > 0\right\}$. The set of \emph{admissible arcs} of a vertex $v$ is the set of all arcs $e$ emanating from $v$ s.t. $c_r(e) > 0$.  A path $P$ from $s$ to $t$ in $G_r$ is called an \emph{augmenting path} if it consists of admissible arcs only. An augmenting path $P(s,t)$ can be used to increase the flow $f$. Let $f_P(e)$ be the flow assigned to arc $e$ in augmenting path $P$. The flow $f$ can now be increased by $\forall e \in P: f(e) = f(e) + f_P(e)$.
+The \emph{residual capacity} of $e \in V \times V$ w.r.t.\ a flow $f$ is defined as $c_r(e) := c(e) - f(e)$. $G_r := (V, E_r)$ is the \emph{residual network}, where $E_r := \left\{e \in V \times V \lvert c_r(e) > 0\right\}$. The set of \emph{admissible arcs} of a vertex $v$ is the set of all arcs $e$ emanating from $v$ s.t. $c_r(e) > 0$.  A path $P$ from $s$ to $t$ in $G_r$ is called an \emph{augmenting path} if it consists of admissible arcs only. An augmenting path $P(s,t)$ can be used to increase the flow $f$. Let $f_P(e)$ be the flow assigned to arc $e$ in augmenting path $P$. The flow $f$ can now be increased by $\forall e \in P: f'(e) := f(e) + f_P(e)$.
 
 \subsection{Algorithm of Ford-Fulkerson}
 \label{sec:fordfulkerson}
@@ -107,13 +107,13 @@ The algorithm of Ford and Fulkerson as shown in Algorithm \ref{algo:fordFulkerso
 \label{algo:fordFulkerson}
 \begin{algorithmic}[1]
 	\Function{Ford-Fulkerson}{$N=(G=(V,E),s,t,c)$}
-	\State $f(u,v) = 0$ $\forall e=(u,v) \in E$ \Comment{Start with a valid flow}
-	\State  $G_r = G$ 
-	\State $c_r(P) = min \{c_r(u,v): (u,v) \in P(s,t) \}$
+	\State $f(u,v) \gets 0$ $\forall e=(u,v) \in E$ \Comment{Start with a valid flow}
+	\State  $G_r \gets G$ 
+	\State $c_r(P) \gets min \{c_r(u,v): (u,v) \in P(s,t) \}$
 	\While{$\exists P(s,t) \in G_r: \forall (u,v) \in P(s,t): c_r(u, v) > 0$}
-		\State $f(u,v) = f(u,v) + c_r(P)$ \Comment{Increase the flow by as much flow as can be pushed along $P(s,t)$}
-		\State $c_r(u,v) = c_r(u,v) - c_r(P)$
-		\State $f(v,u) = f(v,u) + c_r(P)$ 
+		\State $f(u,v) \gets f(u,v) + c_r(P)$ \Comment{Increase the flow by as much flow as can be pushed along $P(s,t)$}
+		\State $c_r(u,v) \gets c_r(u,v) - c_r(P)$
+		\State $f(v,u) \gets f(v,u) + c_r(P)$ 
 	\EndWhile
 	\EndFunction
 \end{algorithmic}
@@ -205,7 +205,7 @@ As shown in~\cite{papa95}, \lstinline|MAX-FLOW| is P-complete and no parallel al
 \label{sec:dinitz}
 $N = (V,E,s,t,c)$ is a \textbf{layered network}~\cite{yossi81} if each vertex $v \in V$ has a layer number $l(v)$ s.t.
 \begin{itemize}
-	\item $l(s) = 0$ and $0 \leq l(v) \leq l(t)$ $\forall v \in V$
+	\item $l(s) := 0$ and $0 \leq l(v) \leq l(t)$ $\forall v \in V$
 	\item $e = (u,v) \in E  \Rightarrow l(v) - l(u) = 1$
 \end{itemize}
 Figure \ref{fig:dinitz} shows a layered network and its underlying directed acyclic network.
@@ -259,8 +259,8 @@ A layered network can easily be constructed from a directed acyclic network by p
 	\While{$l(t) \neq \infty$} %\Comment{\textcolor{OliveGreen}{$O(n)$}}	
 		\State Construct residual network $G_r$ %\Comment{\textcolor{OliveGreen}{$O(n)$, $p=O(n)$}}
 		\State Construct layered network $G_l$ from $G_r$ %\Comment{\textcolor{OliveGreen}}{$O(m/p + n)$}
-		\State $f_l$ = MAX-FLOW($G_l$)  %\Comment{tbd}
-		\State $f$ = $f$ + $f_l$ %\Comment{\textcolor{OliveGreen}{$O(n)$}}
+		\State $f_l \gets$ MAX-FLOW($G_l$)  %\Comment{tbd}
+		\State $f \gets f$ + $f_l$ %\Comment{\textcolor{OliveGreen}{$O(n)$}}
 	\EndWhile
 	\EndFunction
 \end{algorithmic}
@@ -272,12 +272,12 @@ The Shiloach-Vishkin algorithm is based on Dinitz' scheme as shown in Section \r
 
 The following notation will be used:
 \begin{description}
-	\item [EXCESS(v)] The amount of excessive pre-flow at node $v$. \lstinline|EXCESS(v)| = $\mathrm{IN}(f,v) - \mathrm{OUT}(f,v) \geq 0$.
-	\item[UNBALANCED] The set of vertices that hold some excess flow. \lstinline|UNBALANCED| = $\{v \in V \lvert \mathrm{EXCESS}(v) > 0 \}$. The sequential implementation (Section \ref{sec:sv_seq}) uses a queue to maintain FIFO order on the set of unbalanced vertices.
+	\item [EXCESS(v)] The amount of excessive pre-flow at node $v$. \lstinline|EXCESS(v)| $ := \mathrm{IN}(f,v) - \mathrm{OUT}(f,v) \geq 0$.
+	\item[UNBALANCED] The set of vertices that hold some excess flow. \lstinline|UNBALANCED| $ := \{v \in V \lvert \mathrm{EXCESS}(v) > 0 \}$. The sequential implementation (Section \ref{sec:sv_seq}) uses a queue to maintain FIFO order on the set of unbalanced vertices.
 	\item[blocked] A vertex v is blocked if for all its outgoing arcs $e_i = (v, u_i)$, $e_i$ is either saturated or $u_i$ is blocked\footnote{The sink vertex $t$ is never blocked.}. 
 \end{description}
 	
-The algorithm operates in \emph{pulses}: In the first pulse, all outgoing arcs of $s$ or saturated: $\forall e_i = (s, v_i):$ $f(e_i) = c(e_i)$. The set of unbalanced vertices at the end of pulse 1 is thus the set of all neighbors of $s$: \lstinline|UNBALANCED| = $\{v_i\lvert \exists (s, v_i) \in E \}$. In each subsequent pulse, the unbalanced vertices try to push forward\footnote{i.e., to the next layer of the network.} as much of their excessive flow as possible. Any remaining excessive flow will be returned backwards. All balanced vertices remain idle during the pulses. The algorithm terminates as soon as no unbalanced vertices are available, implying that all flow reached the source $s$ or sink $t$.
+The algorithm operates in \emph{pulses}: In the first pulse, all outgoing arcs of $s$ or saturated: $\forall e_i = (s, v_i):$ $f(e_i) := c(e_i)$. The set of unbalanced vertices at the end of pulse 1 is thus the set of all neighbors of $s$: \lstinline|UNBALANCED| $= \{v_i\lvert \exists (s, v_i) \in E \}$. In each subsequent pulse, the unbalanced vertices try to push forward\footnote{i.e., to the next layer of the network.} as much of their excessive flow as possible. Any remaining excessive flow will be returned backwards. All balanced vertices remain idle during the pulses. The algorithm terminates as soon as no unbalanced vertices are available, implying that all flow reached the source $s$ or sink $t$.
 
 Algorithm \ref{algo:sv} shows an abstract routine for solving \lstinline|MAX-FLOW| in a given layered network. In each pulse $p>1$, the \lstinline|while| loop in lines 4-12 is executed in parallel for each node $v \in \mathrm{UNBALANCED}$. Parallel implementations of functions \lstinline|PUSH| and \lstinline|RETURN| are depicted in Algorithm \ref{algo:sv_push} and Algorithm \ref{algo:sv_return}, respectively and will be explained in detail in the remainder of this section. The algorithm maintains the number of the current pulse in \texttt{i}.
 
@@ -286,9 +286,9 @@ Algorithm \ref{algo:sv} shows an abstract routine for solving \lstinline|MAX-FLO
 \label{algo:sv}
 \begin{algorithmic}[1]
 	\Function{MAX-FLOW}{$G_l$}
-		\State EXCESS(s) = $\Sigma_{v \in L_1}$ c(s$\rightarrow$v)
+		\State EXCESS(s) $ \gets \Sigma_{v \in L_1}$ c(s$\rightarrow$v)
 		\State PUSH(s, EXCESS(s))
-		i = 1;
+		$i \gets 1$;
 		\While{$\exists$ v $\in UNBALANCED$}
 			\State i++
 			\ForAll {$v \in UNBALANCED$}			
@@ -409,10 +409,10 @@ At beginning of each pulse:
 	\Function{INITIALIZE}{v}
 		\State \textcolor{blue}{P($e_j = v \rightarrow w$):}
 		\State UPDATE($j$, $c_r(e_j)$) T-OUT(v)
-		\State f($e_j$) = 0
+		\State $f(e_j) \gets 0$
 		\State \textcolor{blue}{P(v):}
-		\State head(v) = 0	
-		\State k'(v) = 1	
+		\State $\mathrm{head}(v) \gets 0	$
+		\State $k'(v) \gets 1$	
  	\EndFunction
 \end{algorithmic}
 \end{algorithm}
@@ -427,27 +427,27 @@ In the next step, all processors assigned to an arc $e_j$ s.t. $k'\leq j \leq k'
 \begin{algorithmic}[1]
 	\Function{PUSH}{v,EXCESS(v)}
 		\State \textcolor{blue}{P(v):}
-		\State $\alpha$ = min\{EXCESS(v), T-OUT(v)[root]\} 
-		\State EXCESS(v) = EXCESS(v) - $\alpha$
+		\State $\alpha \gets$ min\{EXCESS(v), T-OUT(v)[root]\} 
+		\State EXCESS(v) $\gets$ EXCESS(v) - $\alpha$
 		\State FIND($\alpha$, k, $\rho$) in T-OUT(v)
 		\State \textcolor{blue}{P($e_j = v \rightarrow w$):}
 		\If{k' $\leq$ j $\leq$ k' + k}
  		\State UPDATE(j,1) in T-ACCESS(w)
 		\State SUM(j,$S_j$) in T-ACCESS(w)
 		\If{$j == k$}
-			$q_j$ = $\rho$
+			$q_j \gets \rho$
 		\Else
-			\State $q_j$ = T-OUT(v)[1,j]
+			\State $q_j\gets$ T-OUT(v)[1,j]
 		\EndIf
-		\State $f(e_j)$ = $f(e_j)$ + $q_j$
-		\State TOTAL(w) = T-IN(w)[root]
+		\State $f(e_j) \gets f(e_j)$ + $q_j$
+		\State TOTAL(w) $\gets$ T-IN(w)[root]
 		\State UPDATE(head(w) + $S_j$, $q_j$) in T-IN(w)
 		\State UPDATE(j, T-OUT(v)[1,j] - $q_j$) in T-OUT(v)
-		\State head(w) = head(w) + T-ACCESS(w)[root] 
+		\State head(w) $\gets$ head(w) + T-ACCESS(w)[root] 
 		\State CLEAR(j) in T-ACCESS(w)
-		\State EXCESS(w) = T-IN(w)[root] - TOTAL(w)
+		\State EXCESS(w) $\gets$ T-IN(w)[root] - TOTAL(w)
 		\EndIf
-		\State \textcolor{blue}{P(v):} k' = k
+		\State \textcolor{blue}{P(v):} $k' \gets k$
 		\State \textcolor{blue}{P($e_j = v \rightarrow w$):}
 		\If{EXCESS(v) $>$ 0}
 			\State block v
@@ -477,20 +477,20 @@ Finally, in line 17 the pointer $head$ is set to the latest flow quantum that wa
 	\Function{RETURN}{v, EXCESS(v)}
 		\State \textcolor{blue}{P(v):}
 		\State FIND (T-IN(v)[root] - EXCESS(v), k, $\rho$) in T-IN(v)
-		\State EXCESS(v) = 0
+		\State EXCESS(v) $\gets$ 0
 		\State \textcolor{blue}{$P(Q_j = (e_j = u \rightarrow v, q_j))$:}
-		\State $d_j = q_j$ for $k < j \leq head(v)$
-		\State $d_j = q_j - \rho$ if $j == k$
+		\State $d_j \gets q_j$ for $k < j \leq head(v)$
+		\State $d_j \gets q_j - \rho$ if $j == k$
 		\State UPDATE(j, 0) in T-IN(v) for $k < j \leq head(v)$
 		\State UPDATE(j, $\rho$) in T-IN(v) if $j == k$
 		\State UPDATE($p_j$,$d_j$) in T-EDGE($e_j$)
-		\State $f(e_j)$ = $f(e_j)$ - T-EDGE($e_j$)[root]
+		\State $f(e_j) \gets f(e_j)$ - T-EDGE($e_j$)[root]
 		\State UPDATE($e_j$, T-EDGE($e_j$)[root]) in T-SUM(u)
-		\State EXCESS(u) = EXCESS(u) + T-SUM(u)[root]
+		\State EXCESS(u) $\gets$ EXCESS(u) + T-SUM(u)[root]
 		\State CLEAR($r_j$) in T-EDGE($e_j$)
 		\State CLEAR($e_j$) in T-SUM(u)
 		\State \textcolor{blue}{P(v):}
-		\State head(v) = k
+		\State head(v) $\gets k$
 	\EndFunction
 \end{algorithmic}
 \end{algorithm}
@@ -540,7 +540,7 @@ The Goldberg-Tarjan algorithm solves \lstinline|MAX-FLOW| on directed acyclic gr
 
 \subsection{Atoms}
 \label{sec:gt_atoms}
-An \emph{atom} $a$ is defined as the maximal quantity of flow that so far moved along the same path $P(s,v)$. An atom $a$ can move forwards along an arc $e \in E$, or backwards along the same arc. Formally, the backward arcs are defined as $E^{-1} = \{(w,v)\vert (v,w) \in E \}$. Furthermore, an atom $a$ has the following properties:
+An \emph{atom} $a$ is defined as the maximal quantity of flow that so far moved along the same path $P(s,v)$. An atom $a$ can move forwards along an arc $e \in E$, or backwards along the same arc. Formally, the backward arcs are defined as $E^{-1} := \{(w,v)\vert (v,w) \in E \}$. Furthermore, an atom $a$ has the following properties:
 \begin{description}
 	\item [size($a$)] The amount of excess flow that $a$ carries.
 	\item [position($a$)] The vertex $v \in V$ the atom $a$ is currently located at.
@@ -559,9 +559,9 @@ Algorithm \ref{algo:gt_init} shows the initialization of the Goldberg-Tarjan app
 	\Function{INITIALIZE}{$N=(V,E,s,t,c)$}
 	\ForAll{$e_i = (s,v_i) \in E$}
 		\State create new atom $a_i$
-		\State $size(a_i) = c(e_i)$
-		\State $position(a_i) = v_i$
-		\State $trace(a_i) = (s,v_i)$		
+		\State $size(a_i) \gets c(e_i)$
+		\State $position(a_i) \gets v_i$
+		\State $trace(a_i) \gets (s,v_i)$		
 	\EndFor
 	\EndFunction
 \end{algorithmic}
@@ -597,8 +597,8 @@ After all atoms have been pushed forward, vertex $v$ is blocked if all its outgo
 	\Function{PUSH}{$v$}
 	\State Let $a_1 \dots a_k$ be atoms at vertex $v$
 	\State Let $(v,w_1) \dots (v,w_l)$ be admissible arcs at $v$
-	\State $\forall 1 \leq j \leq k: S(j) = \Sigma_{i=1}^{j} size(a_i)$
-	\State $\forall 1 \leq j \leq l: R(j) = \Sigma_{i=1}^{j} c_r(v,w_i)$
+	\State $\forall 1 \leq j \leq k: S(j) \gets \Sigma_{i=1}^{j} size(a_i)$
+	\State $\forall 1 \leq j \leq l: R(j) \gets \Sigma_{i=1}^{j} c_r(v,w_i)$
 	\State Assign $a_i$ to $(v, w_j)$:
 	\If {$S(i) - size(a_i) \geq R(j) - c_r(v, w_j)$}
 		\If{$S(i) \leq R(j)$}
@@ -618,17 +618,17 @@ After all atoms have been pushed forward, vertex $v$ is blocked if all its outgo
 		\ForAll{$(v,w_j)$ assigned to $a_i$}
 			\If{assignment saturates $(v,w_j)$}
 				\State create new atom $a_k$ 
-				\State $size(a_k$) = quanta assigned to $(v,w_j)$
-				\State $trace(a_k) = trace(a_i)$ 
-				\State $position(a_k) = position(a_i)$
+				\State $size(a_k) \gets$ quanta assigned to $(v,w_j)$
+				\State $trace(a_k) \gets trace(a_i)$ 
+				\State $position(a_k) \gets position(a_i)$
 			\EndIf
 		\EndFor
 	\EndIf	
 	\ForAll{$(v,w_j)$}
 		\ForAll{$a_i \leftrightarrow (v,w_j)$}
-			\State $f(v,w_j) = f(v,w_j) + size(a_i)$
-			\State $location(a_i) = w_j$
-			\State $trace(a_i) = trace(a_i) + w_j$
+			\State $f(v,w_j) \gets f(v,w_j) + size(a_i)$
+			\State $location(a_i) \gets w_j$
+			\State $trace(a_i) \gets trace(a_i) + w_j$
 		\EndFor 
 	\EndFor
 	\If{$\forall (v,w_j):$ saturated}
@@ -637,9 +637,9 @@ After all atoms have been pushed forward, vertex $v$ is blocked if all its outgo
 	\ForAll{$w \in V$ and $w$ blocked}
 		\ForAll{$a_i$ at $w$}
 			\State Let $(v_{a_i}, w)$ be last arc on $trace(a_i)$
-			\State $f(v_{a_i}, w) = f(v_{a_i}, w) - size(a_i)$
-			\State $location(a_i) = v_{a_i}$
-			\State $trace(a_i) = trace(a_i) - (v_{a_i}, w)$
+			\State $f(v_{a_i}, w) \gets f(v_{a_i}, w) - size(a_i)$
+			\State $location(a_i) \gets v_{a_i}$
+			\State $trace(a_i) \gets trace(a_i) - (v_{a_i}, w)$
 		\EndFor
 	\EndFor	
 	\EndFunction
